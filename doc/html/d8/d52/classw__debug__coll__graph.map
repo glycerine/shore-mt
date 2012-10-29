@@ -1,0 +1,4 @@
+base referer
+rect $d4/d17/class_err_log.html 39,5 101,32
+rect $d0/dda/classlogstream.html 116,96 201,123
+rect $df/dd5/classw__ostrstream.html 152,5 261,32

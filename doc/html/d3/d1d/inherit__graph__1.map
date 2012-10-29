@@ -1,0 +1,4 @@
+base referer
+rect $d8/dc5/classatomic__container.html 5,5 139,32
+rect $dd/d01/structatomic__preallocated__pool.html 187,5 373,32
+rect $d9/d85/structatomic__class__pool.html 421,5 597,32
