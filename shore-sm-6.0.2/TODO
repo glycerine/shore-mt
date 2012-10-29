@@ -1,0 +1,17 @@
+1) run perf comparisons btwn two mem_block versions
+2) run with ssm.1 or 2 to figure out what's happening with large dbs and
+small #s of threads (?)
+3) clean up changes 
+4) update gnats db
+5) check in changes
+6) update documentation
+7) run through smsh scripts
+8) SOLARIS!
+
+9) cvs diff kits!!!!!!!!!!!!!!!!!!!!!!!!!
+
+9) make release
+
+NOTE: kits fails in atomic container if running 
+tpcc mix (tx 0).
+Also the speedup numbers are odd.

@@ -1,0 +1,142 @@
+# <std-header style='tcl' orig-src='shore'>
+#
+#  $Id: lock.upgrade.release,v 1.2 2010/06/22 02:48:36 nhall Exp $
+#
+# SHORE -- Scalable Heterogeneous Object REpository
+#
+# Copyright (c) 1994-99 Computer Sciences Department, University of
+#                       Wisconsin -- Madison
+# All Rights Reserved.
+#
+# Permission to use, copy, modify and distribute this software and its
+# documentation is hereby granted, provided that both the copyright
+# notice and this permission notice appear in all copies of the
+# software, derivative works or modified versions, and any portions
+# thereof, and that both notices appear in supporting documentation.
+#
+# THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY
+# OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS
+# "AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND
+# FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.
+#
+# This software was developed with support by the Advanced Research
+# Project Agency, ARPA order number 018 (formerly 8230), monitored by
+# the U.S. Army Research Laboratory under contract DAAB07-91-C-Q518.
+# Further funding for this work was provided by DARPA through
+# Rome Research Laboratory Contract No. F30602-97-2-0247.
+#
+#   -- do not edit anything above this line --   </std-header>
+
+############################################################################
+#
+#  This script tests lock upgrade:  
+#	{ SH EX	}		on record
+# 	{ IS IX SH SIX UD EX }	on file and volume
+#
+#  Currently, the script is not self-verifying, so the results
+#  need to be looked at to see if the expected lock is set on
+#  an object.
+#
+############################################################################
+set mode1		{ SH EX }
+set mode2 		{ IS IX SH SIX UD EX }
+set mode3 		{ EX IX }
+set mode4		{ EX EX }
+set rid			"k(s(10.0).100.200)"
+set pid			"p(10.0.100)"
+set fid			"s(10.0)"
+set vid			"10"
+
+proc lockit { id locks DURATION} {
+    global supremum
+    global verbose_flag
+
+	set t 0
+    foreach d $DURATION {
+	    set dur($t) [lindex $DURATION $t]
+		echo duration $t $dur($t)
+		set t [expr {$t + 1}]
+	}
+    foreach i $locks {
+    	foreach j $locks {
+		set t 0
+	sm begin_xct
+	    verbose "===== Expected lock on $id  $i + $j = $supremum($i,$j) ====="
+	    verbose sm lock $id $i $dur($t)
+	    set result [sm lock $id $i $dur($t)]
+	    verbose sm lock $id $i $dur($t) returned $result
+	    if {$verbose_flag}  { 
+			echo FIRST lock $i $dur($t)
+			sm dump_locks }
+	    set mode [sm query_lock $id] 
+	    verbose "verifying $mode == $i"
+	    assert {expr [string compare $mode $i] == 0}
+
+		set t [expr {$t + 1}]
+	    verbose "------------"
+	    verbose sm lock $id $j $dur($t)
+	    set result [sm lock $id $j $dur($t)]
+	    verbose sm lock $id $j $dur($t) returns $result
+	    if {$verbose_flag}  { 
+			echo FIRST lock $j $dur($t)
+			sm dump_locks }
+
+	    set mode [sm query_lock $id] 
+	    verbose "verifying $mode == supremum($i,$j) = $supremum($i,$j)"
+	    assert {expr [string compare $mode $supremum($i,$j)] == 0}
+
+		sm unlock $id
+	    if {$verbose_flag}  { 
+			echo FIRST unlock 
+			sm dump_locks }
+
+		sm unlock $id
+	    if {$verbose_flag}  { 
+			echo SECOND unlock 
+			sm dump_locks }
+
+	sm commit_xct
+	    verbose ""
+
+	}
+    }
+}
+
+# lockit $rid $mode4 {MEDIUM LONG}
+verbose "TEST:\tLock Upgrade on Record and File"
+
+verbose "\n*******  Lock Upgrade on Record  *******\n"
+lockit $rid $mode1 {LONG MEDIUM}
+lockit $rid $mode2 {LONG MEDIUM}
+lockit $rid $mode3 {LONG MEDIUM}
+lockit $rid $mode1 {MEDIUM LONG}
+lockit $rid $mode2 {MEDIUM LONG}
+lockit $rid $mode3 {MEDIUM LONG}
+#
+verbose "\n*******  Lock Upgrade on Page  *******\n"
+# GNATS 112: use first LONG then MEDIUM so that
+# long/SH goes into the lock table and we try to upgrade with a 
+# medium (which doesn't work)
+lockit $pid $mode1 {LONG MEDIUM}
+lockit $pid $mode3 {MEDIUM LONG}
+
+verbose "\n*******  Lock Upgrade on File  *******\n"
+lockit $fid $mode1 {MEDIUM LONG}
+lockit $fid $mode1 {LONG MEDIUM}
+lockit $fid $mode2 {MEDIUM LONG}
+lockit $fid $mode2 {LONG MEDIUM}
+lockit $fid $mode3 {MEDIUM LONG}
+lockit $fid $mode3 {LONG MEDIUM}
+
+verbose "\n*******  Lock Upgrade on Volume  *******\n"
+lockit $vid $mode1 {LONG MEDIUM}
+lockit $vid $mode1 {MEDIUM LONG}
+lockit $vid $mode2 {LONG MEDIUM}
+lockit $vid $mode2 {MEDIUM LONG}
+lockit $vid $mode3 {LONG MEDIUM}
+lockit $vid $mode3 {MEDIUM LONG}
+
+verbose "STATUS:\tOK"
+
+unset mode1 mode2 mode3 fid vid rid
+

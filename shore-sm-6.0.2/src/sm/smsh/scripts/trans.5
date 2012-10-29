@@ -1,0 +1,188 @@
+# <std-header style='tcl' orig-src='shore'>
+#
+#  $Id: trans.5,v 1.1 2010/10/27 17:04:29 nhall Exp $
+#
+# SHORE -- Scalable Heterogeneous Object REpository
+#
+# Copyright (c) 1994-99 Computer Sciences Department, University of
+#                       Wisconsin -- Madison
+# All Rights Reserved.
+#
+# Permission to use, copy, modify and distribute this software and its
+# documentation is hereby granted, provided that both the copyright
+# notice and this permission notice appear in all copies of the
+# software, derivative works or modified versions, and any portions
+# thereof, and that both notices appear in supporting documentation.
+#
+# THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY
+# OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS
+# "AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND
+# FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.
+#
+# This software was developed with support by the Advanced Research
+# Project Agency, ARPA order number 018 (formerly 8230), monitored by
+# the U.S. Army Research Laboratory under contract DAAB07-91-C-Q518.
+# Further funding for this work was provided by DARPA through
+# Rome Research Laboratory Contract No. F30602-97-2-0247.
+#
+#   -- do not edit anything above this line --   </std-header>
+
+#
+# Test group-commit xcts 
+#
+
+source $script_dir/vol.init
+
+set nrecords 1000
+## beware too many tids; smsh can't handle it -- list too long
+## for shell.cpp array of tids.
+set ntids 98
+
+proc scanit { f nrec } {
+    verbose scanit $f
+    set scan [sm scan_file_create $f t_cc_record]
+    # verbose get first record from $scan
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+		set rec [sm pin_rid $pin]
+		# verbose rec: $rec
+
+		set pid [sm pin_page_containing $pin 10]
+		# verbose byte 10 is on page $pid
+
+		# don't unpin! 
+		# sm pin_unpin $pin
+		set pin [sm scan_file_next $scan 0]
+		set i [expr {$i+1} ]
+    }
+    sm scan_file_destroy $scan
+
+    # verbose scan found $i records
+	assert {expr {$nrec ==  $i}}
+
+	unset scan
+	unset i
+	unset pid
+	unset pin
+}
+
+proc check_file_not_gone {fid nrecords} {
+    verbose check_file_not_gone: trying to add record to file $fid
+	sm begin_xct
+	if [catch {sm create_rec $fid header 4 body } catcherr] {
+		verbose (EXPECTED) check_file_not_gone error: $catcherr
+		assert {error_is $catcherr E_OK}
+	}
+
+	scanit $fid [expr $nrecords + 1]
+	verbose OK
+	sm abort_xct
+
+	unset catcherr
+}
+
+proc check_file_gone {fid} {
+    verbose check_file_gone: trying to add record to file $fid
+	sm begin_xct
+	if [catch {sm create_rec $fid header 4 body } catcherr] {
+		verbose (EXPECTED) check_file_gone error: $catcherr
+		assert {error_is $catcherr E_BADSTID}
+	}
+	verbose OK
+	sm abort_xct
+	unset catcherr
+}
+
+if {1} {
+##  Each transaction creates and populates a file, detaches.
+set command { sm commit_xct_group}
+for {set j 0} {$j < $ntids} { incr j} {
+## start transaction and append its pointer to the commit command
+	sm begin_xct
+	# verbose begin xct $j
+	set xct($j) [sm xct]
+	lappend command $xct($j)
+
+##  create file
+	set fid($j) [sm create_file $volid]
+	# verbose created file $fid($j)
+
+##  populate file
+	for {set k 0} {$k < $nrecords} {incr k} {
+		# verbose creating rec $k in $fid($j)
+		set res [sm create_rec $fid($j) header 4 body]
+		# verbose res  $res
+	}
+	sm detach_xct $xct($j)
+}
+
+verbose command $command
+##  Now do the group commit:
+eval $command
+verbose commit group done
+
+
+## check that all files are there and contain proper number of records.
+for {set j 0} {$j < $ntids} { incr j} {
+	check_file_not_gone $fid($j) $nrecords
+}
+
+## restart and make sure they're still there.
+verbose restart
+restart
+## check that all files are there and contain proper number of records.
+for {set j 0} {$j < $ntids} { incr j} {
+	check_file_not_gone $fid($j) $nrecords
+}
+
+## destroy the files.
+sm begin_xct
+for {set j 0} {$j < $ntids} { incr j} {
+	sm destroy_file $fid($j)
+}
+sm commit_xct
+}
+
+if {1} {
+
+## Do the same but restart in the middle and check that
+#the files don't exist (all xcts aborted).
+
+##  Each transaction creates and populates a file, detaches.
+set command { sm commit_xct_group}
+for {set j 0} {$j < $ntids} { incr j} {
+## start transaction and append its pointer to the commit command
+	sm begin_xct
+	# verbose begin xct $j
+	set xct($j) [sm xct]
+	lappend command $xct($j)
+
+##  create file
+	set fid($j) [sm create_file $volid]
+	# verbose created file $fid($j)
+
+##  populate file
+	for {set k 0} {$k < $nrecords} {incr k} {
+		# verbose creating rec $k in $fid($j)
+		set res [sm create_rec $fid($j) header 4 body]
+		# verbose res  $res
+	}
+	sm detach_xct $xct($j)
+}
+
+verbose restart
+restart
+## check that all files are gone.
+for {set j 0} {$j < $ntids} { incr j} {
+	check_file_gone $fid($j)
+	unset fid($j)
+	unset xct($j)
+}
+}
+unset nrecords
+unset ntids
+unset xct
+unset fid
+unset command
+unset j k

@@ -1,0 +1,159 @@
+# <std-header style='tcl' orig-src='shore'>
+#
+#  $Id: latchcount,v 1.1 2010/11/08 15:07:19 nhall Exp $
+#
+# SHORE -- Scalable Heterogeneous Object REpository
+#
+# Copyright (c) 1994-99 Computer Sciences Department, University of
+#                       Wisconsin -- Madison
+# All Rights Reserved.
+#
+# Permission to use, copy, modify and distribute this software and its
+# documentation is hereby granted, provided that both the copyright
+# notice and this permission notice appear in all copies of the
+# software, derivative works or modified versions, and any portions
+# thereof, and that both notices appear in supporting documentation.
+#
+# THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY
+# OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS
+# "AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND
+# FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.
+#
+# This software was developed with support by the Advanced Research
+# Project Agency, ARPA order number 018 (formerly 8230), monitored by
+# the U.S. Army Research Laboratory under contract DAAB07-91-C-Q518.
+# Further funding for this work was provided by DARPA through
+# Rome Research Laboratory Contract No. F30602-97-2-0247.
+#
+#   -- do not edit anything above this line --   </std-header>
+
+#
+#   Measure latch counts
+#
+#   To use this you should turn off background processes
+#
+#   Measure latches for :
+#   create store 
+#   -index, file
+#   destroy store
+#   -index, file
+#   create rec in file
+#   destroy rec in file
+#   create index entry
+#   destroy index entry
+#   reserve ext in store (special API)
+#   free ext in store (special API)
+#   reserve page in store (special API)
+#   free page in store (special API)
+#
+source $script_dir/vol.init
+set_config_info
+
+
+# 1 per page
+set smobjsize [expr {(${page_size} / 2) + 20} ]
+# small large rec
+set lgobjsize ${lg_rec_page_space} 
+# 2 per page as required
+set entrysize [expr {${max_btree_entry_size} - 10} ]
+
+# for the larger tests
+set npages 500
+
+# Create record bodies 
+set prefix ".123456789"
+set smbody [formatlong $prefix [expr {$smobjsize / 10}] %d 1]
+set i [string length $smbody] 
+# echo smbody $i desired $smobjsize
+# not quite there yet
+set j [expr { ( $smobjsize - $i) -1}]
+set rest [formatlong x $j %d 0]
+set smbody $rest$smbody
+set i [string length $smbody] 
+# echo smbody $i desired $smobjsize
+
+# j = required prefix length
+set j [expr { ( $lgobjsize - $i) -1}]
+# echo $j
+# k = # times we need to prepend $smbody
+set k [expr { $j / $i }]
+# echo i $i j $j k $k
+if {$k==0} { incr k }
+# echo i $i j $j k $k
+set lgbody [formatlong $smbody $k %d 1]
+# Find out how close we are
+set i [string length $lgbody] 
+# echo lgbody $i desired $lgobjsize
+if {$i < $lgobjsize } {
+	# not quite there yet
+	set j [expr { ( $lgobjsize - $i) -1}]
+	set rest [formatlong x $j %d 0]
+	set lgbody $rest$lgbody
+	set i [string length $lgbody] 
+	# echo lgbody $i desired $lgobjsize
+}
+unset i j k rest
+
+# Create key/value entry info.
+set key "a"
+set form_len [expr {$entrysize - 10}]
+set value [formatlong 0 $form_len %010d 1]
+# echo key $key
+# echo value $value
+unset form_len
+
+
+# Test 1: create empty file, records, destroy
+proc c_file {vid} {
+	set before [sm gather_xct_stats true]
+	verbose CREATE_FILE 
+		set fid [sm create_file $vid]
+	set after [sm gather_xct_stats true]
+    verbose [pnzstats $after]
+	return $fid
+}
+
+proc d_file {f} {
+	set before [sm gather_xct_stats reset]
+		verbose DESTROY_FILE $f
+		sm destroy_file $f
+	set after [sm gather_xct_stats reset]
+    verbose [pnzstats $after]
+}
+
+proc c_rec {f objsize body msg} {
+	set before [sm gather_xct_stats reset]
+		verbose $msg $f
+		set rec [sm create_rec $f "" $objsize $body]
+	set after [sm gather_xct_stats reset]
+    verbose [pnzstats $after]
+	return $rec
+}
+
+proc d_rec {rid msg} {
+	set before [sm gather_xct_stats reset]
+		verbose $msg $rid
+		sm destroy_rec $rid 
+	set after [sm gather_xct_stats reset]
+    verbose [pnzstats $after]
+}
+
+sm begin_xct
+set fid [c_file $volid]
+set rid(1) [c_rec $fid $smobjsize $smbody CREATE_SMALL_REC]
+set rid(2) [c_rec $fid $smobjsize $smbody CREATE_SMALL_REC]
+set rid(3) [c_rec $fid $lgobjsize $lgbody CREATE_LARGE_REC]
+set rid(4) [c_rec $fid $lgobjsize $lgbody CREATE_LARGE_REC]
+
+d_rec $rid(4) DESTROY_LARGE_REC
+d_rec $rid(3) DESTROY_LARGE_REC
+d_rec $rid(2) DESTROY_SMALL_REC
+d_rec $rid(1) DESTROY_SMALL_REC
+
+d_file $fid
+sm commit_xct
+
+# Test 2: create index, insert, destory
+
+unset rid(1) rid(2) rid(3) rid(4)
+unset fid

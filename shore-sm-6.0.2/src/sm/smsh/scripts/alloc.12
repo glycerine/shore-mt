@@ -1,0 +1,143 @@
+# <std-header style='tcl' orig-src='shore'>
+#
+#  $Id: alloc.12,v 1.1 2010/07/21 17:06:20 nhall Exp $
+#
+# SHORE -- Scalable Heterogeneous Object REpository
+#
+# Copyright (c) 1994-99 Computer Sciences Department, University of
+#                       Wisconsin -- Madison
+# All Rights Reserved.
+#
+# Permission to use, copy, modify and distribute this software and its
+# documentation is hereby granted, provided that both the copyright
+# notice and this permission notice appear in all copies of the
+# software, derivative works or modified versions, and any portions
+# thereof, and that both notices appear in supporting documentation.
+#
+# THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY
+# OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS
+# "AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND
+# FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.
+#
+# This software was developed with support by the Advanced Research
+# Project Agency, ARPA order number 018 (formerly 8230), monitored by
+# the U.S. Army Research Laboratory under contract DAAB07-91-C-Q518.
+# Further funding for this work was provided by DARPA through
+# Rome Research Laboratory Contract No. F30602-97-2-0247.
+#
+#   -- do not edit anything above this line --   </std-header>
+
+#
+#	Test allocation & abort of pages
+#	T0: create file
+#	T1: alloc R1/P1
+#	T2: alloc R2/P1
+#	T1: alloc R3/P1, R4 ... 12/P1
+#	T1: abort (should not remove the page from the file)
+#	T2: destroy R2 (should remove the page)
+#	T2: commit
+#	T3: Alloc rec on page in the file
+#	T3 abort.
+#
+
+source $script_dir/vol.init
+
+# format for body size -- >= one page
+
+verbose 1: xct [sm xct]
+# create file 
+sm begin_xct
+verbose 2: xct [sm xct]
+set f0 [sm create_file $volid]]
+sm commit_xct
+verbose 3: xct [sm xct]
+
+# T1: create some records in the file
+sm begin_xct
+verbose 4: xct [sm xct]
+set t1 [sm xct]
+set tid1 [sm xct_to_tid $t1]
+verbose $t1: create rec
+set r [sm create_rec $f0 hdr 100  ABCD ]
+verbose $t1: created rec $r 
+
+verbose $t1: create rec 
+set r [sm create_rec $f0 hdr 100 ABCD ]
+verbose $t1: created rec $r 
+
+verbose $t1: create rec 
+set r [sm create_rec $f0 hdr 100 ABCD ]
+verbose $t1: created rec $r 
+
+verbose $t1: create rec 
+set r [sm create_rec $f0 hdr 100 ABCD ]
+verbose $t1: created rec $r 
+
+verbose $t1: create rec 
+set r [sm create_rec $f0 hdr 100 ABCD ]
+verbose $t1: created rec $r 
+
+verbose $t1: create rec 
+set r [sm create_rec $f0 hdr 100 ABCD ]
+verbose $t1: created rec $r 
+
+verbose $t1: create rec 
+set r [sm create_rec $f0 hdr 100 ABCD ]
+verbose $t1: created rec $r 
+
+verbose $t1: create rec 
+set r [sm create_rec $f0 hdr 100 ABCD ]
+verbose $t1: created rec $r 
+
+verbose 5: xct [sm xct]
+sm detach_xct $t1
+verbose 6: xct [sm xct]
+verbose detached [sm xct]
+
+sm begin_xct
+set t2 [sm xct]
+verbose $t2
+verbose 7: xct [sm xct]
+set tid2 [sm xct_to_tid $t2]
+verbose $t2: create rec
+set s1 [sm create_rec $f0 hdr 100 ABCD ]
+verbose $t2: created rec $s1 
+verbose 8: xct [sm xct]
+sm detach_xct $t2
+verbose 9: xct [sm xct]
+verbose detached [sm xct]
+
+verbose attaching $t1
+sm attach_xct $t1
+verbose 10: xct [sm xct]
+verbose $t1: 1: aborting
+set err [catch {sm abort_xct} caught]
+verbose catch: $err $caught 
+verbose 11: xct [sm xct]
+
+verbose attaching $t2
+sm attach_xct $t2
+verbose 12: xct [sm xct]
+verbose $t2: 2: aborting
+set err [catch {sm abort_xct} caught]
+verbose catch: $err $caught 
+verbose 13: xct [sm xct]
+
+sm begin_xct
+set t3 [sm xct]
+set tid3 [sm xct_to_tid $t3]
+verbose $t3: create rec
+set r1 [sm create_rec $f0 hdr 100  ABCD ]
+verbose $t3: created rec $r1 
+verbose $t3: 3: aborting
+sm abort_xct
+
+sm begin_xct
+sm destroy_file $f0
+sm commit_xct
+
+unset f0 
+unset tid1 tid2 tid3 t1 t2 t3 
+unset err r r1
+unset caught
+unset s1

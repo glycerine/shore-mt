@@ -1,0 +1,125 @@
+#!/bin/sh
+
+echo /bin/rm -f config/shore-config.h config.status config.log autom4te.cache
+/bin/rm -rf config/shore-config.h config.status config.log autom4te.cache
+
+# aclocal: find macros needed by automake
+# output: aclocal.m4 files
+echo aclocal  --force  ...
+aclocal  --force 
+
+# Insert activities of your choice for morning and afternoon.
+am="meditate"
+pm="take a break"
+
+OS=`uname`
+
+if [ "$OS" = "SunOS" ] ; then
+    echo "Running autoheader. Don't expect lightning speed ..."
+fi
+
+# autoheader:  create template file of #define statements
+# for ./configure to use.
+# input: configure.ac
+# output: config/shore-config-h.in
+#       (unfortunately for debugging, the output is in alphabetic order)
+
+echo autoheader  --force  ...
+autoheader  --force 
+
+if [ "$OS" = "SunOS" ] ; then
+    t=`date +%H`
+    if test $t -gt 16 -a $t -lt 22; then
+        act=$pm
+    else
+        act=$am
+    fi
+    echo "Running autoconf.  Go $act and come back later."
+fi
+
+# autoconf: produce the shore-config.h file for make to use
+# input: configure.ac
+# input: config/shore-config-h.in
+# output: ./configure, ./configure.status (slave)
+echo autoconf --force  ...
+autoconf --force 
+
+# automake: create the Makefile.in files
+# input: configure.ac
+# input: <dirs>/Makefile.am
+# output: <dirs>/Makefile.in
+if [ "$OS" = "SunOS" ] ; then
+    echo "Running autoconf. This is like watching paint dry.  Go $act again."
+fi
+echo automake  -a --include-deps ...
+automake  -a --include-deps
+
+# configure: generate the Makefiles
+# input: ./configure.status
+# input: <dirs>/Makefile.in
+#
+echo ------------------------------------------------------------
+echo CONFIGURE:
+echo 1. Set CXX shell and/or environment variable to point to your 
+echo " choice of C++ compiler. Do the same with CC."
+echo
+echo 2. Edit Makefile.local so that it picks up your 64-bit, threads-enabled
+echo      Tcl installation.
+echo
+echo 3. Prepare to configure:
+echo Run
+echo "    ./configure --help "
+echo "           to see the options. "
+echo
+echo "    (NOTE: we suspect Linux bugs in hugetlbfs and "
+echo "           advise against using it for the present.)"
+echo
+echo 4. Run configure:
+echo Example configurations:
+echo
+
+if [ "$OS" = "SunOS" ] ; then
+
+echo For SOLARIS, 
+echo "  we suggest that you use --enable-dependendency-tracking"
+echo "  and the SOLARIS CC compiler: "
+configopts="CXX=CC CC=cc --enable-dependency-tracking"
+else
+configopts=""
+echo For use with valgrind and to override CXX shell variable:
+echo "   ./configure CXX=/usr/bin/g++34 CC=/usr/bin/gcc34 --enable-valgrind"
+fi
+
+prefixopts="--prefix=<installdir>"
+
+echo
+echo "For maximum debugging and tracing (slow**2) :"
+echo "    ./configure  $configopts --with-debug-level3 --enable-checkrc --enable-trace $prefixopts"
+echo
+echo "For lots of debugging and tracing (slow*2) :"
+echo "   ./configure $configopts --with-debug-level2 --enable-trace $prefixopts"
+echo
+echo "For some debugging and no tracing (slow) :"
+echo "   ./configure $configopts --with-debug-level1  $prefixopts"
+echo 
+echo "For no debugging and no tracing : "
+echo "    ./configure  $configopts $prefixopts"
+echo
+echo ------------------------------------------------------------
+echo BUILD:
+echo
+echo 1. After you configure as described above, run
+echo "   make"
+echo 
+echo 2. "(Optional, but highly recommended):"
+echo "   make check"
+echo "   NOTE: you must have Tcl installed for this to succeed in the"
+echo "   directory src/sm/smsh. If you do not have Tcl, you may ignore"
+echo "   the failure to build and run smsh." 
+
+echo
+echo 3. "(Optional, for convenience of building your server, namely, to"
+echo "   find include files in  <prefix>/include and libraries in <prefix>/lib:"
+echo "   make install"
+echo
+echo ------------------------------------------------------------

@@ -1,0 +1,64 @@
+Distributions of Shore Storage Manager 
+
+5.0 : Thu Jun 7 15:25 2007
+      from starting point being the 4th interim release ...
+      1) removed the Imake-based configuration and replaced it with autoconf
+      2) changes ssh to smsh
+
+5.0.1: Sat Aug 18 15:37:16 CDT 2007
+      1) added the smsh scripts to the distr
+
+5.0.2-prelim: Tue Aug 21 15:04:47 CDT 2007
+       1) fixed 'make clean' bug in sthread/tests to get rid of tests/diskrw
+       2) fixed 'make clean' bug in smsh to clean up log* and volumes/*
+       3) increased volume size in .smshrc to allow all scripts to run
+                with default page size
+       4) removed logical OIDs
+       NOTE-> documents are NOT updated
+
+6.0.1-alpha: Mon May 24 10:15:01 MDT 2010
+
+This is a major overhaul of the storage manager.
+
+It is a port of the entire storage manager and its tests to true concurrent
+pthreads. It no longer uses sthreads and its primitives. This release
+is an extension of the 2009 SHORE-MT release.
+
+Included are too many bug fixes and changes to enumerate them here.
+The documentation is strictly html, built from the source files using
+Doxygen; the .pdf files of prior releases are gone.
+
+6.0.0-Beta: October 2010: Beta releases of the above.
+
+6.0.0: December 2010: first non-beta release of the above.
+
+6.0.1:  Minor changes: Updated hyper-refs to new UW web host; 
+       makefile changes for maintenance purposes.
+
+6.0.2:  Minor changes: 
+       Minor compiler warning fixes.
+
+	   Document problem with gcc4.4 (do not use: it has serious optimizer
+	   bugs).
+
+	   Updated comments in code.
+
+	   Removed some obsolete code in btree implementation.
+
+	   Removed need for gethostbyname() in ss_m::generate_new_lvid():
+	     now generating a long volume id is thus:
+		  1) an optional string argument is passed in for the host name
+		  2) if null host name given, the following is used to get an IP4 
+		  address:
+		     2a) if uname() is present, use it, else
+			 2b) if gethostname() is present, use it, else
+			 2c) use "localhost.localdomain"
+		  3) convert the host name string to an IP4 address thus:
+		     3a) if gethostbyname() is present use it, else
+			 3b) use getaddrinfo()
+	    Generating the lower half of the long identifier now hashes a
+		clock value.  If gettimeofday() is present, that is used to
+		incorporate microseconds into the formula.
+
+	    Documentation changes: fixed typos, updated to reflect above changes
+		in generate_new_lvid().

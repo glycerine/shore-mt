@@ -1,0 +1,116 @@
+# <std-header style='tcl' orig-src='shore'>
+#
+#  $Id: alloc.13,v 1.1 2010/11/08 15:07:14 nhall Exp $
+#
+# SHORE -- Scalable Heterogeneous Object REpository
+#
+# Copyright (c) 1994-99 Computer Sciences Department, University of
+#                       Wisconsin -- Madison
+# All Rights Reserved.
+#
+# Permission to use, copy, modify and distribute this software and its
+# documentation is hereby granted, provided that both the copyright
+# notice and this permission notice appear in all copies of the
+# software, derivative works or modified versions, and any portions
+# thereof, and that both notices appear in supporting documentation.
+#
+# THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY
+# OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS
+# "AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND
+# FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.
+#
+# This software was developed with support by the Advanced Research
+# Project Agency, ARPA order number 018 (formerly 8230), monitored by
+# the U.S. Army Research Laboratory under contract DAAB07-91-C-Q518.
+# Further funding for this work was provided by DARPA through
+# Rome Research Laboratory Contract No. F30602-97-2-0247.
+#
+#   -- do not edit anything above this line --   </std-header>
+
+#
+#	Test validity-checking of record reference
+#	create some recs in a file, commit
+#	delete the file, commit
+#	re-create file using same store id, but don't put so many
+#	records in it.
+#	commit
+#
+#	try to update a record in the first instantion of the file
+#	that doesn't exist in the new file.
+#	Where/how does the sm verify the page?
+
+source $script_dir/vol.init
+
+# format for body size -- >= one page
+set formsize [expr {${page_size} / 2} ]
+
+set numrecs1 300
+set numrecs2 10
+set cleanup 1
+
+proc scanit { f } {
+    verbose scanit $f
+    set scan [sm scan_file_create $f t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+	set rec [sm pin_rid $pin]
+
+	set pid [sm pin_page_containing $pin 10]
+	verbose rec: $rec byte 10 is on page $pid
+
+	# don't unpin! 
+	# sm pin_unpin $pin
+	set pin [sm scan_file_next $scan 0]
+	set i [expr {$i+1} ]
+    }
+    sm scan_file_destroy $scan
+
+    verbose scan found $i records
+}
+
+sm begin_xct
+set f0 [sm create_file $volid]
+verbose created file $f0
+for { set i 1} { $i <= $numrecs1} { incr i} {
+    set j [sm create_rec $f0 h$i 1000 [formatlong 0 $formsize %010d $i] ]
+    verbose created rec $j
+}
+set lastrid $j
+verbose created $numrecs2 recs file $f0
+scanit $f0
+sm commit_xct
+verbose "CREATED $f0"
+sm check_volume $volid
+
+sm begin_xct
+set f0 [sm destroy_file $f0]
+sm commit_xct
+verbose "DESTROYED $f0"
+sm check_volume $volid
+
+sm begin_xct
+set f0 [sm create_file $volid]
+for { set i 1} { $i <= $numrecs2} { incr i} {
+    set j [sm create_rec $f0 h$i 1000 [formatlong 0 $formsize %010d $i] ]
+    verbose created rec $j
+}
+verbose created $numrecs2 recs file $f0
+scanit $f0
+sm commit_xct
+verbose "RECREATED $f0"
+sm check_volume $volid
+
+sm begin_xct
+verbose "TRY sm append_rec $lastrid xxxxxxxxx "
+set res [catch { sm append_rec $lastrid xxxxxxxxx } catcherr ]
+echo append_rec returned res $res catcherr $catcherr
+sm abort_xct
+
+if {$cleanup} {
+sm begin_xct
+sm destroy_file $f0
+sm commit_xct
+}
+
+unset formsize f0 numrecs1 numrecs2 i j lastrid res

@@ -1,0 +1,344 @@
+#<std-header style='tcl' orig-src='shore'>
+#
+#  $Id: sort.mkey.1,v 1.16 2010/10/07 15:12:40 nhall Exp $
+#
+# SHORE -- Scalable Heterogeneous Object REpository
+#
+# Copyright (c) 1994-99 Computer Sciences Department, University of
+#                       Wisconsin -- Madison
+# All Rights Reserved.
+#
+# Permission to use, copy, modify and distribute this software and its
+# documentation is hereby granted, provided that both the copyright
+# notice and this permission notice appear in all copies of the
+# software, derivative works or modified versions, and any portions
+# thereof, and that both notices appear in supporting documentation.
+#
+# THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY
+# OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS
+# "AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND
+# FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.
+#
+# This software was developed with support by the Advanced Research
+# Project Agency, ARPA order number 018 (formerly 8230), monitored by
+# the U.S. Army Research Laboratory under contract DAAB07-91-C-Q518.
+# Further funding for this work was provided by DARPA through
+# Rome Research Laboratory Contract No. F30602-97-2-0247.
+#
+#   -- do not edit anything above this line --   </std-header>
+
+
+source $script_dir/vol.init
+# set verbose_flag 1
+#
+# This does a whopping number (over 7000) of tests.
+
+# 
+# NB: set do_eval to 0 if all you want to do is generate
+# a list of commands with verbose on.
+# Set do_eval to 1 if you want to run the commands
+#
+#
+# This calls smsh hard-coded functions that do much of the testing and 
+# assertions. Note that sm/newsort.cpp must be built with INSTRUMENT_SORT
+# on for this to work.
+#
+echo "*******************************************************************"
+echo "This script runs many (more than 1500) tests and takes a long time."
+echo "*******************************************************************"
+set testnumber 0
+#
+#
+# use do_eval to control whether you want to just list the tests to be run
+# or list them and run them.
+#
+set do_eval 1
+# use skip_dupok to control whether you want to run only the uniq (eliminate dups)
+# tests or all the tests.
+set skip_dupok 0
+
+# scratch variable:
+set eval_afterall 1
+
+set nrecslist { 1 8000 2 20 100 }
+set nrecslen [llength $nrecslist]
+verbose  nrecs $nrecslist
+
+set runsizelist { 3 12 8 }
+set runsizelen [llength $runsizelist]
+verbose runsizes $runsizelist
+
+if { $skip_dupok } {
+	set unique { uniq } 
+} else {
+	set unique { uniq dupok } 
+} 
+
+set ulen [llength $unique]
+verbose unique $unique
+
+set direction { up down }
+set dirlen [llength $direction]
+verbose direction $direction
+
+set carry { carry nocarry  }
+set carrylen [llength $carry]
+verbose carry  $carry
+
+set deep { shallow deep  }
+set deeplen [llength $deep]
+verbose deep  $deep
+
+# TODO RESTORE set keep { nokeep keep  }
+set keep { nokeep  }
+# Can't use keep and shallow together
+set keeplen [llength $keep]
+verbose keep  $keep
+
+
+#set outlist { index file }
+# NB: remove index case from this test because
+# btree output can only contain one key and we are
+# testing multiple keys here.  btree.11 now tests the
+# index output.
+set outlist { file }
+set outlen [llength $outlist]
+verbose outputs $outlist
+
+
+# b*1000@VA is must-compute-in-pieces and causes recompute,
+# which we haven't yet implemented
+# b*1000@VA  also generates very large objects, so we
+# must limit the number generated 
+#
+# NB: since the test code is somewhat limited in what it can
+# do, we cannot check the order of alignment-requiring things
+# if prior keys are unaligned, because we copy the mess to a buffer
+# in check_file.
+#
+# We also can't handle creating records with fixed-location keys after
+# non-fixed-loc keys
+#
+# NB: blarge@AVN produces, with 8K pages and some random deviation,
+# a file of about 33MB, so your .sshrc must create a volume at least
+# twice that size; more like 3X.
+# NB: Mon Dec 14 11:27:34 CST 2009 : from the above comment, it appears that
+# we *used to* be able to handle large keys, but now we hit an assert in
+# sort_funcs4 saying that we can't handle large objects in this test.
+# So i've temp removed this from the xlist:
+#  blarge@AVN \
+#
+# Legend:
+# F fixed-length key
+# V variable-loc key
+# N Null/nullable key
+# D derived key
+# A aligned key
+# spatial -> derived 
+#
+set xlist_ui { \
+    u4@V:u4@V:u4@V:u4@V\
+    u2@FAN\
+    u2@FA\
+    u2@VN\
+    u2@V\
+    u2@F\
+    u2@FN\
+    i4@FNA \
+    u4@FA:u4@FA:u4@FA:u4@FA:u4@FA\
+    i2@FAN:u2@N:u1@V:u2@VN:u2@AVN\
+    i1@FAN:u1@V:u1@VN:u1@AVN\
+}
+
+set xlist_blarge { \
+    b*1000@FN \
+    b*1000@VA  \
+    i1@FA:b*1000@FN \
+}
+set xlist_b { \
+    b1@V \
+    b1@VNA \
+    b1@FA \
+    b1@FN \
+    i1@FA:b23@FN \
+    b23@FA:b23@FN \
+}
+
+set xlist_f { \
+    u1@FA:i2@V:f4@V:b1@A:u4@VN \
+    f8@FNA \
+    f8@FA:u4@FA:i2@FA:b1@FA:u1@FA \
+    f8@V \
+    f4@V \
+    f4@FA:f8@N \
+}
+
+## NOTE: smsh doesn't have support for spatial & nullable
+# that is, it doesn't have a way to verify the sorted-ness of the file
+# in that case.
+# NOTE: spatial is necessarily derived (D). We don't automagically
+# make it derived so we must put D in the key descr here:
+set xlist_s { \
+    spatial@FD:i4@FA \
+    spatial@DF:i2@FAN:b1@VNA:spatial@D \
+    spatial@FD \
+    spatial@FD:i4@FA:u4@FA \
+    spatial@FD:i4@FA:u4@FA:i1@V \
+    spatial@FD:i4@FA:u4@FA:i1@V:u4@V \
+    i2@FAN:u2@N:spatial@D\
+    spatial@VD \
+    spatial@DF \
+    spatial@D \
+}
+
+# set xlist $xlist_f OK
+# set xlist $xlist_ui OK
+# set xlist $xlist_s fails
+# set xlist $xlist_b fails on the b*1000 items when the
+# page size is only 1K, so I've removed them to xlist_blarge
+# for later work.
+set xlist [concat $xlist_b $xlist_ui $xlist_s $xlist_f ]
+
+set xlistlen [llength $xlist]
+
+# index/file output
+# key types
+for {set x 0} {$x < $xlistlen} {incr x} {
+    set experiment [lindex $xlist $x] 
+
+    verbose  EXPERIMENT = $experiment
+
+    # verbose experiment=$experiment
+    # verbose keylist [split $experiment ":"]
+    set nkeys [llength [split $experiment ":"]]
+    # verbose $nkeys
+    set rest [split $experiment ":@"]
+    set experiment [lindex $xlist $x] 
+
+	for {set f 0} {$f < $outlen} {incr f} {
+		set outfile [lindex $outlist $f] 
+
+		verbose  OUTPUT = $outfile
+
+		# run size
+		for {set r 0} {$r < $runsizelen} {incr r} {
+		set runsize [lindex $runsizelist $r] 
+
+		verbose  RUNSIZE  = $runsize
+
+		# number of records
+		for {set n 0} {$n < $nrecslen} {incr n} {
+			set nrecs [lindex $nrecslist $n] 
+
+			verbose  NRECS  = $nrecs
+
+
+			# direction
+			for {set d 0} {$d < $dirlen} {incr d} {
+			set dir [lindex $direction $d]
+
+			verbose  UP/DOWN  = $dir
+
+			# carry
+			for {set c 0} {$c < $carrylen} {incr c} {
+			set carry_obj [lindex $carry $c]
+
+			verbose  CARRY = $carry_obj
+
+			# deep copy
+			for {set dc 0} {$dc < $deeplen} {incr dc} {
+			set deep_copy [lindex $deep $dc]
+
+			verbose  DEEP/SHALLOW  = $deep_copy
+
+			# keep 
+			for {set k 0} {$k < $keeplen} {incr k} {
+			set keep_file [lindex $keep $k]
+
+			verbose  KEEP/DESTROY  = $keep
+
+			for {set u 0} {$u < $ulen} {incr u} {
+
+				# remove duplicates: uniq/dupok
+				set uniq [lindex $unique $u]
+
+				set overrode 0
+				# See if we need to override the value of $uniq
+				if [expr {[string match uniq $uniq]}] {
+					set nullable [expr [string first "N" $rest]]
+					if [expr { $nullable < 0 }] {
+						# did not find "N" in $rest
+					} else {
+						# did find "N" in $rest: override $uniq
+						verbose OVERRIDING $uniq because test specifies nullable: $rest
+						set uniq "dupok"
+						set overrode 1
+					}
+				}
+				verbose  UNIQ/DUPOK  = $uniq
+
+				set cmd "sm multikey_sort_file $volid $nrecs $runsize $dir $uniq $outfile $keep_file $deep_copy $carry_obj"
+					
+				set command "$cmd $nkeys $rest"
+
+			    set eval_afterall $do_eval
+                if {$skip_dupok} {
+					if {$overrode} {
+					   set eval_afterall 0
+					   verbose SKIPPING OVERRIDDEN TEST $command $eval_afterall
+					}
+				}
+				if {$eval_afterall} {
+					sm begin_xct
+					# set save_verbose_flag $verbose_flag 
+					#set verbose_flag 0
+					incr testnumber
+					echo $testnumber $command
+					eval $command
+					# set verbose_flag $save_verbose_flag
+					sm commit_xct
+				}
+			}
+			# for u: unique/dupok
+
+			}
+			# for k:  keep file
+
+			}
+			# for dc: deep_copy
+
+			}
+			# for c: carry_obj
+
+			}
+			# for d: direction
+
+		}
+		# for n: num of records
+		
+		}
+		# for r: run size
+	}
+    # for f: outlist -- index/file output
+
+}
+# for x: experiment
+
+unset eval_afterall skip_dupok overrode testnumber
+
+# clean up tcl variables
+unset nkeys rest cmd command
+unset xlist xlistlen experiment x
+unset outlist outlen outfile f
+unset unique ulen uniq  u
+unset direction dirlen dir d
+unset runsizelist runsizelen runsize r
+unset nrecslist nrecslen nrecs n
+
+unset keep keeplen
+unset carry carrylen
+unset deep deeplen
+unset deep_copy
+unset keep_file carry_obj
+unset c dc k do_eval
+unset xlist_s xlist_ui xlist_b xlist_f

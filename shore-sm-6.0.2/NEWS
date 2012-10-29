@@ -1,0 +1,39 @@
+SHORE Storage Manager Release 6.0.2:
+  - Minor documentation improvements, removal of dead code. 
+  - Minor portability improvement: got rid of gethostbyname()
+  - Bug fixes (by gnats number): 
+     162) no-op in bf htab lookup
+     165) deadlock detection bugs : was not taking into account incompatibility
+	 between upgrade-mode of waiting request and the "current" request's modes, which could
+	 result in interminable sleep, and
+	 was not properly dealing with update-locks in deadlock detection.
+	 166) incorporated some hash-function and deadlock-detection performance improvements per
+	 suggestions from a user.
+     174) memory management bug that could cause system to run out of
+     memory with the type-specific heaps
+	 172) btree traversal bug: removed a buggy optimization in re-traversing after
+	 a posc
+	 173)  btree performance improvement: avoids excessive heap use where items can
+	 use the stack instead.
+
+SHORE Storage Manager Release 6.0.1:
+
+  - Changes to Hypertext references in documentation in response to
+    web-hosting changes at UW Computer Sciences.  No functional changes.
+  - Minor corrections to Makefiles regarding creating distributions.
+
+SHORE Storage Manager Release 6.0.0:
+
+  - Based on the first Shore-MT release, which was based on 5.0.1 release
+    of the SHORE Storage Manager.
+  - Completed port of of Shore-MT to Pthreads, including the unit tests
+    and smsh.
+  - Huge clean-up : 
+     - removed much of the sthreads layer, including the scond_t and smutex_t
+     - removed a ton of dead code dating back to the SHORE days and the
+	   Paradise days
+  - Rewrite of the buffer manager, deadlock detection, and significant
+       portions of the volume manager.
+  - Documentation re-written.  Now uses Doxygen so the documentation is
+    embedded in code comments.
+  - Slight API changes to accommodate additional work at DIAS (Shore-MT).
