@@ -10,3 +10,13 @@
 *.lai
 *.la
 *.a
+
+# emacs leftovers
+*~
+
+# configure generated and changed files
+Makefile.in
+Makefile
+*.in
+.deps
+
