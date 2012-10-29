@@ -402,7 +402,7 @@ int main(int argc, const char** argv)
             if (f_arg) {
                 TCL_AV char* av[2];
                 av[0] = TCL_AV1 "source";
-                av[1] = f_arg;
+                av[1] = TCL_CVBUG  f_arg;
                 // smsh -f <file>
                 tcl_thread = new tcl_thread_t(2, av, 
                                 smsh_libdir->value(),

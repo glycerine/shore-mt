@@ -1668,7 +1668,7 @@ void tcl_thread_t::initialize(
     {
         // read .smshrc
         Tcl_DString buf;
-        char* rcfilename = Tcl_TildeSubst(ip, rcfile, &buf);
+        char* rcfilename = Tcl_TildeSubst(ip, TCL_CVBUG rcfile, &buf);
         if (rcfilename)  {
             FILE* f;
             f = fopen(rcfilename, "r");
@@ -1706,7 +1706,7 @@ void tcl_thread_t::initialize(
     {
         w_ostrstream_buf otmp(100);        // XXX magic number
         otmp << ac << ends;
-        Tcl_SetVar(ip, TCL_CVBUG "argc", otmp.c_str(), TCL_GLOBAL_ONLY);
+        Tcl_SetVar(ip, TCL_CVBUG "argc", TCL_CVBUG otmp.c_str(), TCL_GLOBAL_ONLY);
     }
 
 
