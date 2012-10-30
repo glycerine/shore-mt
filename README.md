@@ -18,10 +18,14 @@ I configured with
 To get make check to succeed, I had to add in a couple of TCL_CVBUG casts in the src/sm/smsh directory.
 
 
+29 Oct:
+=======
 
 Info and copyright notices from the Shore-MT home page 
-(http://research.cs.wisc.edu/shore-mt/) 
 -------------------------------------------------------
+
+(The following is verbatim from the Shore-MT home page, http://research.cs.wisc.edu/shore-mt/, and is provided here only for reference and completeness as of 29 Oct 2012.)
+
 
 <h1>SHORE Storage Manager: The Multi-Threaded Version</h1>
 
