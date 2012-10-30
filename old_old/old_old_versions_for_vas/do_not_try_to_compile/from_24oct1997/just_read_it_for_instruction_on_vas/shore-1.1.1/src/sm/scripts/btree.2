@@ -1,0 +1,75 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  load a btree, and verify its split behavior. A probe is done
+#  after a few inserts.
+#
+
+#
+# start up
+#
+source $script_dir/vol.init
+
+for {set nrec 1} {$nrec <= 8} {incr nrec} {
+    set nrec [expr {$nrec + 100} ]
+    verbose testing integer key btree  nrec= $nrec
+    sm begin_xct
+    sm test_int_btree $volid $nrec
+    sm commit_xct
+}
+
+set nrec 20
+
+verbose testing integer key btree
+sm begin_xct
+sm test_int_btree $volid $nrec
+sm commit_xct
+
+
+set nrec 800
+
+#
+# create index and load it up 
+#
+sm begin_xct
+set ndx [sm create_index $volid btree]
+verbose created index $ndx
+for {set i 1} {$i <= $nrec} {incr i} {
+    #verbose inserting $i [format %03d $i] [format %015d $i]
+    if {$i%20 == 0} { 
+	verbose inserting $i [format %03d $i] [format %015d $i] 
+    }
+    sm create_assoc $ndx [format %03d $i] [format %015d $i]
+    #set el [sm find_assoc $ndx [format %03d $i] ]
+    #assert {[expr {[format %015d $i] == $el}]}
+
+    if {$i > 280 && $i%50 == 0 } {
+	for {set j 1} {$j <= $i} {incr j} {
+	    set el [sm find_assoc $ndx [format %03d $j] ]
+	    #assert {[expr {[format %015d $j] == $el}]}
+	    if {[format %015d $j] != $el} {
+	        verbose [format %015d $j] != $el
+		assert {0}
+	    }
+	}
+    }
+}
+verbose "probe:"
+for {set i 1} {$i <= $nrec} {incr i} {
+    set el [sm find_assoc $ndx [format %03d $i] ]
+    assert {expr [string compare [format %015d $i] $el ] == 0}
+}
+verbose probed [expr $i - 1]
+verbose "---- successful"
+
+sm commit_xct
+
+verbose [sm gather_stats]
+
+unset ndx nrec
+unset i j el

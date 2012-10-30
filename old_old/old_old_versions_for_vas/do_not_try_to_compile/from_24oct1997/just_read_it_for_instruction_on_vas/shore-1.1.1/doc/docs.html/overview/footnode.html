@@ -1,0 +1,860 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Footnotes</TITLE>
+<META NAME="description" CONTENT="Footnotes">
+<META NAME="keywords" CONTENT="overview">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="overview.css">
+<LINK REL="previous" HREF="node7.html">
+<LINK REL="up" HREF="overview.html">
+</HEAD>
+<BODY >
+<P><DL>
+<DT><A NAME="8">...Shore</A>
+<DD>This overview document
+is based heavily on the paper
+``Shoring Up Persistent Applications''
+presented at the
+1994 ACM SIGMOD Conference.  This document was created by editing that
+paper to reflect the state of and plans for the Shore system as of the
+release.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="9">...HREF="footnode.html#8"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A></A>
+<DD>
+This research is sponsored
+by the Advanced Research Project Agency, ARPA order number 018 (formerly
+8230), monitored by the U.S. Army Research Laboratory under contract
+DAAB07-92-C-Q508.
+<P><PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="307">...data</A>
+<DD>SDL is very closely related to ODL, a data
+definition language recently proposed as a standard by ODMG,
+an OODB vendor consortium
+[<A
+ HREF="node7.html#c:ods">Cat93</A>].
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="52">...peer-to-peer</A>
+<DD> The release supports only single server operation.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="85">...database&nbsp;[<A
+ HREF="node7.html#llow:the">LLOW91</A>]&nbsp;</A>
+<DD>In this release,
+heaps are not available to application programmers; for now, they are only
+used internally, for storing the variable-sized components of an object.
+Also, demand-paging of large heaps is not implemented,
+so an object's heap is brought in its entirety when the object is faulted
+into the object cache.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="93">...calls.</A>
+<DD>
+The release does not include a Unix system call library;
+that is planned for a later release.
+It does include an NFS server, so Unix system calls can be used
+with Shore objects if the SHORE file system is NFS-mounted on a
+Unix host.
+<P><PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="310">...OODBs.</A>
+<DD>Many
+of the commercial systems use a tree-structured name space for naming
+<EM>databases</EM>, but not for naming or organizing individual persistent
+objects or collections.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="103">...objects</EM></A>
+<DD>
+modules and type objects are not special objects in this release
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="108">...stamps.</A>
+<DD>The semantics of
+time stamps are slightly different from those of Unix in order to make
+them efficiently maintainable while retaining their usefulness to
+applications that rely upon them.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="115">...section.</A>
+<DD>With this release,
+cross references can be followed through NFS, 
+but they cannot be removed through NFS. 
+When a dangling cross reference is followed through NFS, somewhat
+odd behavior results: the NFS client (host) issues a message,
+``name not found'', in which ``name'' is the name of the cross
+reference.
+<P><PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="142">...server.</A>
+<DD> the Unix compatibility library is not yet
+available.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="157">...defined.</A>
+<DD>In the interest
+of brevity, some of the details have been omitted.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="165">...binding.</A>
+<DD>Other bindings are
+planned, of course, but work on them will not begin until Shore is fully
+operational and delivering good performance through its C++ binding.
+Moreover, note that the features described here differ somewhat from their
+description in the SIGMOD-94 Shore paper.  The description here represents
+the Beta release C++ binding; we expect that the binding will become
+cleaner over time.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="167">...definitions.</A>
+<DD>Note, however, that any Shore application can create
+type objects.  For instance, one could write a graphical schema design tool
+to create type objects and install them in the database.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="223">...will</A>
+<DD>in a future
+release
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="237">...server.</A>
+<DD>At present, disk volumes are not
+replicated.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="238">...applications.</A>
+<DD>In this 
+release, remote server support is not provided; the server-to-server
+data shipping and caching code is still under construction at present.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="252">...server.</A>
+<DD>An OID contains a
+volume identifier.  The server uses a global volume-location service to
+find the appropriate server and establishes a network connection if necessary.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="258">...[<A
+ HREF="node7.html#mnss:sec">MNSS87</A>]</A>
+<DD>
+this release uses no authentication
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="270">...database.</A>
+<DD>An SQL server value-added server is an example
+of a rather different use of the Shore Server; the upper layers and type
+system of Shore would essentially be thrown away, and the facilities
+provided by the Shore Storage Manager would be used in the construction
+of a completely different, customized server.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="280">...protocol&nbsp;[<A
+ HREF="node7.html#hkmnssw:sca">HMN+88</A>,<A
+ HREF="node7.html#llow:the">LLOW91</A>,<A
+ HREF="node7.html#wr:cac">WR91</A>,<A
+ HREF="node7.html#fc:cli">FC92</A>]</A>
+<DD>planned
+for a later release
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="285">...de-escalation</EM>&nbsp;[<A
+ HREF="node7.html#lc:aco">LC89</A>,<A
+ HREF="node7.html#j:ada">Jos91</A>].</A>
+<DD> This
+release does not include multi-granularity locking, as that
+code is still being written along with the server-to-server code
+mentioned earlier.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+<DT><A NAME="290">...server.</A>
+<DD>Generally, the
+computational cost of the redo is small enough to be ignored, especially
+when compared to the cost
+of receiving a page of data via the network.
+<PRE>.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+</PRE>
+</DL><ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>
+10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

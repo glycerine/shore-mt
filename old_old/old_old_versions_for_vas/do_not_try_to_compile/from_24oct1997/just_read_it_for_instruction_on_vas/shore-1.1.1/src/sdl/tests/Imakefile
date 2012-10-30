@@ -1,0 +1,35 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * Imakefile for sdl_example SDL program
+ *
+ * $Header: /p/shore/shore_cvs/src/sdl/tests/Imakefile,v 1.6 1997/10/13 11:40:29 solomon Exp $
+ *
+ * This Imakefile follows the conventions in ../../examples/README.makefiles
+ */
+
+#define InstallStuff Makefile.template README 
+
+runtests:
+	@for i in  `echo $(EXECS)`; do\
+		a=`basename $$i .sdl`;\
+		$(RM) -f $$a;\
+		echo $(MAKE) -f Makefile.template -S $(OPTIONS) $$a.h $$a.o $$a;\
+		echo $(MAKE) -f Makefile.template -S $(OPTIONS) $$a.h $$a.o $$a >> $$a.log;\
+		$(MAKE) -f Makefile.template -S $(OPTIONS) $$a.h $$a.o $$a >> $$a.log;\
+		diff -w $$a.log $$a.expected > /dev/null; \
+		if ($$? > 0)  then \
+			echo "ERROR IN $$a -- see $$a.log, $$a.expected";\
+		fi\
+	done
+
+clean::
+	$(RM) -f *.log *.h *.o
+	$(MAKE) -f Makefile.template clean
+
+%GEN install(examples/sdl_example, InstallStuff)

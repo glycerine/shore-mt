@@ -1,0 +1,32 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+/*
+ *      $RCSfile: Imakefile,v $
+ *      $Revision: 1.4 $
+ *      $Date: 1995/09/07 22:06:29 $
+ *      $Author: nhall $
+ */
+
+
+SRC = \
+	1 2 3 4 5 all all.noerr \
+	anon.random anon.test appendAnon \
+	batch.1 batch.2 batch.3 batch.4 batch.5 batch.9 batch.all \
+	cache cd chgrp.1 chmod chmod.1 chmod.2 chmod.3 chmod.4 chmod.compensate \
+	chown.1 connect createAnon dismount.all index index.run \
+	large largedir largedir.2 largedir.3 largedir.4 largedir.all \
+	largedir.create largedir.create.short largedir.remove largedir.remove.reverse \
+	largedir.remove.reverse.short largedir.remove.short \
+	link.1 lock ls mkdir mkdir.2 mkdir.3 mkdir.compensate mkdir.errcodes \
+	mklgpool mount mount.save \
+	part.noerr path perm permissions.dirs read.bad remove rename setup.all \
+	setup.large setup.small small stat symlink  \
+	time time.all time.create time.null time.read time.write truncateAnon \
+	truncateAnon.2 \
+	utimes xref
+
+SRC.cvs = $(SRC)

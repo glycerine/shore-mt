@@ -1,0 +1,36 @@
+This is a prototype shore/sdl/C++ implementation of the oo7 benchmark.
+The SDL descriptions are in oo7.sdl.  The SDL compiler generates oo7.h
+from oo7.sdl.  If you want to avoid using the SDL compiler, you can
+copy oo7.h.precompiled to oo7.h.
+
+There is a program to generate the database, gendb, and one to run
+queries, bench.  Currently, the bench program is actually set up
+to both generate the database and run an operation against it.
+
+There are 2 configuration files, oo7.config.small and oo7.config.tiny.
+oo7.config.tiny ends up using 414 objects, so it should be resonable;
+oo7.config.small creates 66000 objects or something silly like that
+
+You can run this as
+	oo7client gendb <configfile>
+and
+	oo7client bench <configfile> <queryparameters>
+
+e.g
+	oo7client gendb oo7.config.tiny
+or
+	oo7client bench oo7.config.tiny 1 t1 one
+
+
+PERFORMANCE:
+
+We have run some comparisons of Shore with Exodus.  For the tests we
+had the Shore (Exodus) server running on the same dual-processor
+Sparcstation as the Shore (Exodus) OO7 program.  In some of the hot
+traversal tests, Shore was slightly faster.  However, in many tests
+Shore was slower (usually 2-5 times slower).  This was expecially true
+in update tests or index tests, since the alpha release of Shore has an
+inefficient update implementation and no support for caching index
+lookups at the client.
+
+

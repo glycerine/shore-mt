@@ -1,0 +1,369 @@
+#!/bin/sh
+# the next line restarts using wish \
+exec wish "$0" "$@"
+
+
+set copyright {
+
+
+This software is derived from software containing the following restriction,
+and the copyright that follows it:
+
+PERMISSION IS GRANTED TO DISTRIBUTE THIS SOFTWARE FREELY, BUT ONE MAY NOT 
+CHARGE FOR IT OR INCLUDE IT WITH SOFTWARE WHICH IS SOLD.
+
+Copyright (c) 1993  T.A. Phelps
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for educational, research and non-profit purposes, 
+without fee, and without a written agreement is hereby granted, 
+provided that the above copyright notice and the following three 
+paragraphs appear in all copies.  
+
+Permission to incorporate this software into commercial products may 
+be obtained from the Office of Technology Licensing, 2150 Shattuck 
+Avenue, Suite 510, Berkeley, CA  94704. 
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES, 
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE 
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF 
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, 
+ENHANCEMENTS, OR MODIFICATIONS.
+
+
+}
+
+#
+# NB: NOT DONE!
+# for the time being, it ONLY works if you search for ssh
+# in the ps list!!!!!!!!!
+#
+#
+
+set startup $env(HOME)/.shoreconfig
+set smstats "smstats"
+set smstatsdir "./"
+
+# MONSTER KLUDGE -- REMOVE : get directory from path of  sm_diskrw  option
+
+if {$startup!="" && [file readable $startup]} {
+   if {[catch {set fid [open $startup r ]}]} {
+       puts stderr "Cannot open $startup."
+       exit 1
+   }
+   while {![eof $fid]} {
+       set junk [gets $fid]
+       if [regexp {^[^#]*sm_diskrw:} $junk] {
+	  set junk [lindex $junk 1]
+
+	  set junk [string range $junk [string first ":" $junk ] end]
+	  set ind  [string last "/" $junk ]
+	  set smstatsdir [string range $junk 0 $ind]
+	  # puts stdout "junk 4: $smstatsdir$smstats"
+       }
+   }
+   if [catch {close $fid}] {
+       puts stdout  "wierd error - cannot close $startup"
+       exit 1
+   }
+}
+if {! [file executable $smstatsdir$smstats]} {
+   puts stderr "Cannot locate smstats executable."
+   exit 1
+}
+
+
+set font "-*-Helvetica-Medium-R-Normal--*-140-*-*-*-*-*-*"
+set font "-*-Helvetica-Medium-R-Normal--*-75-*-*-*-*-*-*"
+
+set w ""
+set window "."
+# toplevel $w
+set pid none
+set testint 0
+
+set execfile "./ssh"
+
+proc setpid { t dest } {
+   global pid
+
+   set junk 0
+   set location 0
+   catch {set location [$t index sel.first]}
+
+   catch {set junk [$t get sel.first sel.last]}
+   $dest delete 0 end  
+   $dest insert end  $junk
+   set pid $junk
+
+   if {$location != 0} {
+      scan $location "%d.%d" line char
+      set junk [$t get $line.0 "$line.0 lineend"]
+      set execfile [lindex $junk 4]
+   }
+   # refresh 
+}
+
+proc locate { t } {
+   global pid
+   # puts stdout "locate"
+   set pipe "ps -axw"
+   if {[catch {set fid [open "|$pipe" r ]}]} {
+       puts stderr  " cannot open pipe: $pipe "
+       $t insert end " cannot open pipe $pipe "
+       exit 1
+   }
+   $t configure -state normal
+   $t delete 0.1 end
+
+   while {![eof $fid]} {
+       set junk [gets $fid]
+       $t insert end  "$junk \n"
+   }
+   if [catch {close $fid}] {
+       #  puts stdout  "wierd error - cannot close $fid"
+   }
+   $t configure -state disabled
+   $t yview 
+   update idletasks
+}
+
+set t $w.text.t
+
+proc refresh {} {
+   global pid
+   global testint 
+   global t
+   global smstats
+   global execfile
+
+   set pixel [.text.scroll get]
+   set coord [lindex $pixel 0]
+   scan $coord "%d.%d" x y
+   set fract [.text.scroll fraction $x $y]
+
+   # puts stdout { "$smstats -e ./ssh -p " $pid }
+
+   $t configure -state normal
+   $t delete 0.1 end
+
+   set pipe "$smstats -e $execfile -p  $pid "
+
+   if {[catch {set fid [open "| $pipe" r ]}]} {
+       puts stderr  " cannot open pipe: $pipe "
+       $t insert end " cannot open pipe $pipe "
+       exit 1
+   }
+   set lines 0
+   while {![eof $fid]} {
+       set junk [gets $fid]
+       $t insert end  "$junk \n"
+       incr lines
+   }
+   if { $lines == 0 } {
+       $t insert end  "$pid is not a Storage Manager process \n"
+   }
+   if [catch {close $fid}] {
+       # puts stdout  "wierd error - cannot close $fid"
+   }
+
+   $t configure -state disabled
+   # $t yview moveto $fract
+   update idletasks
+}
+
+set searchoffset 0.0
+
+proc dofound { t i } {
+   global pid
+	
+   # if this is the locate window ...
+   # puts stdout "dofound $t $i"
+	
+   if { [string compare $t ".locate.t"]==0 } {
+	set junk [$t get "$i.3 wordstart" "$i.1 wordend"]
+	.pid.pid delete 0 end  
+	.pid.pid insert end  $junk
+	set pid $junk
+	# puts stdout "dofound -- $pid "
+
+	set junk [$t get "$i.0 wordstart" "$i.0 lineend"]
+	# puts stdout "dofound -- $junk "
+   }
+}
+
+proc searchnext { t w } {
+  global searchoffset
+  set what [$w get]
+  catch { $t tag remove high high.first high.last }
+
+  scan [$t index end] "%d" nl
+  scan $searchoffset "%d.%d" startline startchar
+  set found 0
+  for {set i $startline} {$i <= $nl} {incr i} {
+	scan [$t index "$i.$startchar lineend"] "%d.%d" junk lineend
+	set junk [$t get $i.$startchar $i.$lineend]
+	set startchar 0
+	if [regexp -indices -nocase $what $junk ind] {
+	   set found 1
+	   scan $ind "%d %d" l r
+	   $t tag add high $i.[expr $startchar+$l] $i.[expr $startchar+$r+1]
+	   $t tag configure high -background black -foreground white
+	   $t yview $i.[lindex $ind 0] 
+	   set searchoffset $i.[lindex $ind 1]
+
+	   dofound $t $i
+
+	   break
+	}
+  }
+  if { $found == 0 } {
+       $t yview 0.0
+  }
+}
+
+proc search { t w } {
+  global searchoffset
+  set what [$w get]
+
+  if {[string compare $t ".locate.t"] == 0} {
+      locate $t
+
+      if {[regexp -nocase $what "ssh"] == 0} {
+	 puts stderr "CANNOT SEARCH FOR ANYTHING BUT SSH"
+      }
+  } 
+
+  scan [$t index end] "%d" nl
+  set start 0
+  for {set i 1} {$i <= $nl} {incr i} {
+	scan [$t index "$i.0 lineend"] "%d.%d" junk lineend
+	set junk [$t get $i.0 $i.$lineend]
+	if [regexp -indices -nocase $what $junk ind] {
+	   scan $ind "%d %d" l r
+	   $t tag add high $i.[expr $start+$l] $i.[expr $start+$r+1]
+	   $t tag configure high -background black -foreground white
+	   $t yview $i.[lindex $ind 0] 
+	   set searchoffset $i.[lindex $ind 1]
+
+	   dofound $t $i
+
+	   break
+	}
+  }
+	
+}
+
+# create the main buttons
+frame $w.buttons
+pack  $w.buttons -side top -expand no -fill x -pady 2m
+button $w.buttons.quit -text "Quit" -command "destroy $window"
+button $w.buttons.refresh -text "Read Process Statistics " -command "refresh"
+button $w.buttons.ps -text "Re-run ps " -command "locate $w.locate.t"
+foreach i { quit refresh ps } {
+    pack $w.buttons.$i -side left -expand 1
+} 
+frame $w.pid -borderwidth 2  
+entry $w.pid.pid -textvariable $pid -state normal
+label $w.pid.msg -text "Selected Process: "  
+pack $w.pid.msg -in $w.pid -side left -fill x -expand yes
+pack $w.pid.pid -in $w.pid -side right
+pack $w.pid -in $w.buttons -side top -expand no
+
+
+
+proc textSearchButtonFrame { w name ht wd msg } {
+    set textboxmargin 5
+
+    frame $w.$name -relief sunken
+    label $w.$name.l -text $msg
+    pack $w.$name.l -side top -fill y 
+
+    text $w.$name.t -yscrollcommand "$w.$name.scroll set" -wrap word \
+	-setgrid false \
+	-state disabled \
+	-exportselection yes\
+	-relief sunken -borderwidth 2 -padx $textboxmargin \
+	-height $ht -width $wd
+
+    frame $w.$name.search 
+    button $w.$name.search.search \
+	-text "Search "\
+	-command "search $w.$name.t $w.$name.search.w"
+
+    button $w.$name.search.next -text "Next " -command "searchnext $w.$name.t $w.$name.search.w; "
+
+    scrollbar $w.$name.scroll -orient vertical -command "$w.$name.t yview"
+    pack $w.$name.scroll -side right -fill y 
+
+    pack $w.$name.t -in $w.$name -expand yes -fill both
+
+    bind $w.$name.search <Enter> "focus $w.$name.search.w"
+    entry $w.$name.search.w -relief sunken -state normal 
+    bind $w.$name.search.w <Enter> "focus $w.$name.search.w"
+
+    bind $w.$name.search.w <KeyPress-Return> "search $w.$name.t $w.$name.search.w"
+
+    foreach i { search next } {
+	pack $w.$name.search.$i -side left 
+    } 
+    pack $w.$name.search.w -side left -fill x -expand yes 
+    pack $w.$name.search -side left -fill x -expand no 
+
+# bind $t.$name.t <Double-Button-1> "$w.$name.search.w select from 0; $w.$name.search.w select to end"
+
+}
+
+textSearchButtonFrame $w locate 20 5 "Select a process ID here."
+textSearchButtonFrame $w text 20 5 "Statistics:"
+
+
+
+
+set t $w.text.t
+
+pack $w.locate -expand yes -side left -fill both
+pack $w.text   -expand yes -fill both
+$t configure -font $font
+
+
+
+
+$t configure -font $font
+
+wm title $window "Sm Statistics"
+wm iconname $window "sm statistics"
+
+proc positionWindow w {
+    wm geometry $w +300+300
+}
+
+positionWindow $window
+
+
+# eval $t tag configure highlight -background #ffd8ffffb332
+
+focus $w
+locate $w.locate.t
+$w.locate.t tag add sel 0.0 0.0
+
+# bind $w.locate.t <Leave> "setpid $w.locate.t $w.pid.pid"
+# bind $w.locate.t <Double-Button-1> "setpid $w.locate.t $w.pid.pid"
+bind $w.locate.t <ButtonRelease-1> "setpid $w.locate.t $w.pid.pid"
+
+
+$w.text.t configure -state normal
+$w.text.t insert end $copyright
+$w.text.t yview
+$w.text.t configure -state disabled
+
+$w.locate.search.w configure -state normal
+$w.locate.search.w insert end "ssh"
+$w.locate.search.w configure -state disabled

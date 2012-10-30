@@ -1,0 +1,415 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Testing Your Installation</TITLE>
+<META NAME="description" CONTENT="Testing Your Installation">
+<META NAME="keywords" CONTENT="installation">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="installation.css">
+<LINK REL="previous" HREF="node6.html">
+<LINK REL="up" HREF="installation.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif_gr.gif"> 
+<A NAME="tex2html109"
+ HREF="installation.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html107"
+ HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html111"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Up:</B> <A NAME="tex2html110"
+ HREF="installation.html">Shore Software Installation Manual</A>
+<B> Previous:</B> <A NAME="tex2html108"
+ HREF="node6.html">Compiling and Installing the</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html112"
+ HREF="node7.html#SECTION00071000000000000000000">
+Running the Shore Server</A>
+<LI><A NAME="tex2html113"
+ HREF="node7.html#SECTION00072000000000000000000">
+Compiling and Running an Application</A>
+<LI><A NAME="tex2html114"
+ HREF="node7.html#SECTION00073000000000000000000">
+NFS-Mounting the Shore File System</A>
+<LI><A NAME="tex2html115"
+ HREF="node7.html#SECTION00074000000000000000000">
+Compiling and Running a Value-Added Server</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="installation:testing">&#160;</A><H1><A NAME="SECTION00070000000000000000000">
+Testing Your Installation</A>
+</H1>
+<P>
+This section lists steps to test your installation.
+Included are instructions for running the Shore server,
+compiling and running some example programs, and mounting
+the Shore file system.  There are also instructions for compiling
+a simple value-added server built with the Shore Storage Manager.
+Only brief explanations are provided.  Pointers to relevant documents
+are given.
+<P><A NAME="installation:running">&#160;</A><H2><A NAME="SECTION00071000000000000000000">
+Running the Shore Server</A>
+</H2>
+<P>
+Set the environment variable <TT>SHORE</TT> to point to the directory containing
+the directories <TT>bin</TT>, <TT>lib</TT>, etc. containing the Shore programs
+and libraries.  If you installed a binary release, this directory will be
+<TT>$SHROOT</TT> (the shell variable SHROOT is explained in
+<A HREF="node3.html#installation:vars">the <B>Requirements</B> section</A>).
+If you built the binaries from the source release, it will
+be <TT>$SRCDIR/installed</TT>.
+<PRE>
+    setenv SHORE $SHROOT
+    # or
+    setenv SHORE $SRCDIR/installed
+
+    # if you use sh, ksh, etc, do this instead
+    SHORE=$SHROOT
+    # or
+    SHORE=$SRCDIR/installed
+
+    export SHORE
+</PRE>
+<P>
+Copy the configuration files to your home directory and
+modify a line in the  .shoreconfig file to point to 
+installation location.  (In the <TT>sed</TT>
+command below, treat PUT-YOUR-INSTALLED-DIR-HERE literally. You
+can yank this entire command with your mouse.)
+<PRE>
+    sed -e &quot;s,PUT-YOUR-INSTALLED-DIR-HERE,$SHORE,&quot; \
+         $SHORE/lib/options &gt; ~/.shoreconfig
+    cp $SHORE/lib/shore.rc ~
+    # in case you want to edit them later,
+    chmod u+w ~/.shoreconfig ~/shore.rc
+</PRE>
+<P>
+Make a directory in which to run the Shore server.  This directory
+will have subdirectories <TT>log</TT> and <TT>volumes</TT>.  You must
+run the server while in this directory since the <TT>~/.shoreconfig</TT>
+and <TT>~/shore.rc</TT> files refer to <TT>./log</TT> and <TT>./volumes</TT>.
+The directory should be in a file system with at least 100 MB of free
+space (this is because the log and volume sizes 
+in the distributed configuration files 
+are this large).
+<PRE>
+    # create a directory for running the Shore server
+    mkdir shoreserver   
+    cd shoreserver
+    mkdir log volumes
+</PRE>
+<P>
+Now you can run the Shore server.
+<PRE>
+    $SHORE/bin/shore
+</PRE>
+You can safely ignore the warning
+<PRE>
+Warning: no database administrator -- running under userid ...
+</PRE>
+<P>
+Expect the server to print a few lines like these:
+<PRE>
+Looking for run command file &quot;~/shore.rc&quot;...
+format --./volumes/miniroot-- 5000 true 
+mkfs ./volumes/miniroot 5000 10 
+Done serving devices and making filesystems.
+ 
+root = 0 
+setroot  10 
+/ is now 0.0.0.0:10.20007  
+See if  /  exists in the Shore namespace. 
+/  does exist 
+Done putting together the namespace.
+ 
+Done reading ~/shore.rc.
+Shore Server 
+Release 1.1.1
+(0)%
+</PRE>
+<P>
+Try typing the following commands to the Shore server.
+<PRE>
+    # list directories, registered objects, pools in root directory 
+    ls -al
+    help
+</PRE>
+<P>
+To shut down the server try any one of these:
+<PRE>
+    # at the server prompt
+    q[uit]
+    bye
+    exit
+    ctrl-D
+
+    # or open another window and run this program 
+    $SHORE/bin/sshutdown
+</PRE>
+<P>
+The document,
+<A NAME="tex2html3"
+ HREF="../running/running.html">Running a Shore Server</A>,
+gives more information on configuring and running the Shore Server.
+<P><A NAME="installation:compileapp">&#160;</A><H2><A NAME="SECTION00072000000000000000000">
+Compiling and Running an Application</A>
+</H2>
+<P>
+The first test uses 
+one of the examples shipped in the documentation release.
+See <TT>pscan/README</TT> for details.
+For other examples, see the <TT>README</TT> in each of the
+examples directories.
+<P>
+For the following examples, you must have a server running.
+If you don't, start one as described above in another window, or in
+the background.
+(The server needs to be running for the <TT>make</TT>, since it invokes the
+SDL compiler, which needs to contact the server to register types.)
+The commands in the following paragraphs should be typed to a Unix shell
+in another window, not to the Shore VAS shell.
+<P>
+You must also fetch and unpack a copy of the example programs either
+by installing the documentation release or the examples release as described
+<A HREF="node4.html#installation:docs">above</A>,
+First copy the entire <TT>examples/pscan</TT> directory into another
+directory.
+<P><PRE>
+    mkdir pscan
+    cp $SHROOT/examples/pscan/* pscan
+</PRE>
+<P>(The directory $SHROOT/examples is part of the documentation release).
+<P>
+Then build the test programs <TT>build</TT>, <TT>pscan</TT>, and <TT>destroy</TT>
+and try running them.
+<P><PRE>
+    cd pscan
+    make
+    build 10 testpool
+    pscan testpool
+    destroy testpool
+</PRE>
+<P>
+The output should look something like this:
+<PRE>
+    % build 10 testpool
+    Created 10 parts
+    % pscan testpool
+    0, Part0
+    1, Part1
+    2, Part2
+    3, Part3
+    4, Part4
+    5, Part5
+    6, Part6
+    7, Part7
+    8, Part8
+    9, Part9
+    Found 10 parts
+    % destroy testpool
+    Destroyed 10parts
+</PRE>
+<P>
+The document
+<A NAME="tex2html4"
+ HREF="../stree/stree.html">Getting Started with Shore</A>
+gives information about writing Shore applications,
+using <TT>$SHROOT/examples/stree</TT> as an example.
+<P><A NAME="installation:nfs">&#160;</A><H2><A NAME="SECTION00073000000000000000000">
+NFS-Mounting the Shore File System</A>
+</H2>
+<P>
+The Shore Server creates and manages a name space of objects, the Shore
+file system, that looks like a Unix file system.  The Shore file system
+can be mounted as an NFS remote file system, allowing you to use
+standard commands such as <TT>ls</TT> to navigate it.
+<P>
+To mount the Shore file system you must have super-user (root) 
+privileges on your machine.
+<P><PRE>
+    su
+    # create a mount point (an empty Unix directory)
+    mkdir /shoremnt
+
+    $SHORE/bin/mnt localhost /shoremnt $SHORE/bin
+    exit
+</PRE>
+<P>
+To check the mount (you don't have to be super-user):
+<PRE>
+    # use your system's mount command to see what's mounted
+    mount
+    # The mount command may not be in your path by default.  For Solaris, the
+    # command is /usr/sbin/mount
+</PRE>
+You should see something like this:
+<PRE>
+/shoremnt on localhost:/
+    soft/intr/port=2999/mport=2997/timeo=60/rsize=8192
+    /wsize=8192/mport=2997/remote
+    on Tue Aug  5 15:40:27 1997
+</PRE>
+(the exact format varies from platform to platform; it will probably all be on
+one line).
+<PRE>
+    # at an ordinary shell prompt in one window, type 
+    cp /etc/motd /shoremnt
+    # at the prompt from the shore server that you started earlier, type
+    ls -l /
+    # at the ordinary shell prompt, type 
+    ls -l /shoremnt
+    cat /shoremnt/motd
+    rm /shoremnt/motd
+    ls -l /shoremnt
+    # results should indicate the same directory contents,
+    # although the syntax will vary
+
+    # at the prompt from the shore server, type
+    log all trace
+
+    # repeat the previous sequence of commands at the shell prompt
+    cp /etc/motd /shoremnt
+    ls -l /shoremnt
+    cat /shoremnt/motd
+    rm /shoremnt/motd
+    ls -l /shoremnt
+
+    # You should see a trace of the NFS operations performed by the server
+    # emulating a Unix file system.
+    # To turn off the tracing, exit from the Shore server and restart it,
+    # or type the following at the server prompt.
+    log all error
+</PRE>
+After you're done, unmount the Shore file system (again, as super-user).
+<PRE>
+    su
+    $SHORE/bin/sumount /shoremnt
+    exit
+    ls -l /shoremnt
+    # result should be 'total 0'
+</PRE>
+For Linux, there is no special Shore version of umount.
+<PRE>
+    su
+    umount /shoremnt
+    exit
+</PRE>
+You may ignore the message
+<PRE>
+    Cannot MOUNTPROG RPC: RPC: Program not registered
+</PRE>
+<P>
+The document
+<A HREF="../running/node5.html#running:nfs">Running a Shore Server</A>
+gives more information on NFS-Mounting the Shore file system.
+<P><A NAME="installation:ssm">&#160;</A><H2><A NAME="SECTION00074000000000000000000">
+Compiling and Running a Value-Added Server</A>
+</H2>
+<P>
+If you plan on writing your own value-added server (VAS) using
+Shore Storage Manager (SSM) you should perform the following tests
+on the SSM installation.
+This test uses 
+the &quot;hello world&quot; example shipped in the documentation release.
+See <TT>examples/vas/hello/README</TT> for details about the program.
+For other VAS examples, see the file <TT>examples/vas/README</TT>.
+<P>
+The first thing to do is copy the program to a new directory.
+<P><PRE>
+    mkdir hello
+    cp $SHROOT/examples/vas/hello/* hello
+    cd hello
+    make
+</PRE>
+<P>
+Before running the <TT>hello</TT> program,
+copy <TT>exampleconfig</TT> to <TT>config</TT> and replace <TT>DISKRW</TT>
+to the pathname of the installed shore <TT>diskrw</TT> program.
+If you have set the shell variable SHORE correctly,
+you can yank this entire command with your mouse.
+You will also need
+to make a directory for holding the log.  The log directory
+used is set by the <TT>sm_logdir</TT> option in <TT>exampleconfig</TT>.
+Running <TT>hello</TT> will leave log files in <TT>./log.hello</TT>
+and a storage device file called <TT>./device.hello</TT>.  These
+can be removed when you are done.
+<P><PRE>
+    sed -e &quot;s,DISKRW,$SHORE/bin/diskrw,&quot; exampleconfig &gt; config
+    mkdir log.hello
+    ./hello
+    rm -r log.hello device.hello
+</PRE>
+<P>
+You should see something like this.
+<PRE>
+    processing configuration options ...
+    forking ...
+    waiting ...
+    Starting SSM and performing recovery ...
+    Formatting and mounting device: ./device.hello...
+    Creating a new volume on the device ...
+    Creating a file for holding the hello record ...
+    Creating the hello record ...
+    Pinning the hello record for printing ...
+
+    Hello World!
+
+    Shutting down SSM ...
+    Finished!
+</PRE>
+<P>
+The document
+<A NAME="tex2html5"
+ HREF="../ssmvas/ssmvas.html">Writing Value-Added Servers with the Shore Storage Manager</A>
+gives information about writing value-added servers
+using <TT>$SHROOT/examples/vas/grid</TT> as an example.
+<HR>
+<!--Navigation Panel-->
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif_gr.gif"> 
+<A NAME="tex2html109"
+ HREF="installation.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html107"
+ HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html111"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Up:</B> <A NAME="tex2html110"
+ HREF="installation.html">Shore Software Installation Manual</A>
+<B> Previous:</B> <A NAME="tex2html108"
+ HREF="node6.html">Compiling and Installing the</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

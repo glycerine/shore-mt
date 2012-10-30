@@ -1,0 +1,94 @@
+####  global variables  ####
+
+
+# pagesize = 1024
+# lgdatasize = 960
+# smdatasize = 936
+
+set unit $pagesize 
+set verbose 0
+
+
+####  procedures  ####
+
+proc float2int { float_num } {
+    return [format "%.0f" $float_num]
+}
+
+proc append_obj { pool core heap app } {
+    global unit	
+    set core_sz [ float2int [expr { $core * $unit }] ]
+    set heap_sz [ float2int [expr { $heap * $unit }] ]
+    set app_sz [ float2int [expr { $app * $unit }] ]
+   
+    puts stdout "$core_sz $heap_sz $app_sz" nonewline
+
+    set o1 [mkanon $pool ${core_sz}:${heap_sz}:0]
+    set o2 [mkanon $pool ${core_sz}:${heap_sz}:0]
+    set o3 [mkanon $pool ${core_sz}:${heap_sz}:0]
+
+# puts stdout "o1 is $o1"
+# puts stdout "o2 is $o2"
+# puts stdout "o3 is $o3"
+
+    for { set i 1 } { $i <= 5 } { incr i } {
+        append $o1 $app_sz
+        append $o2 $app_sz
+        append $o3 $app_sz
+	puts stdout "." nonewline
+    }
+	puts stdout ""
+}
+
+
+####  main  ####
+
+source ../scripts/setup.all
+
+cd /large
+begin
+# compensating tx
+foreach f { p } {
+	cout [unlink $f]
+}
+commit
+
+cd /large
+begin
+	mkpool p
+commit
+
+# foreach core { 0.01 } {
+#   foreach heap { 0.99 } {
+#      foreach app { 0.01 0.1 0.2 0.9 0.99 1.0 2.0 10.0 40.0 0.9 0.1 } {
+
+# foreach core { 0.01 } {
+#   foreach heap { 50.0 } {
+#     foreach app { 1.0 } {
+
+foreach core { 0.01 0.1 0.2 0.9 0.99 1.0 2.0 10.0 50.0 100.0 } {
+  foreach heap { 0.01 0.1 0.2 0.9 0.99 1.0 2.0 10.0 50.0 100.0 } {
+    foreach app { 0.01 0.1 0.2 0.9 0.99 1.0 2.0 10.0 40.0 0.9 0.1 0.01 } {
+
+#	begin
+#	append_obj p $core $heap $app
+#	abort
+
+	begin
+	append_obj p $core $heap $app
+	commit
+    }
+  }
+}
+
+puts stdout "Verify begins"
+verify
+puts stdout "Verify ends"
+puts stdout ==========================================================
+
+# verify
+# puts stdout ==========================================================
+# verify
+# puts stdout ==========================================================
+
+# printovt commit

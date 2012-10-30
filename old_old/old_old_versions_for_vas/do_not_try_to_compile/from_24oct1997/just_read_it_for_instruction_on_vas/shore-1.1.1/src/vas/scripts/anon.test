@@ -1,0 +1,57 @@
+#source ../scripts/anon.test
+source ../scripts/setup.all
+source ../scripts/anon.tests.setup
+
+cd /small
+
+set sizes1 { 976658 751927 787220 374771 860846 927749 } 
+
+compensate
+
+begin
+cout mkanon... abort
+foreach sz $sizes1 { 
+	cout mkanon pool $sz:0:0
+	mkanon pool $sz:0:0
+}
+cout abort
+abort
+
+pstats; cstats
+
+begin
+cout mkanon... commit
+foreach sz $sizes1 { 
+	cout mkanon pool $sz:0:0
+	mkanon pool $sz:0:0
+}
+cout commit
+commit
+
+pstats; cstats
+
+
+compenstate
+
+begin
+cout mk Z anon... abort
+foreach sz $sizes1 { 
+	cout mk Z anon pool $sz:0:0
+	mkzanon pool $sz:0:0
+}
+cout abort
+abort
+
+pstats; cstats
+
+begin
+cout mk Z anon... commit
+foreach sz $sizes1 { 
+	cout mk Z anon pool $sz:0:0
+	mkzanon pool $sz:0:0
+}
+cout commit
+commit
+
+compenstate
+return "anon.test done."

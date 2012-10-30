@@ -1,0 +1,45 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  test btree bulk load
+#
+
+#
+# start up
+#
+source $script_dir/vol.init
+
+
+set nrec 120
+
+set typelist { u2 u4 i2 i4 b*1000 f4 f8 u1 i1 }
+
+set len [llength $typelist]
+
+for {set k 0} {$k < $len} {incr k} {
+    set ktype [lindex $typelist $k] 
+    verbose "---- testing -- $ktype"
+
+    source $script_dir/btree.3a
+}
+
+
+if { 0 } {
+    # BEGIN test b1
+    # testing characters is a bit different since we
+    # don't want duplicates in this test
+    set nrec 9
+    set ktype b1
+    verbose "---- testing -- $ktype"
+    source $script_dir/btree.3a
+    # END test b1
+}
+
+verbose [sm gather_stats]
+
+unset k ktype len typelist nrec

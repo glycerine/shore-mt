@@ -1,0 +1,80 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+
+58
+
+1	2	# callback_m::do_callbacks
+2	2	# callback_m::do_callbacks
+3	2	# callback_m::do_callback_at_client
+4	4	# callback_m::do_callback_at_client
+5	6	# callback_m::do_callback_at_client
+6	6	# callback_m::do_callback_at_client
+7	6	# callback_m::do_callback_at_client
+8	6	# callback_m::do_callback_at_client
+
+51	2
+52	2
+53	8
+54	2
+
+101	2	# remote_m::send_callbacks
+102	2	# remote_m::_callback_srv
+103	3	# remote_m::send_cb_reply
+104	3	# remote_m::_abort_callback_srv
+105	5	# remote_m::_abort_callback_srv : is cb xct found?  its state?
+106	5	# remote_m::get_cb_replies : received purged_pages_msg
+107	2	# remote_m::get_cb_replies : received cb reply
+108	4	# remote_m::get_cb_replies : cb blockers carried in cb reply
+109	2	# remote_m::send_callback_aborts
+110	3	# remote_m::_lookup_lid_cli : sending req & receiving reply
+111	3	# remote_m::_lookup_lid_srv : receiving req
+112	4	# remote_m::_lookup_lid_srv : sending reply
+113	5	# remote_m::_acquire_lock_cli : sending req
+114	5	# remote_m::_acquire_lock_cli : receiving reply
+115	6	# remote_m::_acquire_lock_srv : receiving req
+116	6	# remote_m::_acquire_lock_srv : sending reply
+117	4
+118	4
+119	3
+120	4
+121	4
+122	4
+123	8
+124	8
+125	9
+126	9
+127	7
+128	7
+129	9
+130	9
+131	7
+132	7
+133	9
+134	9
+135	8
+136	4
+
+201	10
+202	10
+203	8
+204	8	# remote_m::monitor_server_req_port : msg arrival
+205	8	# remote_m::monitor_xct_port : msg arrival
+
+301	3	# cache_m::delete_copy
+302	4	# cache_m::register_copy
+
+351	4	# bf_m::discard_page
+352	4	# bf_m::fix : remote page replacement
+353	10	# bf_m::fix : local page replacement
+
+bf.c		350	400
+cache.c		301	350
+callback.c	1	50
+remote.c	101	300
+test.c		50	100
+

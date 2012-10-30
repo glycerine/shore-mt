@@ -1,0 +1,200 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Requirements</TITLE>
+<META NAME="description" CONTENT="Requirements">
+<META NAME="keywords" CONTENT="installation">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="installation.css">
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="up" HREF="installation.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html67"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html64"
+ HREF="installation.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html58"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html66"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html68"
+ HREF="node4.html">Installing the Documentation Release</A>
+<B> Up:</B> <A NAME="tex2html65"
+ HREF="installation.html">Shore Software Installation Manual</A>
+<B> Previous:</B> <A NAME="tex2html59"
+ HREF="node2.html">Introduction</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="installation:requirements">&#160;</A><H1><A NAME="SECTION00030000000000000000000">
+Requirements</A>
+</H1>
+<P>
+To install and run the Shore documentation and binary releases, you
+will need,
+<P><UL>
+<LI>
+Solaris running on a SPARCstation or Intel X86 workstation
+(we built this release under Solaris 2.5.1 on a SPARCstation-10 and
+on Pentium Pro);
+<LI>
+An up-to-date version of the GNU C/C++ compiler
+(programs compiled with other compilers will not be link-compatible with
+the libraries supplied).
+Binary release 1.1.1 was built with gcc and g++ version 2.7.2.3 and #include
+files from libg++ release 2.7.2.
+Use of older versions of the compiler or libraries may cause problems.
+This software is available from the
+Free Software Foundation,
+<A NAME="tex2html1"
+ HREF="http://www.fsf.org/order/ftp.html">http://www.fsf.org</A>
+;
+<LI>
+the <EM>gzip</EM>  file (de)compression facility to unpack the release.
+This program is also available from the
+<A NAME="tex2html1"
+ HREF="http://www.fsf.org/order/ftp.html">Free Software Foundation</A>
+;
+<LI>
+lots of free disk space: roughly
+<UL>
+<LI>
+5 MB for the documentation release (1.5 MB for HTML, 3.3 MB for Postscript).
+You can conserve disk space by throwing the Postscript version after (or
+before printing) it.  You can even throw away both versions and read the
+documentation over the world-wide web directly from the
+<A NAME="tex2html1"
+HREF="http://www.cs.wisc.edu/shore">University of Wisconsin site</A>
+, as well as
+<LI>
+70 MB
+(or less, depending on the architecture) 
+for the binaries configured with debugging,
+<LI>
+25 MB
+(or less, depending on the architecture) 
+for the binaries configured without debugging, or
+<LI>
+200 MB
+(or less, depending on the architecture) 
+for the source release and space to build from scratch; 
+</UL>
+<LI>
+a World-Wide-Web (WWW) browser for reading
+the HTML versions of the documentation, or
+software for reading or printing Postscript.
+</UL>
+<P>
+If you also wish to build Shore from the sources, you will also need
+<P><UL>
+<LI>
+an up-to-date version of GNU gcc and associated libraries
+(version 2.7.2.1 or later-we are using version 2.7.2.3);
+<LI>
+disk space to build (in addition to space for sources):
+<UL>
+<LI>
+115 MB without debugging symbols and without debugging code (-UDEBUG) or
+<LI>
+170 MB with debugging symbols and with debugging code (-DDEBUG);
+</UL>
+<LI>
+Perl 5 (we are currently using version 5.003).
+For more information about Perl, see the Perl home page at
+<A NAME="tex2html1"
+ HREF="http://www.perl.com/perl/index.html">http://www.perl.com/perl</A>
+;
+<LI>
+GNU Make (we are currently using version 3.74),
+Flex (we are using version 2.5.2),
+and Bison (we are using version 1.24).
+These programs are available from the
+<A NAME="tex2html1"
+ HREF="http://www.fsf.org/order/ftp.html">Free Software Foundation</A>
+.
+Flex and Bison are only necessary if you wish to rebuild the SDL compiler.
+The GNU version of <TT>make</TT> is absolutely essential.
+None of the Makefiles in the source distribution are likely to work
+with other versions of <TT>make</TT>;
+<LI>
+the TCL (Tool Command Language) library (we use version 7.4).
+TCL is used to provide a command-line (shell-like) interface to various
+parts of Shore, including the Storage Manager and the Shore Server.
+We hope in future releases to get rid of the dependency on TCL.
+TCL is currently available from
+<A NAME="tex2html1"
+ HREF="ftp://ftp.smli.com/pub/tcl">ftp://ftp.smli.com/pub/tcl</A>
+or
+<A NAME="tex2html1"
+ HREF="http://sunscript.sun.com/">http://sunscript.sun.com/</A>
+; and
+<LI>
+the normal Unix utilities /bin/sh, /bin/sed, /bin/mv, etc.
+</UL>
+<P><A NAME="installation:vars">&#160;</A>For all the following installation steps, we use two
+variables, so that you can &quot;cut and paste&quot; the instructions below.
+<PRE>
+    set TARDIR=directory-that-holds-tar-files
+    set SHROOT=directory-in-which-to-install-shore
+</PRE>
+(If you use the Bourne shell (<TT>/bin/sh</TT>) or one of the shells derived
+from it, such as ksh, omit the word &quot;set&quot;.)
+<P>
+Whatever shell you use, make a directory in which to install Shore.
+(If you plan to install both the debugging
+and no-debugging versions, create a separate directory for each.)
+<P><PRE>
+    mkdir $SHROOT
+</PRE>
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html67"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html64"
+ HREF="installation.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html58"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html66"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html68"
+ HREF="node4.html">Installing the Documentation Release</A>
+<B> Up:</B> <A NAME="tex2html65"
+ HREF="installation.html">Shore Software Installation Manual</A>
+<B> Previous:</B> <A NAME="tex2html59"
+ HREF="node2.html">Introduction</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

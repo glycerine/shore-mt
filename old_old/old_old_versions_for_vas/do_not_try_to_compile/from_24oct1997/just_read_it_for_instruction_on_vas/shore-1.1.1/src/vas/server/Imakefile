@@ -1,0 +1,95 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ *      $RCSfile: Imakefile,v $
+ *      $Revision: 1.88 $
+ *      $Date: 1997/06/17 16:10:50 $
+ *      $Author: solomon $
+ */
+
+CPPFLAGS = -DSERVER_ONLY %
+	-I../include -I../common -I../../common -I../../fc -I../../sthread %
+	-I../../sm Include(TclInclude)
+
+all_local:: libserver.a shore
+
+HDR = %
+	Anonymous.h Directory.h Object.h Pool.h Registered.h Symlink.h Xref.h %
+	client.h cltab.h efs.h funcproto.h hdrinfo.h mount_m.h rpc_service.h %
+	smcalls.h svas_layer.h svas_nfs.h svas_server.h svas_service.h sysp.h %
+	tclshell_service.h tcp_clients.h tcp_rpc_service.h udp_clients.h %
+	udp_rpc_service.h vaserr.h
+
+LIB.C = %
+	client.C cltab.C cmsg.C efs.C mknod.C mount_m.C mountd.C nfs_ops.C %
+	replybuf.C rpc_service.C signals.C stdin.C stubs.C svas_layer.C %
+	svas_nfs.C svc_run.C sysp.C tcp_clients.C tcp_rpc_service.C trans.C %
+	udp_clients.C udp_rpc_service.C vas.C vmsg.C xact.C %
+	Anonymous.C Directory.C Object.C Pool.C Registered.C Symlink.C Xref.C %
+	anonymous.C directory.C index.C object.C pool.C registered.C symlink.C %
+	unixfile.C xref.C
+LIB.c = nfs_xdr.c nfs_svc.c
+LIB.o = $(LIB.C:.C=.o) $(LIB.c:.c=.o) ../common/msg_svc.o
+
+SRC = $(LIB.C) $(LIB.c) main.C
+
+#if defined(IS_SOLARIS2)
+/* Solaris does not require librpc.a, since it's in the default libraries */
+LIB = libserver.a ../common/libcommon.a %
+	../../sm/libsm.a ../../sthread/libst.a ../../common/libcommon.a %
+	../../fc/libfc.a TclLib
+#else
+LIB = libserver.a ../../rpc4.0/rpc/librpclib.a ../common/libcommon.a %
+	../../sm/libsm.a ../../sthread/libst.a ../../common/libcommon.a %
+	../../fc/libfc.a TclLib
+#endif
+
+%GEN stats(sysp.dat, SyspCache)
+%GEN stats(efs.dat, efs_stats)
+
+%GEN install(include, SyspCache_def.i efs_stats_def.i)
+%GEN install(lib, shore.rc options)
+%GEN install(bin, shore)
+
+vmsg_stats.i vmsg_names.i: ../common/msg.h
+	Perl ../common/msgstats.pl -r -s ../common/msg.h | sort -n > vmsg_names.i
+	Perl ../common/msgstats.pl -r -v ../common/msg.h | sort -n > vmsg_stats.i
+%GEN generated_headers(vmsg_stats.i vmsg_names.i)
+
+mount_names.i mount_stats.i : nfs.h
+	Perl ../common/msgstats.pl -m -v nfs.h | sort -n > mount_stats.i
+	Perl ../common/msgstats.pl -m -s nfs.h | sort -n > mount_names.i
+%GEN generated_headers(mount_names.i mount_stats.i)
+
+nfs_names.i nfs_stats.i : nfs.h
+	Perl ../common/msgstats.pl -n -v nfs.h | sort -n > nfs_stats.i
+	Perl ../common/msgstats.pl -n -s nfs.h | sort -n > nfs_names.i
+%GEN generated_headers(nfs_names.i nfs_stats.i)
+
+%GEN library(libserver.a, $(LIB.o))
+%GEN c_plus_program(shore, main.o, $(LIB))
+
+nfs.h: nfs.x ../../rpc4.0/rpcgen/rpcgen
+	../../rpc4.0/rpcgen/rpcgen -h -o $@ nfs.x
+%GEN generated_headers(nfs.h)
+
+nfs_svc.c: nfs.x sed.script.svc ../../rpc4.0/rpcgen/rpcgen
+	../../rpc4.0/rpcgen/rpcgen -m -o $@ nfs.x
+	sed -f sed.script.svc nfs_svc.c > nfs_svc.c.tmp
+	mv -f nfs_svc.c.tmp nfs_svc.c
+%GEN generated_srcs(nfs_svc.c)
+
+nfs_xdr.c: nfs.x ../../rpc4.0/rpcgen/rpcgen
+	../../rpc4.0/rpcgen/rpcgen -c -o $@ nfs.x
+%GEN generated_srcs(nfs_xdr.c)
+
+%GEN tags($(SRC) $(HDR))
+%GEN depend_target($(SRC))
+
+../../rpc4.0/rpcgen/rpcgen:
+	$(MAKE) -C ../../rpc4.0/rpcgen rpcgen

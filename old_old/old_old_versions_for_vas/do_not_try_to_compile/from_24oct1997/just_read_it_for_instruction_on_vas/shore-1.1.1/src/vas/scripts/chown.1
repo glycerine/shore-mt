@@ -1,0 +1,30 @@
+source ../scripts/setup.all
+# source ../scripts/chown.1
+
+cd /small/z
+# compensating transaction
+begin
+	unlink tfile
+	unlink tdir
+commit
+
+set true "1"
+set false "0"
+
+# One tx for testing a file
+begin
+	set subject tfile
+	set oid [mkuserdef $subject 0:1:0]
+
+#	see CHOWN_2_V_MAN_PAGE in Registered.C:
+#  	change the symlink, not the object to which it points
+
+#  test: only super-user can change owner of file
+
+#  test: if owner is -1, no change is done
+
+
+	
+commit
+
+return "chown.1 done."

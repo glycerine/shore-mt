@@ -1,0 +1,32 @@
+set volid 1
+source ../scripts/vol.init
+verbose $volid
+
+if { 0 } {
+# simplest case first
+sm coord $volid
+co retire
+
+# next simplest case 
+sm coord $volid
+co startns ns_file
+co retire
+
+# next simplest case 
+sm coord $volid
+co startns ns_file
+co startco "coord"
+co print
+co retire
+}
+
+sm coord $volid
+co startns ns_file
+co startco "coord"
+co startsub subord coord
+
+co print
+echo RETIRING - will see PortQueue message
+echo because we don't yet support both startsub and startco
+echo in one sm_coord.
+co retire

@@ -1,0 +1,214 @@
+#ifndef Arch
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*************
+**
+** This file figures out what platform we are building for.
+**
+** The net result is to define five C preprocessor macros:
+**    Arch     the hardward architecture (e.g., Sparc, I386, Snake, Rs6000)
+**    OpSys    the operating system (e.g., SUNOS41, SOLARIS2, Linux, HPUX8)
+**    IS_ARCH,
+**    IS_OPSYS, and
+**    IS_ARCH_OPSYS are all defined to be 1, where ARCH and OPSYS are upper-case
+**             versions of Arch and OpSys.  There should be exactly one
+**             such macro of each kind defined.
+** For example, in a Linux platform, the net result is
+**     #define Arch I386
+**     #define OpSys Linux
+**     #define IS_I386
+**     #define IS_LINUX
+**     #define IS_I386_LINUX
+**
+** These macros are used three ways.
+**   1.  In other Imake.* files, they are used to control conditional buiding.
+**       For example, Imake.vars contains
+**           #if defined(IS_SOLARIS2)
+**              ...
+**           #endif
+**   2.  They are used to make Makefiles that call gcc and g++ with
+**       appropriate -D flags, e.g.
+**           g++ -DLinux -DI386 ...
+**   3.  The Makefile in ../src/fc creates a header file ShoreConfig.h,
+**       which defines macros with the same names as the values of Arch and
+**       OpSys, e.g.
+**           #ifndef  I386
+**           #define  I386
+**           #endif 
+**           #ifndef  Linux
+**           #define  Linux
+**           #endif 
+**       Source can use "#ifdef I386" etc for platform-dependent features and
+**       either have the definitions supplied by the generated Makefiles, or,
+**       if they are expected to be built outside the source tree,
+**       "#include <ShoreConfig.h>" from the installed Shore library.
+** In short:
+**    defined at conifgure time: IS_I386, IS_LINUX, IS_I386_LINUX
+**    defined at compile time:   I386 Linux
+**
+** Certain preprocessor marcros that polute the name space contrary to
+** ANSI standards (viz. names without underscores such as "unix" or "sun")
+** are undefined to prevent them from accidently modifying source files.
+** To conform to these standards, we really should use __Arch__ instead of
+** Arch, __Linux__ instead of Linux, etc.  Perhaps some day...
+**
+** Warnings:
+**    1.  Not all combinations listed below are actually supported.
+**        See the installation documentation for a list of supported platforms.
+**    2.  The determination of platform is done based on definitions built into
+**        the version of gcc used to process this file (which is done by
+**        tools/makemake when generating Makefiles from Imakefiles).  Thus
+**        cross-compilation (building a system for Platform Y on Platform X)
+**        is not supported.
+**
+*************/
+
+%#>>>>>>>>>>>> $Header: /p/shore/shore_cvs/config/Imake.platform,v 1.1 1997/06/13 22:24:57 solomon Exp $
+
+#undef unix
+
+/**************  Various Sun platforms */
+
+#ifdef __sun__
+#undef sun
+
+#ifdef __sparc__
+/* Sun Sparcstation -- either SunOS or Solaris */
+#undef sparc
+#define Arch Sparc
+#define IS_SPARC 1
+
+#ifdef __svr4__
+#define OpSys SOLARIS2
+#define IS_SPARC_SOLARIS2 1
+#define IS_SOLARIS2 1
+#else
+#define OpSys SUNOS41
+#define IS_SPARC_SUNOS41 1
+#define IS_SUNOS41 1
+#endif
+#endif /* __sparc__ */
+
+#ifdef __i386__
+/* Sun X86 -- must be Solaris */
+#undef i386
+#define Arch I386
+#define OpSys SOLARIS2
+#define IS_I386 1
+#define IS_SOLARIS2 1
+#define IS_I386_SOLARIS2 1
+#endif /* __i386__ */
+
+#endif /* __sun__ */
+
+/**************  Hewlett Packard  */
+#if defined(hpux) && defined(hp9000s800)
+#undef hpux
+#undef hp9000s800
+#define Arch Snake
+#define OpSys HPUX8
+#define IS_SNAKE 1
+#define IS_HPUX8 1
+#define IS_SNAKE_HPUX8 1
+#endif /* hpux */
+
+/**************  Linux  */
+#if defined(i386) && defined(linux)
+#define Arch I386
+#define OpSys Linux
+#define IS_I386 1
+#define IS_LINUX 1
+#define IS_I386_LINUX 1
+#endif /* linux */
+
+/**************  Open Software Foundation (run on the Intel Paragon)  */
+#if defined(__OSF1__) && defined(__PARAGON__)
+#define	Arch	I860
+#define	OpSys	OSF1AD
+#define	IS_I860 1
+#define	IS_OSF1AD 1
+#define	IS_I860_OSF1AD 1
+#endif /* paragon */
+
+/**************  Digital Equipment Corp. */
+#if defined(mips) && defined(ultrix)
+#undef mips
+#undef ultrix
+#define	Arch	Mips
+#define	OpSys	Ultrix42
+#define IS_MIPS 1
+#define IS_ULTRIX42 1
+#define IS_MIPS_ULTRIX42 1
+#endif /* mips ultrix */
+
+/**************  Silicon Graphics, Inc. */
+#if defined(sgi)
+#undef sgi
+#define Arch Mips
+#define OpSys Irix
+#define IS_MIPS 1
+#define IS_IRIX 1
+#define IS_MIPS_IRIX 1
+#endif /* sgi */
+
+/**************  IBM */
+#if defined(aix)
+#define Arch Rs6000
+#define IS_RS6000 1
+#ifdef FORCE_AIX4
+#define	OpSys	AIX41
+#define	IS_AIX41 1
+#define	IS_RS6000_AIX41 1
+#else
+#define OpSys AIX32
+#define IS_AIX32 1
+#define IS_RS6000_AIX32 1
+#endif
+#endif
+
+/************** Misc namespace polution */
+#if defined(sun) && defined(mc68020)
+#undef sun
+#undef mc68020
+#endif
+
+#if defined(cm5)
+#undef sun
+#undef sparc
+#undef cm5
+#endif
+
+#if defined(mc68000) && defined(hp300)
+#undef mc68000
+#undef hp300
+#endif
+
+#if defined(vax) && defined(ultrix)
+#undef vax
+#undef ultrix
+#endif
+
+#if defined(i386) && defined(sequent)
+#undef i386
+#undef sequent
+#endif
+
+#if defined(ibm032)
+#undef ibm032
+#endif
+
+#if !defined(Arch)
+#error Unknown Hardware Architecture
+#endif
+
+#if !defined(OpSys)
+#error Unknown Operating System
+#endif
+
+%#<<<<<<<<<<<< end of Imake.platform
+#endif

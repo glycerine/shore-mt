@@ -1,0 +1,20 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+fc = 0x00010000 "Foundation Classes" w_error_t {
+INTERNAL	Internal error
+OS 		Operating system error 
+FULL		Container is full
+EMPTY		Container is empty
+OUTOFMEMORY	Malloc failed : out of memory 
+NOTFOUND 	Item not found 
+NOTIMPLEMENTED	Feature is not implemented
+READONLY	Update operation on read-only object
+MIXED	Attempting to mix static and dynamic containers
+FOUND	Item already found
+NOSUCHERROR	unknown error code
+}

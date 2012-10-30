@@ -1,0 +1,8 @@
+shore.oo7.*.svas_host: localhost
+shore.oo7.*.configfile: oo7.config.tiny
+shore.oo7.*.debug: no
+shore.oo7.*.oc_pstats: yes
+shore.oo7.*.oc_premotestats: no
+shore.oo7.*.oc_mlimit: 8000000
+shore.oo7.bench.svas_print_user_errors: no
+shore.oo7.?.svas_log: debug.out

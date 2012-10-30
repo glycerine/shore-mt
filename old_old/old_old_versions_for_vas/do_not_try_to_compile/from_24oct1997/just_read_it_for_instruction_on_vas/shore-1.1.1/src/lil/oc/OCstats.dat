@@ -1,0 +1,30 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+
+OCSTAT Object Cache statistics = 0x00120000 OCstats {
+    int anoncreates;	Anonymous objects created
+    int regcreates;	Registered objects created
+    int otentries;	OT entries
+    int ncached;	Objects fetched into cache
+    int nbytes;		Bytes fetched into cache
+    int nupdates;	Objects updated
+    int ndestroys;	Objects destroyed
+
+	// these need to be renamed!!
+	int total_pins; Pins
+	int total_unpins; Unpins
+
+	// cache space limits
+	int mem_limit; Memory limit imposed on OC 
+	// int obj_limit; Limit on # objects that OC can cache 
+
+	int mem_used; Current # bytes used by OC to cache objects
+	int obj_used; Current # objects cached by OC
+	int extern_mem; Bytes used for objects that would not fit
+	int extern_obj; Objects that would not fit by replacing other objects 
+}

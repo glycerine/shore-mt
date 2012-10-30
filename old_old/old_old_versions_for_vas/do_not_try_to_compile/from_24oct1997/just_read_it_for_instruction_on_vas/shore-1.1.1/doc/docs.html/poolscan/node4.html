@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>A Pool Scan Example</TITLE>
+<META NAME="description" CONTENT="A Pool Scan Example">
+<META NAME="keywords" CONTENT="poolscan">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="poolscan.css">
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="poolscan.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html56"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html53"
+ HREF="poolscan.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html47"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html55"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html57"
+ HREF="node5.html">Bugs and Limitations</A>
+<B> Up:</B> <A NAME="tex2html54"
+ HREF="poolscan.html">Scanning Pools in a Application</A>
+<B> Previous:</B> <A NAME="tex2html48"
+ HREF="node3.html">The PoolScan Class</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="poolscan:example">&#160;</A><H1><A NAME="SECTION00040000000000000000000">
+A Pool Scan Example</A>
+</H1>
+<P>
+The following function counts the total number of objects in the indicated
+pool.
+<P><PRE>
+    int count(const char *pathname)
+    {
+        ref&lt;any&gt; ref;
+        int count;
+
+        // Open a scan over the pool given by &quot;pathname&quot;
+        PoolScan scan(pathname);
+
+        // Make sure the scan was successfully opened.
+        if(scan != RCOK){
+            cout &lt;&lt; &quot;Error scanning pool &quot; &lt;&lt; pathname &lt;&lt; &quot;: &quot;
+                 &lt;&lt; rc &lt;&lt; endl;
+            return 0;
+        }
+
+        // Scan until end-of-scan or an error is encountered.
+        for(count = 0; scan.next(ref) == RCOK; ++count);
+
+        // Check for errors
+        if(scan.rc().err_num() != OC_EndOfScan){
+            cout &lt;&lt; &quot;Error scanning pool &quot; &lt;&lt; pathname &lt;&lt; &quot;: &quot;
+                 &lt;&lt; rc &lt;&lt; endl;
+            return 0;
+        }
+
+        cout &lt;&lt; path &lt;&lt; &quot; has &quot; &lt;&lt; count &lt;&lt; &quot; objects.&quot; &lt;&lt; endl;
+
+        // The destructor will close the scan object.
+
+        return count;
+    }
+</PRE>
+A complete program using code similar to this may be found in the
+directory <TT>examples/pscan</TT> in the documentation distribution.
+See the instructions for
+<A HREF="../installation/node7.html#installation:compileapp"><EM>Compiling and Running an Application</EM> </A>
+in the <EM>Shore Software Installation Manual</EM> .
+<P>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

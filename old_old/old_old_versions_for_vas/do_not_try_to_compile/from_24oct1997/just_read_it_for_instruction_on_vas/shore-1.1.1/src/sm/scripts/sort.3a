@@ -1,0 +1,65 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test sort_stream_i on integers and floats
+#	this is called by sort.1
+#    to test multiple integer and unsigned key types.
+#    This assumed that $ktype, and $nrec  are set by calling script
+#
+
+# create and load a stream in reverse order for sort
+# and make sure there are duplicates
+
+
+# create and load a stream in ascending order for sort in reverse order
+# this time make it descending
+
+proc do_sort_stream { volid ktype disnct updown } {
+    global nrec
+    sm begin_xct
+	sm begin_sort_stream $volid 2 $ktype 10 $disnct $updown
+
+	for {set i 0} {$i < $nrec} {incr i} {
+	    for {set j 0} {$j < $i } {incr j} {
+		if {$updown == "up" } {
+		    set data [expr { $nrec - $i }]
+		} else {
+		    set data $i
+		}
+		set hdr $data
+		if { $ktype == "b*1000" } {
+		    for {set c 0} {$c < $i} {incr c} {
+			set hdr "$hdr$data"
+		    }
+		}
+		set data "$data.$j"
+		sm sort_stream_put $ktype $hdr $data
+	    }
+	}
+
+	#display
+	verbose SORTED: $disnct $updown ...
+	for {set i 0} {$i < $nrec} {incr i} {
+	    for {set j 0} {$j < $i } {incr j} {
+		set r [sm sort_stream_get next $ktype]
+		if {$r == "eof"} then { break }
+		set key [string trimleft [lindex $r 0] 0]
+		set el [lindex $r 1]
+		verbose ($key,$el)
+	    }
+	}
+	sm sort_stream_end
+    sm commit_xct
+}
+
+do_sort_stream  $volid $ktype distinct up
+do_sort_stream  $volid $ktype distinct down
+
+do_sort_stream  $volid $ktype normal up
+do_sort_stream  $volid $ktype normal down
+

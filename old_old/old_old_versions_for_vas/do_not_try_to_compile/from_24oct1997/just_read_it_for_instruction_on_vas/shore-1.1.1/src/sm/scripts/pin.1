@@ -1,0 +1,138 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test file create and destroy
+#
+source $script_dir/vol.init
+
+# clear stats
+set st [clearstats]
+
+sm begin_xct
+set f1 [sm create_file $volid]
+verbose f1 = $f1
+
+set r1 [sm create_rec $f1 hdr12345 11 hellodata]
+verbose r1 = $r1
+set read_result [sm read_rec $r1 0 0]
+# verbose read of $r1: $read_result
+
+verbose doing repin
+set pin [sm pin_create]
+sm pin_pin $pin $r1 0
+sm pin_repin $pin
+verbose check of pin_repin $r1: [sm pin_body $pin]
+
+#check error detection
+#sm pin_update_rec $pin 20 DEFG
+#sm pin_update_rec $pin 6 DEFG
+
+sm pin_update_rec $pin 3 DEFG
+verbose check of pin_update_rec $r1 3 DEFG: [sm pin_body $pin]
+
+sm pin_update_rec_hdr $pin 2 DEF
+verbose check of pin_update_rec_hdr $r1 2 DEF: [sm pin_hdr $pin]
+
+sm pin_append_rec $pin 12345
+verbose check of pin_append_rec $r1 12345: [sm pin_body $pin]
+
+sm pin_truncate_rec $pin 4
+verbose check of pin_truncate_rec $r1 4: [sm pin_body $pin]
+
+sm pin_unpin $pin
+sm pin_destroy $pin
+
+sm commit_xct
+
+# make sure pin and unpin counts match
+verbose Compare pin count with unpin count...
+set st [clearstats]
+set i_pin [expr [lsearch $st rec_pin_cnt] + 1]
+verbose i_pin = [lindex $st $i_pin]
+set i_unpin [expr [lsearch $st rec_unpin_cnt] + 1]
+verbose i_unpin = [lindex $st $i_unpin]
+assert {expr [lindex $st $i_pin] == [lindex $st $i_unpin]}
+
+sm begin_xct
+    verbose pinning 10 
+    for {set i 0} {$i < 10} {incr i} {
+	set p($i) [sm pin_create]
+	sm pin_pin $p($i) $r1 0
+    }
+    for {set i 0} {$i < 10} {incr i} { sm pin_destroy $p($i) }
+sm commit_xct
+
+# make sure pin and unpin counts match
+# NB: clearstats procedure does just that
+set st [clearstats]
+set i_pin [expr [lsearch $st rec_pin_cnt] + 1]
+verbose i_pin = [lindex $st $i_pin]
+set i_unpin [expr [lsearch $st rec_unpin_cnt] + 1]
+verbose i_unpin = [lindex $st $i_unpin]
+assert {expr [lindex $st $i_pin] == [lindex $st $i_unpin]}
+
+# test that truncation from large to small rec results in a smallrec
+if {$Use_logical_id} {
+    set_config_info
+    sm begin_xct
+	set f1 [sm create_file $volid]
+	set r1 [sm create_rec $f1 "" 11 hellodata]
+	verbose phys_rid: [sm serial_to_rid $r1]
+
+	set pin [sm pin_create]
+	sm pin_pin $pin $r1 0 EX
+	assert {sm pin_is_small $pin}
+
+	set chunk_pattern %0$max_small_rec\d
+	set chunk [format $chunk_pattern 1]
+	verbose performing append to make large
+	sm pin_append_rec $pin $chunk
+	assert {expr [sm pin_is_small $pin] == 0}
+	unset chunk chunk_pattern
+	
+	verbose performing trunc to make small
+	sm pin_truncate_rec $pin [string length "hellodata+2"] 
+	assert {sm pin_is_small $pin}
+
+	verbose performing append to make large
+	sm pin_append_rec $pin "hellodata+2" 
+	assert {expr [sm pin_is_small $pin] == 0}
+	verbose performing trunc on upinned record to make small
+	sm pin_unpin $pin
+	sm pin_truncate_rec $pin [string length "hellodata+2"] 
+	sm pin_repin $pin EX
+	assert {sm pin_is_small $pin}
+
+	verbose performing append on upinned record to make large
+	sm pin_unpin $pin
+	sm pin_append_rec $pin "hellodata+2" 
+	sm pin_repin $pin
+	assert {expr [sm pin_is_small $pin] == 0}
+
+	sm pin_unpin $pin
+	sm pin_destroy $pin
+    sm commit_xct
+}
+
+verbose [sm get_volume_quota $volid]
+# nb: this checking of pin counts is done by checkstats
+# also -- could just call that
+set st [sm gather_stats]
+pstats
+
+# make sure pin and unpin counts match
+set i_pin [expr [lsearch $st rec_pin_cnt] + 1]
+verbose i_pin = [lindex $st $i_pin]
+
+set i_unpin [expr [lsearch $st rec_unpin_cnt] + 1]
+verbose i_unpin = [lindex $st $i_unpin]
+
+assert {expr [lindex $st $i_pin] == [lindex $st $i_unpin]}
+
+unset pin i_pin p i_unpin r1 read_result st
+unset f1 i

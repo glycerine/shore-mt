@@ -1,0 +1,92 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test prepare tx
+#
+
+source $script_dir/vol.init
+
+set form %09000d
+proc scanit { f } {
+    set scan [sm scan_file_create $f t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+	set rec [sm pin_rid $pin]
+	echo rec: $rec
+	sm pin_unpin $pin
+	set pin [sm scan_file_next $scan 0]
+	set i [expr {$i+1} ]
+    }
+    sm scan_file_destroy $scan
+    echo scan found $i records
+}
+
+set numrecs 3
+
+sm begin_xct
+set f0 [sm create_file $volid]]
+echo created file $f0
+for { set i 1} { $i <= $numrecs} { incr i} {
+    set j [sm create_rec $f0 h$i 1000 [format $form $i] ]
+    echo created rec $j
+}
+echo created $numrecs recs file $f0
+
+set finish "xxxxx"
+sm enter2pc $finish
+sm prepare_xct
+set tid [sm xct_to_tid [sm xct]]
+
+echo restarting... with prepared tx $tid
+restart
+
+set x [sm tid_to_xct $tid]
+
+echo attaching to prepared tx $tid ...
+sm attach_xct $x
+echo attached to prepared tx $tid
+sm commit_xct
+
+sm begin_xct
+echo SHOULD CONTAIN $numrecs RECORDS
+scanit $f0
+sm destroy_file $f0
+echo destroyed file $f0
+sm commit_xct
+
+
+#same as above but instead of commiting, abort
+
+sm begin_xct
+set f0 [sm create_file $volid]]
+echo created file $f0
+for { set i 1} { $i <= $numrecs} { incr i} {
+    set j [sm create_rec $f0 h$i 1000 [format $form $i] ]
+    echo created rec $j
+}
+echo created $numrecs recs file $f0
+
+sm enter2pc $finish
+sm prepare_xct
+set tid [sm xct_to_tid [sm xct]]
+
+restart
+
+set x [sm tid_to_xct $tid]
+sm attach_xct $x
+sm abort_xct
+
+sm begin_xct
+echo SHOULD NOT EXIST
+scanit $f0
+sm destroy_file $f0
+echo destroyed file $f0
+sm commit_xct
+
+unset $finish

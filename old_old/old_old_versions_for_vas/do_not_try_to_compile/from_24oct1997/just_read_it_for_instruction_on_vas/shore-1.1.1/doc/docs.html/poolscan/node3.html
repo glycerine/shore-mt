@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>The PoolScan Class</TITLE>
+<META NAME="description" CONTENT="The PoolScan Class">
+<META NAME="keywords" CONTENT="poolscan">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="poolscan.css">
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="up" HREF="poolscan.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html45"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html42"
+ HREF="poolscan.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html36"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html44"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html46"
+ HREF="node4.html">A Pool Scan Example</A>
+<B> Up:</B> <A NAME="tex2html43"
+ HREF="poolscan.html">Scanning Pools in a Application</A>
+<B> Previous:</B> <A NAME="tex2html37"
+ HREF="node2.html">Introduction</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="poolscan:class">&#160;</A><H1><A NAME="SECTION00030000000000000000000">
+The PoolScan Class</A>
+</H1>
+<P>
+An application scans a pool by creating a PoolScan object.  PoolScan
+objects are transient C++ objects, not persistent Shore objects.  A PoolScan
+object can be in one of two states: <EM>open</EM> or <EM>closed</EM>.  A scan
+must be opened inside a transaction, and can only be used inside the
+transaction in which it was opened.  Once a scan is opened, it stays open
+until it is explicitly closed, or until the scan object is destroyed, or
+the transaction terminates.  In particular, the scan object
+remains open even after the end of the scan has been reached or an
+error has occurred.
+<P>
+The public interface to the PoolScan class is
+<P><PRE>
+    class PoolScan {
+     public:
+        PoolScan();
+        PoolScan(const char *path);
+        PoolScan(const ref&lt;Pool&gt; pool);
+
+        shrc open(const char *path);
+        shrc open(const ref&lt;Pool&gt; pool);
+
+        shrc next(ref&lt;any&gt; &amp;ref, bool fetch = false, LockMode mode = SH);
+
+        bool is_open();
+        shrc rc();
+        int operator==(shrc rc);
+        int operator!=(shrc rc);
+
+        shrc close();
+        ~PoolScan();
+    };
+</PRE>
+<P><DL>
+<DT><STRONG><TT>PoolScan()</TT></STRONG>
+<DD>is the default constructor.  The resulting PoolScan object is in the
+<EM>closed</EM>  state.
+It may be opened by the <TT>open</TT> member function.
+<DT><STRONG><TT>PoolScan(const char *path)</TT></STRONG>
+<DD><DT><STRONG><TT>PoolScan(const ref&lt;Pool&gt; pool)</TT></STRONG>
+<DD>These constructors invoke the corresponding versions of the <TT>open</TT> member
+function.
+The caller should whether the <TT>open</TT> operation was successful by calling
+<TT>is_open()</TT> or by testing the return code with <TT>rc()</TT>,
+<TT>operator==()</TT>, or <TT>operator!=()</TT>.
+<P><DT><STRONG><TT>shrc open(const char *pool)</TT></STRONG>
+<DD><DT><STRONG><TT>shrc open(const ref&lt;Pool&gt; pool)</TT></STRONG>
+<DD>The <TT>pool</TT> argument should be the pathname of a valid directory
+in the Shore filesystem namespace or a reference to a Pool object,
+and the PoolScan object should be in the <EM>closed</EM>  state.
+The caller must have (at least) read permission for the indicated pool
+and must have a transaction open.
+Upon successful completion, <TT>RCOK</TT> is returned.  Any
+other return value indicates an error condition.
+<P><DT><STRONG><TT>shrc next(ref&lt;any&gt; &amp;ref, bool fetch = false,
+LockMode mode = SH)</TT></STRONG>
+<DD>returns a reference to the next object in the pool (if the scan has
+just been opened, then it returns the first object in the pool).
+Objects are returned in apparently random order, but each object is returned
+exactly once by a scan.
+If <TT>fetch</TT> is <TT>true</TT>, the object will be fetched into the
+object cache, and a lock will be obtained on the object in the mode
+indicated by <TT>mode</TT>, if such a lock is not already held by the
+transaction.
+If <TT>fetch</TT> is <TT>false</TT> (the default), <TT>mode</TT> is
+ignored and the object is not fetched from the server.
+<P>
+The return value of <TT>next</TT> is <TT>RCOK</TT> if there was a next object in
+the scan.  If an attempt is made to go beyond the end of the scan (i.e., a
+call to <TT>next</TT> is made after the last object in the scan has already
+been returned), then the return code will be <TT>OC_EndOfScan</TT>.  Any
+other return code indicates an error condition.
+<P><DT><STRONG><TT>bool is_open()</TT></STRONG>
+<DD>indicates whether the scan is open or closed.
+Note that the scan remains open after retrieving the last entry.
+<P><DT><STRONG><TT>shrc rc()</TT></STRONG>
+<DD>returns the return code generated by the last operation
+(<TT>open</TT> or <TT>next</TT>).
+<P><DT><STRONG><TT>int operator==(shrc rc)</TT></STRONG>
+<DD><DT><STRONG><TT>int operator!=(shrc rc)</TT></STRONG>
+<DD>These operators provide a convenient way to check the status of the scan.
+For example, applications can say <TT>if (scan == RCOK) ...</TT>.
+<P><DT><STRONG><TT>shrc close()</TT></STRONG>
+<DD>closes the scan object.  Closing a scan object releases any resources
+associated with the scan in both the server and client processes (such as
+the scan buffer).  It also allows the scan object to be reused.
+The scan is closed implicitly when the PoolScan object is
+destroyed (either via operator delete or when the DirScan object goes out
+of scope), or when the transaction in which the scan was opened terminates.
+<P><DT><STRONG><TT>~PoolScan()</TT></STRONG>
+<DD>The PoolScan destructor closes the scan object if it is open.
+<P></DL><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html45"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html42"
+ HREF="poolscan.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html36"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html44"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html46"
+ HREF="node4.html">A Pool Scan Example</A>
+<B> Up:</B> <A NAME="tex2html43"
+ HREF="poolscan.html">Scanning Pools in a Application</A>
+<B> Previous:</B> <A NAME="tex2html37"
+ HREF="node2.html">Introduction</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

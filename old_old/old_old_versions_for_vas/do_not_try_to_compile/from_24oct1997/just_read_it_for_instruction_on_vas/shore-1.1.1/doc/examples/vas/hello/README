@@ -1,0 +1,37 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+This is an example VAS, called hello, that stores the string
+``hello world!'' using the SSM and then prints it.
+
+To do this, the program:
+    configures the SSM
+    formats a storage device
+    creates a volume on the device,
+    creates a file on the volume, 
+    creates a record, in the file, containing the string ``hello''
+    appends ``world!'' to the record
+    reads the record and prints it
+    shuts down the SSM
+
+The hello program demonstrates how to start the SSM use some of its
+basic features to store data.  Compiling and running it is a quick
+way to test that your Shore SM installation is correct.
+
+The hello program is rather large (aproximately 200 lines) for programs
+of its kind.  Our excuse is that an analogous program/script for
+Unix would be one that partitions a disk, creates a file-system on
+it, creates a directory and a file to hold ``hello world!'' and then
+reads the file.
+
+Compiling and Running
+---------------------
+
+To compile and run this example, please see the instructions in the
+"Shore Software Installation Manual" in the section "Compiling and Running a
+Value-Added Server".  A copy of this manual is available on the Web at
+  http://www.cs.wisc.edu/shore/doc/installation/installation.html

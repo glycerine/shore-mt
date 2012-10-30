@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Error Handling</TITLE>
+<META NAME="description" CONTENT="Error Handling">
+<META NAME="keywords" CONTENT="ssmapi">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmapi.css">
+<LINK REL="next" HREF="node9.html">
+<LINK REL="previous" HREF="node7.html">
+<LINK REL="up" HREF="ssmapi.html">
+<LINK REL="next" HREF="node9.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html218"
+ HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html215"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html209"
+ HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html217"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html219"
+ HREF="node9.html">Communication and RPC Facilities</A>
+<B> Up:</B> <A NAME="tex2html216"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html210"
+ HREF="node7.html">Thread Management</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="ssmapi:errorhandling">&#160;</A><H1><A NAME="SECTION00080000000000000000000">
+Error Handling</A>
+</H1>
+<P>
+Errors in the SSM (and the rest of Shore) are indicated by an
+unsigned integer encapsulated in a class that includes stack
+traces and other debugging aids.
+The class is <TT>w_rc_t</TT> (commonly <TT>typdef</TT>ed
+to <TT>rc_t</TT>) described in
+<A NAME="tex2html38"
+ HREF="../man/rc.fc.html">rc(fc)</A>.  It is the return type
+for most SSM methods.  When linked with a debugging version of the SSM
+(compiled with <TT>#define DEBUG</TT>), the destructor of an <TT>w_rc_t</TT>
+object verifies that it was checked at least once.
+If not, the destructor calls <TT>w_rc_t::error_not_checked</TT>
+which prints a warning message.  An <TT>w_rc_t</TT> is considered checked
+when any of its methods that read/examine the error code are called,
+including the assignment operator.  Therefore, simply returning an <TT>w_rc_t</TT> (which involves an assignment) is considered checking it.
+Of course, the newly assigned <TT>w_rc_t</TT> is considered unchecked.
+<P>
+The domain of error codes is an extension of the Unix error codes
+found in <TT>#include &lt;errno.h&gt;</TT>.  Each layer of the Shore software
+adds its own extension to the domain.  The following layers have error
+codes which may be returned by SSM methods:
+<UL>
+<LI> The Storage Manager proper; see
+<A NAME="tex2html34"
+ HREF="../man/errors.ssm.html">errors(ssm)</A>.
+<LI> The Thread package; see
+<A NAME="tex2html35"
+ HREF="../man/errors.sthread.html">errors(sthread)</A>.
+<LI> The Configuration options package; see
+<A NAME="tex2html36"
+ HREF="../man/options.common.html">options(common)</A>.
+<LI> The Foundation Classes; see
+<A NAME="tex2html37"
+ HREF="../man/intro.fc.html">intro(fc)</A>.
+<P></UL>
+<P>
+Further discussion of error handling may be found in the
+<A HREF="../ssmvas/node5.html#ssmvas:errors"><EM>Error Codes</EM> </A> section of the
+VAS Tutorial.
+<P>
+VAS writers may wish to use the error handling facility to add their
+own error codes.  See <A NAME="tex2html39"
+ HREF="../man/error.fc.html">error(fc)</A> for
+more details.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html218"
+ HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html215"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html209"
+ HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html217"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html219"
+ HREF="node9.html">Communication and RPC Facilities</A>
+<B> Up:</B> <A NAME="tex2html216"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html210"
+ HREF="node7.html">Thread Management</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

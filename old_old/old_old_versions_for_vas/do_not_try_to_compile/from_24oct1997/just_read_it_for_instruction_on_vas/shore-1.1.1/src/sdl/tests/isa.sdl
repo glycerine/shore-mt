@@ -1,0 +1,7 @@
+module m1 {
+	export all;
+	interface T { };
+	interface U { };
+	interface S: public T {};
+}
+

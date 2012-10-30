@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Constants</TITLE>
+<META NAME="description" CONTENT="Constants">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node11.html">
+<LINK REL="previous" HREF="node9.html">
+<LINK REL="up" HREF="sdlman.html">
+<LINK REL="next" HREF="node11.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html174"
+ HREF="node11.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html171"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html165"
+ HREF="node9.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html173"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html175"
+ HREF="node11.html">Types</A>
+<B> Up:</B> <A NAME="tex2html172"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html166"
+ HREF="node9.html">Interfaces</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html176"
+ HREF="node10.html#SECTION000101000000000000000000">
+Examples</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="sdlman:constant">&#160;</A><H1><A NAME="SECTION000100000000000000000000">
+Constants</A>
+</H1>
+<P><PRE>
+    const_dcl : 'const' const_type ID '=' const_exp
+    const_type : integer_type | boolean_type | 
+            floating_pt_type | 'string' 
+            | type_name // must designate a simple type
+    integer_type : [ 'unsigned' ] ( 'long' | 'short' )
+    boolean_type : 'boolean'
+    floating_pt_type : 'float' | 'double'
+    const_exp : exp1 ( '|' exp1 )*
+    exp1 : exp2 ( '^' exp2 )*
+    exp2 : exp3 ( '&amp;' exp3 )*
+    exp3 : exp4 ( shift_op exp4 )*
+    exp4 : exp5 ( add_op exp5 )*
+    exp5 : exp6 ( mul_op exp6 )*
+    exp6 : [ unary_op ] atom
+    atom : const_name | literal | '(' const_exp ')'
+    shift_op : '&lt;&lt;' | '&gt;&gt;'
+    add_op : '+' | '-'
+    mul_op : '*' | '/' | '%'
+    unary_op : '+' | '-' | '~'
+    literal :
+        INTEGER_CONSTANT
+        | STRING_LITERAL
+        | CHARACTER_CONSTANT
+        | FLOATING_CONSTANT
+        | 'true' | 'false'
+    const_name : scoped_name // must designate a const
+</PRE>
+<P>
+A
+<EM>const_dcl</EM>
+binds a name to a simple (unstructured) constant value.
+<A NAME="tex2html8"
+ HREF="footnode.html#390"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+Constants may be defined by C-like expressions involving
+literals and names of other constants.
+The type of the constant is explicitly indicated.
+An integer type must be explicitly indicated as
+<EM>long</EM>
+or
+<EM>short</EM>;
+there is no default integer size.
+Only one precision of floating point is supported.
+<P><A NAME="sdlman:constantexample">&#160;</A><H2><A NAME="SECTION000101000000000000000000">
+Examples</A>
+</H2>
+<P><PRE>
+    const long Kilobyte = 1&lt;&lt;10;
+    const long Megabyte = 1&lt;&lt;20;
+    const long BytesPerPage = 4*Kilobyte;
+    const long MemSize = 20*Kilobyte;
+    const long MaxPages = MemSize / BytesPerPage;
+    const float PI = 3.1415926525;
+    const float Avogadro = 6.02E24;
+    const string Message = &quot;Error&quot;;
+</PRE>
+<P>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

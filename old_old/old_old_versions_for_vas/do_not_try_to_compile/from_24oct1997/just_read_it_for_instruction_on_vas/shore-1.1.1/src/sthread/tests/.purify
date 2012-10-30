@@ -1,0 +1,13 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+suppress abr sthread_core_switch
+suppress fmw sthread_core_switch
+suppress bsr p897_static
+
+## needed for post 3.0a versions of purify
+ignore sthread_core_switch stcore.o

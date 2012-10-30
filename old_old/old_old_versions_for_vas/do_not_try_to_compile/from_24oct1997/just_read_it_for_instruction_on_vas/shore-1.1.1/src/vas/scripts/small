@@ -1,0 +1,21 @@
+source ../scripts/setup.all
+
+cd /small/z
+
+#compensating transaction -- nothing to do
+
+begin
+set oldverbose $verbose
+set verbose 1
+read uf
+
+set objsiz [sfile size uf]
+read uf 0 $objsiz
+
+set rsiz  [expr {$objsiz / 2}]
+read uf 0 $rsiz
+read uf $rsiz end
+
+commit
+set verbose $oldverbose
+return "small done."

@@ -1,0 +1,19 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  Load a btree, and verify its content
+#  Like btree.1 but it uses a very long key 
+#
+
+set save_short_form $short_form
+set short_form $vlong_form
+echo
+echo RUNNING: btree.1
+source $script_dir/btree.1
+set short_form $save_short_form
+unset save_short_form

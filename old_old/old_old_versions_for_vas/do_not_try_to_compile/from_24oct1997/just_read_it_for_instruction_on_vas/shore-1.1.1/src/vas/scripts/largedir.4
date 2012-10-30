@@ -1,0 +1,19 @@
+# source ../scripts/largedir.4
+source ../scripts/setup.small
+
+global verbose
+cd /small
+
+begin
+mkdir aaaaaaaaaaaaa
+ls -lid .
+mkdir bbbbbbbbbbbbb
+ls -lid .
+mkdir ccccccccccccc
+ls -lid .
+
+rmdir bbbbbbbbbbbbb
+rmdir ccccccccccccc
+rmdir aaaaaaaaaaaaa
+ls
+commit

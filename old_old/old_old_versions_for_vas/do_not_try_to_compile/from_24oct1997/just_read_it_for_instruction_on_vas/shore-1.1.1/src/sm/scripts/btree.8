@@ -1,0 +1,86 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# start up
+#
+source $script_dir/vol.init
+
+set nrec 25
+
+#
+# create index 
+#
+sm begin_xct
+set ndx [sm create_index $volid btree]
+verbose created index $ndx
+sm commit_xct
+
+
+#
+# load
+#
+sm begin_xct
+for {set i 1} {$i <= $nrec} {incr i} {
+    set key [format $short_form $i]
+    for {set j 1} {$j <= $nrec} {incr j}  {
+	verbose inserting $i.$j
+	sm create_assoc $ndx $key [format $short_form $j]
+    }
+}
+sm commit_xct
+
+#
+# remove all odd keys, and scan to confirm result
+#
+verbose remove odd keys
+sm begin_xct
+# sm print_index $ndx
+for {set i 1} {$i <= $nrec} {incr i; incr i}  {
+    set key [format $short_form $i]
+    catch {sm destroy_all_assoc $ndx $key} n
+    verbose "destroyed $i : $n"
+    assert {expr $n == $nrec}
+}
+verbose after odd keys removed
+# sm print_index $ndx
+sm commit_xct
+
+sm begin_xct
+set r 0
+set k1  0
+set k2  0
+set k3 0
+set scan 0
+set el 0
+set key 0
+for {set i 1} {$i < $nrec} {incr i; incr i} {
+    # scan [i, i+1] --- should only encounter keys of i+1
+    verbose "i = $i"
+    set k1 [format $short_form $i]
+    set k2 [format $short_form [expr {$i + 1}]]
+    set k3 [format $short_form [expr {$i + 2}]]
+    set scan [sm create_scan $ndx >= $k1 < $k3]
+    for {set j 1} {$j <= $nrec} {incr j} {
+	set r [sm scan_next $scan]
+	if {$r == "eof"} then { break }
+	set key [string trimleft [lindex $r 0] 0]
+	set el [string trimleft [lindex $r 1] 0]
+	verbose "scanned ($key, $el)"
+	assert {expr $key == $i + 1}
+	assert {expr $el == $j}
+    }
+    verbose "scanned $j records for key $i"
+    assert {expr $j > $nrec}
+    assert {expr [string compare [sm scan_next $scan] eof] == 0}
+    sm destroy_scan $scan
+}
+
+sm commit_xct
+
+unset r k1 k2 k3 scan el key
+unset ndx nrec i n j

@@ -1,0 +1,165 @@
+<!--
+This documentation "home page" was written by hand in html (not generated from
+anything).
+$Header: /p/shore/shore_cvs/releasedoc/homepage.html,v 1.6 1997/10/25 10:30:53 solomon Exp $
+-->
+<head>
+<title> Shore Documents </title>
+<body>
+
+<h1>An Overview of the Shore Online Documentation, Version 1.1.1</h1>
+The Shore distribution comes with a collection of documentation, including
+design documents, tutorials, reference manuals, and manual pages.
+Although there is a large amount of information available, it can sometimes
+be hard to find.  This document provides a set of entry points for navigating
+the online information.  All of the documents here are also available in
+printed form.
+<!--
+<p> There is also a
+<a href="ghindex.html">keyword index</a> to all the online documentation.
+-->
+
+<h1> <a href="release/release.html"> The Shore Release Version 1.1.1 </a> </h1>
+This document gives a brief overview of the contents of the Shore distribution
+package. It specifies the hardware and software requirements for installing and
+running Shore, lists the major packages distributed (including another overview
+of the major documents), and points to information to tell you how to retrieve
+the software, install it, start it running, write your own applications,
+and even extend the Shore server.
+
+<h1> <a href="installation/installation.html"> Shore Software Installation
+Manual </a> </h1>
+This document describes in detail how to install Shore.
+Shore is distributed in four forms:
+a <em>documentation release</em>, a <em>binary release</em>, a <em>source
+release</em>, and an <em>examples release</em> (a subset of the documenation
+release).
+The Installation Manual explains how to install the documentation and the
+binary version of Shore, how to build a new copy of Shore from the source
+release, and how to run a few simple tests by building applications from
+the examples release.
+
+<h1> <a href="bugreport/bugreport.html"> How to Submit a Problem Report </a>
+</h1>
+This document describes how to submit a problem report if you find a problem
+with the Shore software or documentation. 
+Please take a moment to read it before reporting bugs or asking for help
+in getting parts of Shore to work.  Someday, this document should be extended
+into a FAQ.
+
+<h1> <a href="overview/overview.html"> An Overview of Shore </a> </h1>
+This is a version of a paper originally presented at the SIGMOD conference
+on the management of data.
+It describes the goals of the Shore project and a high-level overview of its
+internal structure.
+
+<h1> <a href="glossary/glossary.html"> Glossary of Shore Terms </a> </h1>
+We have attempted to use technical terms in a consisten manner through out
+these documents (and in the source code).
+The <em>Glossary</em> is a concise lexicon of these terms.
+When in doubt, please consult this list.
+
+<h1> <a href="running/running.html"> Configuring and Running the Shore Server
+</a> </h1>
+The <a href="installation/installation.html">installation manual</a>
+tells you how to run the Shore server with its default configuration and
+options.  This manual explains the configuration and startup process in
+more detail, including advice on using raw disk devices to hold the
+database rather than using Unix files.
+It also explains how to use the feature that allows a Shore database to
+be accessed as a file system by ``legacy applications'' through the
+NFS interface.
+
+<h1> <a href="stree/stree.html"> Getting Started with Shore </a> </h1>
+This tutorial shows how to write Shore application programs by describing
+the persistent data structures in a C++-like data-definition language
+called the <em>Shore Data Language</em> (SDL) and manipulating them with C++
+programs.
+
+<h1> <a href="sdlman/sdlman.html"> Shore Data Language Reference Manual </a>
+</h1>
+This reference manual describes SDL in considerably greater detail.
+
+<h1> <a href="dirscan/dirscan.html"> Scanning Directories in a Shore
+Application </a> </h1>
+The <em> DirScan</em> class provides a convenient interface for scanning
+directories.  This document describes how to use the DirScan class.  The
+Shore release includes a simple example program called <em> shls</em> (``Shore
+<em> ls</em>''), that illustrates the use of the DirScan class.  Shls can be
+found in the <tt>examples/shls</tt> directory of the Shore release.
+
+<h1> <a href="poolscan/poolscan.html"> Scanning Pools in a Shore Application
+</a> </h1>
+The <em> PoolScan</em> class provides a convenient interface for scanning
+through the objects in a pool.  This document describes how to use
+PoolScans, as well as known bugs and limitations of the PoolScan class.
+The Shore release includes three example programs that illustrate pool
+scans.  The examples can be found in the <tt> examples/pscan</tt> directory of
+the Shore release.
+
+<h1> <a href="shrc/shrc.html"> Handling Errors in a Shore Application </a> </h1>
+This document describes error handling facilities for Shore applications.
+Shore application writers are encouraged to read 
+<a href="stree/stree.html"> Getting Started with Shore </a>
+and look at the example applications before reading
+this document.  The <a href="sdlman/sdlman.html"> SDL manual</a>
+and the example programs show the standard
+ways of handling errors in Shore.  This document is intended for
+application writers interested in more details.
+
+<h1> <a href="sourceguide/sourceguide.html"> A Roadmap to the Shore Releases
+</a> </h1>
+This document is a guided tour through the numerous directories of the
+Shore releases.
+It briefly describes the purpose of each directory and how the code in it
+interacts with the rest of the system.
+
+<h1> <a href="ssmapi/ssmapi.html"> The Shore Storage Manager Programming
+Interface </a> </h1>
+The Shore Storage Manager (SSM)
+is a package of libraries
+for building object repository servers and their clients.
+The core library in the package,
+<tt>libsm.a</tt>, is a multi-threaded system managing persistent
+storage and caching of un-typed data and indexes.  It provides disk and
+buffer management, transactions, concurrency control and recovery.
+A second library, <tt>libshorecommon.a</tt>, provides many common
+utilities need for implementing both client and servers.  The third
+library, <tt>librpclib.a</tt>, is a slightly modified version (for use
+in a multi-threaded environment) of the Sun RPC package.
+(This library is not needed for Solaris systems).
+<p>
+We use the term <em>value-added-server</em> (VAS) to refer to systems
+built with the SSM.  A VAS relies on the SSM for the above capabilities
+and extends it to provide more functionality.  One example of a VAS is
+the Shore server, which extends the SSM to provide typed objects with
+permissions and ownership and organizes storage as a tree structured
+name-space.  The overall role of the SSM in Shore is further described in
+<a href="overview/overview.html"> An Overview of Shore </a>.
+<p>
+This document provides an overview the SSM facilities and interface.
+Details of the programming interfaces are presented in a set of manual
+pages.  Where each facility is discussed, references are made to the
+appropriate manual pages.
+
+<h1> <a href="ssmvas/ssmvas.html"> Writing Value-Added Servers with the Shore
+Storage Manager </a> </h1>
+A novel feature of Shore is that its server is designed to be easily extended
+to support new applications.
+This tutorial shows how to extend the server through a detailed example,
+the <em>Grid Server</em>.
+
+<!--
+<h1> <a href="plans/plans.html"> Shore Project Plans </a> </h1>
+This document describes what, in the overall plan for Shore, has yet to be
+done, and it describes
+our plans for finishing the Shore project.
+-->
+
+<h1><a href="man/index.man.html">Manual Pages </a> </h1>
+Shore comes with a large set of manual pages in the traditional Unix style.
+This page lists them all.
+The manual can also be accessed through hot links from the documents listed
+above, from cross-references between the man pages, and from the introduction
+pages listed at the beginning of each section of man pages.
+</body>

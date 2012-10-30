@@ -1,0 +1,25 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+st = 0x00040000 "Shore Threads" sthread_base_t {
+TIMEOUT		Timed out waiting for resource
+SEMBUSY		Semaphore busy
+SEMPOSTED	Semaphore already posted
+SEMALREADYRESET Semaphore was already reset
+NOTHREAD	No active thread
+BADFD		Bad file descriptor for I/O operation, seek, or close
+BADIOVCNT	Bad count for io vector (too high)
+TOOMANYOPEN	Too many open files 
+BADADDR		Bad offset in shared memory segment
+BADFILEHDL	Attempt to wait on file handle that is down
+INVAL	        Invalid argument to thread I/O operation
+INUSE		Resource in use
+SHORTIO		Short I/O
+SHORTSEEK	Short Seek
+INVALIDIO	Invalid I/O operation
+EOF		End of File
+}

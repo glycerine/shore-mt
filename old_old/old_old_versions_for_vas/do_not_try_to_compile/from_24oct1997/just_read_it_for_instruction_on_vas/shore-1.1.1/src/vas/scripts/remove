@@ -1,0 +1,151 @@
+source ../scripts/setup.all
+
+cd /small
+
+begin
+# compensating transaction
+foreach f { direct/z direct/uf direct } {
+	cout [unlink $f]
+}
+commit
+
+begin
+	if [not [sfile exists direct]] {
+		mkdir direct
+	} 
+	cd direct
+
+#   remove while in use
+	expect OS_InUse from { rmdir ../direct }
+	expect OS_InvalidArgument from { rmdir . }
+
+# 	This should work
+	cd /small
+	rmdir direct
+	expect SVAS_NotFound from { sfile oid direct }
+commit
+
+
+# mkdir and remove in separate tx
+begin
+	if [not [sfile exists direct]] {
+		mkdir direct
+	} 
+	mkpool direct/pool
+	set oid [sfile oid direct/pool]
+commit
+
+# see if abort of removal works
+begin
+	rmpool direct/pool
+abort
+begin
+	set oidnow [sfile oid direct/pool]
+	assert [ expr {$oidnow == $oid} ]
+commit
+
+# see if commit of removal works
+begin
+	cd /small/direct
+	rmpool pool
+	cd ..
+commit
+
+begin
+	expect SVAS_NotFound from { stat /small/direct/pool }
+commit
+
+set oldverbose $verbose
+set verbose 0
+cd /small/direct
+begin
+# make pool with objects
+# remove them one at a time
+	mkpool pool
+	set o0 [mkanon pool 0:0:NoText]
+	set o1 [mkanon pool 1:0:NoText]
+	set o2 [mkanon pool 2:0:NoText]
+	set o20 [mkanon pool 20:0:NoText]
+	set o200 [mkanon pool 200:0:NoText]
+	set o2000 [mkanon pool 2000:0:NoText]
+	set o20000 [mkanon pool 20000:0:NoText]
+
+	set nobjs [scanpool pool count]
+	assert [expr {$nobjs == 7} ]
+
+	rmanon $o0
+	rmanon $o1
+	rmanon $o2
+	rmanon $o20
+	rmanon $o200
+	rmanon $o2000
+	rmanon $o20000
+
+	set nobjs [scanpool pool count]
+	assert [expr {$nobjs == 0} ]
+commit
+begin
+	set nobjs [scanpool pool count]
+	assert [expr {$nobjs == 0} ]
+	rm pool
+commit
+
+
+begin
+# make and remove pool with objects
+	if [not [sfile exists pool]] {
+		mkpool pool
+	}
+	set o0 [mkanon pool 0:0:NoText]
+	set o1 [mkanon pool 1:0:NoText]
+	set o2 [mkanon pool 2:0:NoText]
+	set o20 [mkanon pool 20:0:NoText]
+	set o200 [mkanon pool 200:0:NoText]
+	set o2000 [mkanon pool 2000:0:NoText]
+	set o20000 [mkanon pool 20000:0:NoText]
+
+	expect OS_NotEmpty from { rmpool pool }
+
+	scanpool pool remove
+	rmpool pool
+	expect SVAS_NotFound from { scanpool pool count }
+commit
+
+begin
+# make & remove unix file
+	if [not [sfile exists uf]] {
+		set uf1 [mkuserdef uf 100]
+	}
+	rm uf
+	ls
+commit
+
+begin
+	if [not [sfile exists uf]] {
+		set uf1 [mkuserdef uf 100]
+	} else {
+		set uf1 [sfile oid uf]
+	}
+	if [not [sfile exists xref]] {
+		set xr1 [mkxref $uf1 xref]
+	}
+	ls -li
+	rm xref
+# should remove the uf and leave the xref
+	ls -li
+commit
+
+# rm dir with something in it : expect error
+begin
+	if [not [sfile exists direct]] {
+		mkdir direct
+	} 
+	cd direct
+	mkdir z
+	cd ..
+	expect OS_NotEmpty from { rmdir direct }
+	rmdir direct/z
+	rmdir direct
+commit
+set verbose $oldverbose
+return "remove done."

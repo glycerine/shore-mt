@@ -1,0 +1,43 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test file pin_i::append_rec running out of space
+#       WARNING: takes a long time with a large volume
+#
+source $script_dir/vol.init
+
+echo WARNING: this script takes a long time on a large volume
+
+# clear stats
+set buffer zvec8090
+sm begin_xct
+    set f1 [sm create_file $volid]
+    set r1 [sm create_rec $f1 hdr12345 11 hellodata]
+
+    set pin [sm pin_create]
+    sm pin_pin $pin $r1 0
+    for {set i 1} {$i > 0} {incr i} {
+	if [catch {sm pin_append_rec $pin $buffer} err] {
+	    verbose ERROR: $err
+	    break;
+	}
+        if [expr { ($i/100)*100 == $i}] {
+	    verbose $i
+	}
+    }
+    verbose  wrote $i records
+    if [expr {[error_is $err E_OUTOFSPACE] == 0} ] {
+        echo ERROR: unexpected error  $err  expected E_OUTOFSPACE
+    }
+    sm pin_unpin $pin
+    sm pin_destroy $pin
+    sm destroy_file $f1
+
+sm commit_xct
+
+unset pin i r1 buffer f1 err

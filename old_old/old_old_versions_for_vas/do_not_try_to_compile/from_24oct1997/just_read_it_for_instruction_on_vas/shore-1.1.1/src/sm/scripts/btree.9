@@ -1,0 +1,95 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  test btree bulk load: duplicate keys
+#  default key type here is b*1000
+#
+
+#
+# start up
+#
+verbose "init"
+source $script_dir/vol.init
+
+set old_short_form $short_form
+set short_form "%023d"
+
+set nrec 5
+#
+# create file of <key, el> pair and sort the file by keys 
+#
+verbose "create file"
+sm begin_xct
+set f1 [sm create_file $volid]
+for {set i 0} {$i < $nrec} {incr i} {
+    for {set j 0} {$j < $i } {incr j} {
+	set data [expr { $nrec - $i } ]
+	# default: string type
+        verbose sm create_rec $f1 [format $short_form $data] 4 data
+        sm create_rec $f1 [format $short_form $data] 4 data
+    }
+}
+
+set f2 [sm sort_file $f1 $volid 3 b23 distinct keep]
+
+#sm scan_recs $f2
+
+sm commit_xct
+
+# dstats $volid
+
+sm begin_xct
+set ndx [sm create_index $volid btree]
+
+# blkld_ndx assumes that input file is already sorted
+# if no key type is given as 3rd argument:
+set stat [sm blkld_ndx $ndx $f2]
+
+verbose created index $ndx again
+verbose stats: $stat
+#sm print_index $ndx
+sm commit_xct
+
+#
+# verify ascending
+#
+verbose "scan up:"
+sm begin_xct
+set scan [sm create_scan $ndx >= neg_inf <= pos_inf]
+for {set i 1} {$i < $nrec} {incr i}  {
+  for {set j $i} {$j < $nrec} {incr j}  {
+    set r [sm scan_next $scan]
+    if {$r == "eof"} then { break }
+    set key [string trimleft [lindex $r 0] 0]
+    set el [lindex $r 1]
+    verbose "$i: scanned ($key, $el)"
+    assert {expr $i == $key}
+    assert {expr $j == $el}
+  }
+}
+
+assert {expr $i >= $nrec}
+assert {expr [string compare [sm scan_next $scan] eof] == 0}
+sm destroy_scan $scan
+verbose "---- successful"
+
+verbose "probe:"
+for {set i 1} {$i < $nrec} {incr i} {
+    set el [sm find_assoc $ndx [format $short_form $i]]
+    assert {expr $el == $i}
+    verbose probed $i
+}
+sm commit_xct
+verbose "---- successful"
+
+unset scan ndx nrec
+unset i j f2 f1
+unset r el key
+unset stat
+set short_form $old_short_form
+unset old_short_form

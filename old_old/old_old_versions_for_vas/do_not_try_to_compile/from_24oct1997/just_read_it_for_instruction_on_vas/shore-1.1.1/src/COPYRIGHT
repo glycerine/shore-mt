@@ -1,0 +1,36 @@
+# ------------------------------------------------------------------------ #
+# -- Copyright (c) 1994, 1995, 1996, 1997 Computer Sciences Department, -- #
+# -- University of Wisconsin-Madison, subject to the terms conditions   -- #
+# -- given in the file COPYRIGHT.  All Rights Reserved.                 -- #
+# ------------------------------------------------------------------------ #
+
+Permission to use, copy, modify and distribute this software and its
+documentation is hereby granted, provided that both the copyright
+notice and this permission notice appear in all copies of the
+software, derivative works or modified versions, and any portions
+thereof, and that both notices appear in supporting documentation.
+
+THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY OF WISCONSIN --
+MADISON ALLOWS FREE USE OF THIS SOFTWARE IN ITS "AS IS" CONDITION.
+THE DEPARTMENT DISCLAIMS ANY LIABILITY OF ANY KIND FOR ANY DAMAGES
+WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.
+
+The Shore Project Group requests users of this software to return
+any improvements or extensions that they make to:
+
+  Shore Project Group
+    c/o Prof. Marvin H. Solomon
+  Computer Sciences Department
+  University of Wisconsin -- Madison
+  Madison, WI 53706
+
+  or 
+
+  shore_support@cs.wisc.edu
+
+In addition, the Shore Project Group requests that users grant the
+Computer Sciences Department rights to redistribute these changes.
+
+This software was developed with support by the Advanced Research 
+Project Agency, ARPA order number 018 (formerly 8230), monitored by 
+the U.S. Army Research Laboratory under contract DAAB07-91-C-Q518.

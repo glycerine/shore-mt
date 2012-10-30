@@ -1,0 +1,75 @@
+
+proc compensate {} {
+	begin
+	scanpool pool remove
+	if [not [sfile exists pool]] { mkpool pool }
+	commit
+}
+
+proc testa { sz commitorabort } {
+	global pagesize
+	begin
+	cout mkanon size= $sz ... $commitorabort
+	set s [mkanon pool 0:$sz:0]
+
+	set j [random [expr {$sz + 1}]]
+	set k [random $pagesize]
+
+	# trunc to j bytes
+	cout trunc to $j bytes ...
+	trunc $s $j
+
+	cout append $k bytes (with trunc)...
+	set sz [expr {$j + $k}]
+	trunc $s $sz
+
+	# write oid start len
+	cout update bytes 0 -> $j
+	write $s  0  $j
+	cout update bytes $j -> end
+	write $s  $j $k
+
+	cout trunc $s 0
+	trunc $s 0
+
+	cout trunc $s $sz
+	trunc $s $sz
+
+	cout $commitorabort
+	eval  $commitorabort 
+}
+
+proc testz { sz  commitorabort} {
+	global pagesize
+	begin
+	cout mkZanon size= $sz ... $commitorabort
+	set s [mkzanon pool 0:$sz:0]
+
+	set j [random [expr {$sz + 1}]]
+	set k [random $pagesize]
+
+	# trunc to j bytes
+	cout trunc to $j bytes ...
+	trunc $s $j
+
+	cout append $k bytes (with trunc)...
+	set sz [expr {$j + $k}]
+	trunc $s $sz
+
+	# write oid start len
+	cout update bytes 0 -> $j
+	write $s  0  $j
+	cout update bytes $j -> end
+	write $s  $j $k
+
+	cout trunc $s 0
+	trunc $s 0
+
+	cout trunc $s $sz
+	trunc $s $sz
+
+	cout $commitorabort
+	eval  $commitorabort 
+}
+
+return "anon.tests.setup done."

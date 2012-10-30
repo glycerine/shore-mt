@@ -1,0 +1,6 @@
+#
+# Suppresions for solaris-dependent problems
+#
+suppress umc _doprnt
+suppress umc sigaction; signal
+suppress abr sigsetjmp; sthread_t::_start()

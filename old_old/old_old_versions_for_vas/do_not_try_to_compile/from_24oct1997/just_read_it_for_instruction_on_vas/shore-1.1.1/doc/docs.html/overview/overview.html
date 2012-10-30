@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>An Overview of Shore</TITLE>
+<META NAME="description" CONTENT="An Overview of Shore">
+<META NAME="keywords" CONTENT="overview">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="overview.css">
+<LINK REL="next" HREF="node1.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html33"
+ HREF="node1.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif_gr.gif"> 
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif_gr.gif"> 
+<A NAME="tex2html32"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html34"
+ HREF="node1.html">Contents</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="overview:TOP">&#160;</A><H1 ALIGN="CENTER">An Overview of Shore<A NAME="tex2html1"
+ HREF="footnode.html#8"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A><A NAME="tex2html2"
+ HREF="footnode.html#9"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A></H1>
+<P ALIGN="CENTER"><STRONG>The Shore Project Group <BR>
+Computer Sciences Department <BR>
+UW-Madison <BR>
+Madison, WI <BR>
+Version 1.1.1 <BR>
+<em>Copyright &#169; 1994-7
+<br> Computer Sciences Department, University of Wisconsin-Madison.
+<br> All Rights Reserved.</em>
+<P></STRONG></P>
+<P ALIGN="CENTER"><STRONG>October 27, 1997</STRONG></P>
+<P ALIGN="LEFT"></P>
+<P>
+<H3 CLASS="ABSTRACT">Abstract:</H3>
+<P CLASS="ABSTRACT">
+Shore (Scalable Heterogeneous Object REpository) is a persistent
+object system under development at the University of Wisconsin. 
+Shore represents a merger of object-oriented database and file system
+technologies.  
+In this document we give the goals and motivation for Shore, 
+and describe how Shore provides features of both technologies.
+We also describe some novel aspects of the Shore architecture, including
+its symmetric peer-to-peer server architecture
+and its support for
+server customization through an extensible <EM>value-added server</EM>
+facility.  
+As will be described, an initial version of Shore has
+been operational at the University of Wisconsin for some time,
+the Shore 
+<A NAME="tex2html1"
+ HREF="ftp://ftp.cs.wisc.edu/shore">release.html</A>
+is now ready for use by the general public.
+This document is intended as a first introduction to
+the system for people interested in trying to use it in their work.
+<P></P>
+<P>
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS">&#160;</A>
+<UL>
+<LI><A NAME="tex2html35"
+ HREF="node1.html#SECTION00010000000000000000000">
+Contents</A>
+<LI><A NAME="tex2html36"
+ HREF="node2.html#SECTION00020000000000000000000">
+Introduction</A>
+<UL>
+<LI><A NAME="tex2html37"
+ HREF="node2.html#SECTION00021000000000000000000">
+EXODUS</A>
+<LI><A NAME="tex2html38"
+ HREF="node2.html#SECTION00022000000000000000000">
+How Shore differs from EXODUS</A>
+</UL>
+<LI><A NAME="tex2html39"
+ HREF="node3.html#SECTION00030000000000000000000">
+Basic Shore System Concepts</A>
+<UL>
+<LI><A NAME="tex2html40"
+ HREF="node3.html#SECTION00031000000000000000000">
+The Big Picture</A>
+<LI><A NAME="tex2html41"
+ HREF="node3.html#SECTION00032000000000000000000">
+Shore Object Basics</A>
+<LI><A NAME="tex2html42"
+ HREF="node3.html#SECTION00033000000000000000000">
+File System Features</A>
+<UL>
+<LI><A NAME="tex2html43"
+ HREF="node3.html#SECTION00033100000000000000000">
+Shore Object Namespace</A>
+<LI><A NAME="tex2html44"
+ HREF="node3.html#SECTION00033200000000000000000">
+Legacy Unix Tool Support</A>
+</UL>
+<LI><A NAME="tex2html45"
+ HREF="node3.html#SECTION00034000000000000000000">
+Object-Oriented Database Features</A>
+<UL>
+<LI><A NAME="tex2html46"
+ HREF="node3.html#SECTION00034100000000000000000">
+The Shore Type System</A>
+<LI><A NAME="tex2html47"
+ HREF="node3.html#SECTION00034200000000000000000">
+Shore Language Bindings</A>
+<LI><A NAME="tex2html48"
+ HREF="node3.html#SECTION00034300000000000000000">
+Other OODB-Like Services</A>
+</UL>
+</UL>
+<LI><A NAME="tex2html49"
+ HREF="node4.html#SECTION00040000000000000000000">
+The Shore Architecture</A>
+<UL>
+<LI><A NAME="tex2html50"
+ HREF="node4.html#SECTION00041000000000000000000">
+Peer-to-Peer Server Communication</A>
+<LI><A NAME="tex2html51"
+ HREF="node4.html#SECTION00042000000000000000000">
+Shore Software Components</A>
+<UL>
+<LI><A NAME="tex2html52"
+ HREF="node4.html#SECTION00042100000000000000000">
+The Language-Independent Library</A>
+<LI><A NAME="tex2html53"
+ HREF="node4.html#SECTION00042200000000000000000">
+The Shore Server</A>
+</UL>
+<LI><A NAME="tex2html54"
+ HREF="node4.html#SECTION00043000000000000000000">
+Some Implementation Details</A>
+<UL>
+<LI><A NAME="tex2html55"
+ HREF="node4.html#SECTION00043100000000000000000">
+Cache Consistency</A>
+<LI><A NAME="tex2html56"
+ HREF="node4.html#SECTION00043200000000000000000">
+Transaction Management</A>
+<LI><A NAME="tex2html57"
+ HREF="node4.html#SECTION00043300000000000000000">
+OID Implementation</A>
+</UL>
+</UL>
+<LI><A NAME="tex2html58"
+ HREF="node5.html#SECTION00050000000000000000000">
+Status of Release</A>
+<LI><A NAME="tex2html59"
+ HREF="node6.html#SECTION00060000000000000000000">
+Conclusion</A>
+<LI><A NAME="tex2html60"
+ HREF="node7.html#SECTION00070000000000000000000">
+References</A>
+<LI><A NAME="tex2html61"
+ HREF="node8.html#SECTION00080000000000000000000">
+List of Figures</A>
+</UL>
+<!--End of Table of Child-Links-->
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

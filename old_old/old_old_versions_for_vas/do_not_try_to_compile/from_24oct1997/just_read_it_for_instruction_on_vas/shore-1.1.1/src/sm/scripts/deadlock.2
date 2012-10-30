@@ -1,0 +1,128 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+# Test Upgrade deadlock detection
+#
+#    {1SH, 2SH} <-- 1EX
+#    {1EX} <-- 2SH
+#
+
+set o1 "10"
+set o2 "20"
+
+proc t1 {} {
+    global o1 o2
+    sm begin_xct
+    sm lock $o1 SH LONG
+    sm lock $o2 EX LONG
+    verbose "t1: acquired SH on o1, EX on o2"
+    sync
+    verbose "t1: attempting to acquire EX on o1"
+    sm lock $o1 EX LONG
+    sm commit_xct
+}
+
+proc t2 {} {
+    global o1 o2
+    sm begin_xct
+    verbose "t2: attempting to acquire SH on o1"
+    sm lock $o1 SH LONG
+    verbose "t2: acquired SH on o1"
+    sync
+    sync
+    verbose "t2: attempting to acquire SH on o2"
+
+    # catch deadlock
+    verbose catch deadlock:
+    catch {sm lock $o2 SH LONG} errorno
+    verbose "(EXPECTED E_DEADLOCK) error is $errorno"
+    assert {error_is $errorno E_DEADLOCK}
+
+    sm commit_xct
+}
+
+# same as t1, but use record stuff instead.
+proc tt1 {o1 o2} {
+    sm begin_xct
+
+# SH on o1
+    verbose [sm read_rec $o1 0 0]
+# EX on o2
+    sm append_rec $o2 zzz
+    verbose "t1: acquired SH on o1, EX on o2"
+    sync
+    verbose "t1: attempting to acquire EX on o1"
+# EX on o1
+    sm append_rec $o1 zzz
+    sm commit_xct
+}
+
+# same as t2, but use record stuff instead.
+proc tt2 {o1 o2} {
+    sm begin_xct
+    verbose "t2: attempting to acquire SH on o1"
+
+# SH on o1
+    verbose [sm read_rec $o1 0 0]
+    verbose "t2: acquired SH on o1"
+    sync
+    sync
+    verbose "t2: attempting to acquire SH on o2 with read"
+
+    # catch deadlock
+# SH on o2
+    set errorno 0
+    verbose catch deadlock:
+    catch {verbose [sm read_rec $o2 0 0]} errorno
+    verbose "(EXPECTED E_DEADLOCK) error is $errorno"
+    assert {error_is $errorno E_DEADLOCK}
+    sm commit_xct
+}
+
+####  main  ####
+
+source $script_dir/vol.init
+
+verbose main
+
+set x [fork_thread t1 {}]
+verbose x $x
+set y [fork_thread t2 {}]
+verbose y $y
+
+verbose sync
+sync_thread $x $y
+verbose sync
+sync_thread $y
+verbose join
+join_thread $x $y
+
+verbose new tx
+sm begin_xct
+set f [ sm create_file $volid ]
+verbose $f
+set r1 [ sm create_rec $f hdr12345 11 abcdefghijklmnopqrstuvwxyz ]
+verbose $r1
+set r2 [ sm create_rec $f hdr 8 ABCDEF ]
+verbose $r2
+sm commit_xct
+
+set x [fork_thread tt1 $r1 $r2]
+verbose forked $x
+set y [fork_thread tt2 $r1 $r2]
+verbose forked $y
+
+verbose sync
+sync_thread $x $y
+verbose sync
+sync_thread $y
+verbose join
+join_thread $x $y
+
+verbose end
+
+unset o1 o2 f r1 r2 x y

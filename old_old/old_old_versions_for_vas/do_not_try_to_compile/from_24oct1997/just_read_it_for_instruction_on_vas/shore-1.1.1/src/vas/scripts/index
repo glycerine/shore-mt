@@ -1,0 +1,126 @@
+source ../scripts/setup.all
+
+# manual indexes
+
+cd /small
+begin
+# compensating tx
+	scanpool pool remove
+	unlink pool
+	unlink idx
+	mkpool pool
+commit
+
+proc	idxkind {
+	set k [random 3]
+	set kind [lindex {btree lhash rtree} $k]
+	set kind "btree"
+	return $kind
+}
+
+proc rindex { i s n } {
+	if [not [sfile exists $n]] {
+		set oid [mkuserdef $n $s:$i]
+		set l [expr $i-1]
+		while {$l > 0} {
+			set kind [idxkind]
+			cout addmindex $oid,$l $kind
+			addmindex $oid,$l $kind
+		}
+		set l [expr $i-1]
+		while {$l > 0} {
+			cout statmindex $oid $l
+			statmindex $oid $l
+			statmindex $n $l
+		}
+		return $oid
+	}
+	return 0
+}
+
+proc aindex { i s p } {
+	if [sfile exists $p] {
+		set oid [mkanon $p $s:$i]
+		set l [expr $i-1]
+		while {$l > 0} {
+			set kind [idxkind]
+			addmindex $oid,$l $kind
+		}
+		set l [expr $i-1]
+		while {$l > 0} {
+			statmindex $oid $l
+		}
+		return  $oid
+	}
+	return 0
+}
+
+begin
+	cd /small
+	set regoid [rindex 3 10:0:10 idx]
+	set aoid [aindex 4 0:0:NoText pool]
+	stat $regoid
+	stat $aoid
+	stat idx
+commit
+
+set ind "idx,0"
+source ../tests/scripts/index.run
+set ind "idx,1"
+source ../tests/scripts/index.run
+set ind "idx,2"
+source ../tests/scripts/index.run
+
+set ind { $regoid,0 }
+source ../tests/scripts/index.run
+set ind { $regoid,1 }
+source ../tests/scripts/index.run
+set ind { $regoid,2 }
+source ../tests/scripts/index.run
+
+set ind { $aoid,0 }
+source ../tests/scripts/index.run
+set ind { $aoid,1 }
+source ../tests/scripts/index.run
+set ind { $aoid,2 }
+source ../tests/scripts/index.run
+
+
+# drop the indexes
+begin
+	cd /small
+	dropmindex idx 0 
+	dropmindex $regoid 1 
+	dripindex idx 2 
+	stat idx
+commit
+
+begin
+# errors
+	statmindex $regoid 4
+	statmindex idx 10
+	statmindex $aoid 9
+commit
+
+# drop some indexes
+begin
+	cd /small
+	dropmindex $aoid 0 
+	dripindex $aoid 2 
+	stat $aoid
+commit
+
+begin
+	cd /small
+	dropmindex $aoid 0 
+	dripindex $aoid 2 
+	stat $aoid
+commit
+
+
+# destroy the objects
+begin
+	rmanon $aoid
+	rm $regioid
+commit
+

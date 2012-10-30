@@ -1,0 +1,68 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#   Time destroying objects in a file 
+#   ASSUMES FILE IS ALREADY THERE -- this is
+#   meant to be run *after* write.perf
+#
+#   Parameters: 
+#   	        size of objects written 
+#		logging on or off
+#
+
+# source $script_dir/vol.init
+
+set objsize [expr {8192 * 50}]
+
+#ignored for now
+set logging 0
+
+set config [sm config_info]
+
+set volsize [lindex [sm get_volume_quota $volid] 0]
+set used [lindex [sm get_volume_quota $volid] 1]
+set volsize [expr {$volsize - $used} ]
+set objksize [expr {$objsize / 1024} ]
+set nobjs [expr {$volsize / $objksize} ]
+unset objksize
+
+set hdr "" 
+set id_body_width zvec%d
+set body [format $id_body_width $objsize]
+
+set fid s(2.4)
+
+set nobjs 200
+set tbytes 0
+
+set dummy [sm gather_stats reset]
+set wtime [ time {
+	sm begin_xct
+		for {set i 0} {$i < $nobjs} {incr i} {
+			sm destroy_rec $r($i) 0 $body
+			incr tbytes $objsize
+		}
+	sm commit_xct
+} 1 ]
+echo
+
+sm force_buffers false
+echo DESTROYS $nobjs RECS, $hot HOT RECS: 
+pstats
+set dummy [sm gather_stats reset]
+
+sm begin_xct
+sm force_buffers true
+sm commit_xct
+
+echo 
+echo total destroy time = $wtime
+set msec [lindex $wtime 0]
+set sec [expr {$msec / 1000000} ]
+echo [expr {$tbytes / $sec}] bytes per second
+pstats

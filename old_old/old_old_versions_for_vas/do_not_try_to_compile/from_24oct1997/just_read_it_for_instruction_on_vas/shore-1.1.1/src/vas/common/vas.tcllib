@@ -1,0 +1,353 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+set auto_noexec 1
+set tcl_interactive 1
+rename source _source
+proc xerrs {} {
+	global expecterrors
+	set s [_info script]
+	if {$s != ""} { set s [concat in [_info script]] }
+	if {$expecterrors != 0} {
+		cerr $expecterrors { ERROR(s) from EXPECT } $s
+	}
+}
+#
+# THE FACT THAT source IS A PROC MEANS THAT
+# ALL VARIABLES CREATED IN SOURCED FILES ARE LOCAL!
+#
+proc source { filename } { 
+# 	make all the linked variables global
+	global expecterrors pagesize linenumber verbose printusererrors puerr puserstats lgdatasize smdatasize direntoverhead uid gid
+	set res [_source $filename]
+	xerrs
+	set expecterrors 0
+	return $res 
+}
+
+proc cleanupxref { name target } {
+	global expecterrors pagesize linenumber verbose printusererrors puerr puserstats lgdatasize smdatasize direntoverhead uid gid
+	if [not [sfile exists $name]] {
+		set xoid [mkxref $target $name]
+	} else {
+		if [not [sfile isxref $name]] {
+	#       our convention is that "xref" is an xref!
+			assert { "0" == "1" }
+			rm $name
+			set xoid [mkxref $target $name]
+		} else {
+			set obj [readref $name]
+			if [not [sfile exists $obj]] {
+				rmxref $name
+				set xoid [mkxref $target $name]
+			} else {
+				set xoid [sfile oid $name]
+			}
+		}
+	}
+	return $xoid
+}
+
+proc _unlink { f dbg } {
+	if [sfile exists $f]  {
+		if [expr {$dbg == 1}] {
+			cout $f exists
+		}
+		set oid [sfile oid $f]
+		if [expr {$dbg == 1}] {
+			cout $f has oid $oid 
+		}
+		if [sfile ispool $f]  {
+			if [expr {$dbg == 1}] {
+				cout $f is pool
+			}
+			scanpool $f remove
+			assert {[sfile isempty $f]==1}
+			if [expr {$dbg==1}] {
+				cout "destroy pool" $f
+			}
+			rmpool $f
+		} else { if [sfile isdirectory $f]  {
+			if [expr {$dbg==1}] {
+				cout $f is directory
+			}
+			if [sfile isempty $f]  {
+				rmdir $f
+			} else {
+				foreach file [ls $f] {
+					if [expr {$dbg==1}] {
+						cout "recursive _unlink:" $f/$file
+					}
+					_unlink $f/$file $dbg
+				}
+				assert {[sfile isempty $f]==1}
+				rmdir $f
+			}
+		} else { if [sfile isxref $f]  {
+			if [expr {$dbg==1}] {
+				cout $f is xref
+			}
+			rmxref $f
+		} else {
+			if [expr {$dbg==1}] {
+				cout $f is file
+			}
+			rm $f
+		}}} 
+		return $oid
+	} else {
+		set g [pwd]
+		return [echo $g ":" $f " does not exist"]
+
+	}
+}
+proc dunlink { f } {
+	cout _unlink $f
+	_unlink $f 1
+}
+proc unlink { f } {
+	_unlink $f 0
+}
+
+proc readablefile { what res } {
+	global verbose 
+	cout "readablefile " $what $res
+	assert { [sfile isother $what] }
+	assert [not [sfile isdirectory $what]]
+	assert [ expr { [sfile readable $what] == $res } ]
+	if { $res == "1" } {
+		read $what 0 [sfile size $what]
+	} else {
+		expect OS_PermissionDenied from { read $what }
+	}
+}
+proc readabledir { what res } {
+	global verbose 
+	cout "readabledir " $what $res
+	assert [not [sfile isother $what]]
+	assert [sfile isdirectory $what]
+	assert [ expr { [sfile readable $what] == $res } ]
+	if { $res == "1" } {
+		ls $what
+	} else {
+		expect OS_PermissionDenied from { ls $what }
+	}
+}
+proc writeablefile { what res } {
+	global verbose 
+	cout "writeablefile " $what $res
+	assert [sfile isother $what]
+	assert [not [sfile isdirectory $what]]
+	cout "assert [ expr { [sfile writable $what] == $res } ]"
+	if { $res == "1" } {
+		cout append $what 1 should work
+		append $what 1
+	} else {
+		cout expect error from append $what 1
+		expect OS_PermissionDenied from { append $what 1 }
+	}
+}
+proc writeabledir { what res } {
+	global verbose 
+	cout "writeabledir " $what $res
+	assert [not [sfile isother $what]]
+	assert [sfile isdirectory $what]
+	assert [ expr { [sfile writable $what] == $res } ]
+	if { $res == "1" } {
+		mkuserdef $what/junkjunkjunk 0:1:0
+		rm $what/junkjunkjunk
+	} else {
+		expect OS_PermissionDenied from { mkuserdef $what/junkjunkjunk 0:1:0 }
+	}
+}
+
+proc execablefile { what res } {
+	global verbose 
+	cout "execeablefile " $what $res
+	assert [sfile isother $what]
+	assert [not [sfile isdirectory $what] ]
+	assert [ expr { [sfile exec $what] == $res } ]
+}
+
+proc execabledir { what res } {
+	global verbose 
+	cout "execeabledir " $what $res
+	assert [not [sfile isother $what]]
+	assert [sfile isdirectory $what]
+	assert [ expr { [sfile exec $what] == $res } ]
+	set current [pwd]
+	assert [ expr { [string match "getwd:*" $current] != 1 } ]
+	if { $res == "1" } {
+		cout cd $what
+		cd $what
+	} else {
+		expect OS_PermissionDenied from { cd $what }
+	}
+	cd $current
+}
+
+set stack { }
+
+proc empty { } {
+	global stack
+	set l [llength $stack]
+	if { $l == "0" } {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+proc push { x } {
+	global stack
+	set stack [linsert $stack 0 $x]
+	return $x
+}
+proc pop {  } {
+	global stack
+	set x [lrange $stack 0 0]
+	set stack [lrange $stack 1 end]
+	return $x
+}
+proc popall {  } {
+	global stack
+	set stack { }
+}
+proc list_pmounts { } {
+	set res {}
+	set cwd [pwd]
+	set devicelist [serve]
+	foreach dev $devicelist {
+		set dpath [lindex $dev 1]
+		set dvolslist [volumes $dpath]
+		foreach vol $dvolslist {
+			set volume [lindex $vol 0]
+			set mountlist [pmount $volume]
+			foreach m $mountlist {
+				set a [lindex $m 0]
+				set b [lindex $m 1]
+				set c [lindex $m 2]
+				set d [lindex $m 3]
+				if { $c == "/" } then {
+					set tmp /$d
+				} else {
+					set tmp $c/$d
+				}
+				set entry [list $a $tmp $dpath]
+				lappend res $entry
+			}
+		}
+	}
+	cd $cwd
+	return $res
+}
+
+proc is_pmounted { vid } {
+	global verbose
+	set oldverbose $verbose
+	set verbose 1
+	set devicelist [serve]
+	foreach dev $devicelist {
+		set dpath [lindex $dev 1]
+		set dvolslist [volumes $dpath]
+		foreach vol $dvolslist {
+			set volume [lindex $vol 0]
+			set mountlist [pmount $volume]
+			foreach m $mountlist {
+				set a [lindex $m 0]
+				set b [lindex $m 1]
+				set c [lindex $m 2]
+				set d [lindex $m 3]
+				if { $vid == $a } {
+					return 1
+				}
+			}
+		}
+	}
+	set verbose $oldverbose
+	return 0
+
+}
+
+proc is_pmountpoint { path } {
+	set devicelist [serve]
+	foreach dev $devicelist {
+		set dpath [lindex $dev 1]
+		set dvolslist [volumes $dpath]
+		foreach vol $dvolslist {
+			set volume [lindex $vol 0]
+			set mountlist [pmount $volume]
+			foreach m $mountlist {
+				set a [lindex $m 0]
+				set b [lindex $m 1]
+				set c [lindex $m 2]
+				set d [lindex $m 3]
+				if { $c == "/" } then {
+					set tmp /$d
+				} else {
+					set tmp $c/$d
+				}
+				if { $path == $tmp } {
+					return 1
+				}
+			}
+		}
+	}
+	return 0
+}
+
+proc is_pmountpoint_reverse { path } {
+	set devicelist [serve]
+	foreach dev $devicelist {
+		set dpath [lindex $dev 1]
+		set dvolslist [volumes $dpath]
+		foreach vol $dvolslist {
+			set volume [lindex $vol 0]
+			set mountlist [pmount $volume]
+			foreach m $mountlist {
+				set a [lindex $m 0]
+				set b [lindex $m 1]
+				set c [lindex $m 2]
+				set d [lindex $m 3]
+				if { $d == ".." }  {
+					set tmp $c/$d
+					if { $path == $tmp } {
+						return 1
+					} 
+				}
+			}
+		}
+	}
+	return 0
+}
+
+proc unknown { a } {
+	cout Unrecognized command: $a
+	return 0
+}
+
+
+proc locate_reverse { pm mpt } {
+	set m $mpt/..
+	foreach item $pm {
+		set mntpt [lindex $item 1]
+		set cmp [string compare $mntpt $m]
+		if { $cmp==0 } {
+			return $item
+		}
+	}
+}
+
+proc locate_item { pm } {
+	foreach item $pm {
+		set mntpt [lindex $item 1]
+		set isrev [string first ".." $mntpt] 
+		if { $isrev == -1 } {
+			set ritem [locate_reverse $pm $mntpt]
+			return [concat $item $ritem]
+		}
+	}
+}

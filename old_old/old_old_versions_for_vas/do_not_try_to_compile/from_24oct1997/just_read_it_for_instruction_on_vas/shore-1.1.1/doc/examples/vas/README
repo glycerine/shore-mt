@@ -1,0 +1,14 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+This directory contains two example value-added-server (VAS) programs
+build with the Shore Storage Manager.
+
+    hello: simple "hello world" program used as an installation test
+    grid:  more complex example used in conjunction with a tutorial
+
+

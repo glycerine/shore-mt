@@ -1,0 +1,15 @@
+
+// PR 276
+// example from sdl manual 
+
+
+module m1 {
+    const long Kilobyte = 1<<10;
+    const long Megabyte = 1<<20;
+    const long BytesPerPage = 4*Kilobyte;
+    const long MemSize = 20*Kilobyte;
+    const long MaxPages = MemSize / BytesPerPage;
+    const float PI = 3.1415926525;
+    const float Avogadro = 6.02E24;
+    const string Message = "Error";
+}

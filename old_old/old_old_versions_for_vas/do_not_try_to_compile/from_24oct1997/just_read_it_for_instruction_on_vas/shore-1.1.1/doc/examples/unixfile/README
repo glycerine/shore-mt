@@ -1,0 +1,45 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+This directory contains an few example programs
+for dealing with Unix files, registered objects, 
+and errors.
+
+*******************************************************
+SOME OF THESE EXAMPLES, WHEN RUN PROPRELY, GET
+ERRORS, e.g., Permission Denied, etc, because
+they are meant to demonstrate different error-handling
+mechanism.
+*******************************************************
+
+Program "uf" creates a single object of type sdl_UnixFile.
+Usage: uf filename [size(default==1)] 
+
+Program "ufstat" is a modified version of uf that prints a few
+	selected statistics.  It always creates an object named "t".
+Usage: ufstat [-l|-nol] [-r|-nor]
+-l/-nol control gathering of local(client) stats 
+    and printing of # voluntary context switches
+-r/-nor control gathering of remote(server) stats 
+    and printing of # log bytes generated
+
+
+Program "remove" removes a registered object.
+Usage: remove path [path] 
+
+Program "dir" creates a directory called "dir" and changes to that directory. 
+Usage: dir
+
+Program "cho" demonstrates the use of "chown".
+Usage: cho filename uid gid
+
+Program "chm" demonstrates the use of "chmod" and several
+different ways to handle errors.
+Usage: chm filename initial_mode new_mode
+
+
+

@@ -1,0 +1,42 @@
+# ind is an oid or path + an integer
+# it has to be expanded
+
+begin
+	insert $ind 17+ tiny
+	insert $ind 18 mike
+	insert $ind 16 chop_suey
+	insert $ind 13 bogus
+	insert $ind 23* sadie
+	insert $ind 13 kitty
+	insert $ind 7 sammy
+	insert $ind 13 unknown
+	insert $ind 5 tanstafl
+commit
+
+begin
+	find $ind 16
+	find $ind 5
+	scanindex $ind
+	scanindex $ind > 18
+	scanindex $ind >= 18
+	scanindex $ind == 18
+	scanindex $ind == 18 = 18
+	scanindex $ind < 16
+	scanindex $ind <= 16
+	scanindex $ind > 16 < 23
+	scanindex $ind = 16 < 23
+	scanindex $ind >= 16 < 23
+	scanindex $ind >= 13 <= 13
+commit
+
+begin
+	remove $ind 16 chop_suey
+	removeall $ind 13
+commit
+
+begin
+## read should yield an error
+	expect OS_PermissionDenied from { read $ind }
+commit
+
+

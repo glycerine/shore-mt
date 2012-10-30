@@ -1,0 +1,16 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ *  $Id: Imakefile,v 1.13 1997/06/13 22:33:08 solomon Exp $
+ */
+
+#define Hdr Any.h Pool.h ShoreApp.h sdl_lookup.h sdl_string.h \
+	 PoolScan.h DirScan.h sdl_set.h sdl_templates.h \
+	 sdl_index.h sdl_UnixFile.h 
+
+%GEN install(include, Hdr)

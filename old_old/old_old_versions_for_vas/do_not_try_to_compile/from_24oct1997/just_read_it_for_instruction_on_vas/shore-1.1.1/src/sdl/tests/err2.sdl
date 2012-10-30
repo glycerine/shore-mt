@@ -1,0 +1,30 @@
+/////////////
+//
+/////////////
+
+//
+// Example 2 from the sdl manual
+// with minor addition to see what
+// values get used where
+//
+
+
+module m1 { 
+	export all;    
+	const long C = 1;    
+	interface i1 {
+	public:
+		attribute long aryc[C];
+	};
+}
+module m2 {
+	import "m1"; 
+	const long D = C; // error: ambiguous (m1::C or m2::C) 
+	const long C = 2; 
+	const long E = m1::C; // ok: E = 1  
+	interface i2 {
+	public:
+		attribute long aryc[C];
+		attribute long aryd[D];
+	};
+}

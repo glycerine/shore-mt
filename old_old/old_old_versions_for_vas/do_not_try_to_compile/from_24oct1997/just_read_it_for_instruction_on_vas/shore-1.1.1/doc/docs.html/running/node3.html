@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Configuring a Shore Server</TITLE>
+<META NAME="description" CONTENT="Configuring a Shore Server">
+<META NAME="keywords" CONTENT="running">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="running.css">
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="up" HREF="running.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html65"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html62"
+ HREF="running.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html56"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html64"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html66"
+ HREF="node4.html">Running a Shore Server</A>
+<B> Up:</B> <A NAME="tex2html63"
+ HREF="running.html">Configuring and Running the Server</A>
+<B> Previous:</B> <A NAME="tex2html57"
+ HREF="node2.html">Introduction</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="running:configuring">&#160;</A><H1><A NAME="SECTION00030000000000000000000">
+Configuring a Shore Server</A>
+</H1>
+<P>
+The SVAS is a program that runs as a daemon process.
+Options control, among other things,
+<UL>
+<LI>
+whether it has a controlling terminal and TCL shell,
+<LI>
+whether it offers a Shore client RPC service,
+<LI>
+whether it offers Network File System (NFS) and NFS mount services,
+<LI>
+what ports it offers these services on,
+<LI>
+whether it uses TCP or shared memory for exchanging data
+with its clients.
+</UL>
+<P>
+The configuration choices are determined by the values of
+<EM>configuration options</EM> , which
+are set by the server at start-up time from a 
+a configuration file containing commands of the form
+<TT>optionname: value</TT> and from
+command arguments of the form <TT>-optionname value</TT>.
+If both the configuration file and the command line specify a value for
+a particular option, the command-line setting takes precedence.
+<P>
+The release contains an example configuration file, which you should find in
+<TT>$SHORE/lib/options</TT>.
+If you followed the instructions in the
+<A NAME="tex2html4"
+ HREF="../installation/installation.html">installation manual</A>,
+you have already put an edited copy
+of the configuration file into <TT>.shoreconfig</TT> in your home directory.
+If not, follow the instructions in the section
+<A HREF="../installation/node7.html#installation:running">Running the Shore Server</A>
+of the installation manual before continuing with these instructions.
+You can set the environment variable <TT>SHORE_RC</TT> to specify some
+location or file name other than <TT>&nbsp;/.shoreconfig</TT>
+for the configuration file.
+<P>
+See the manual page
+<A NAME="tex2html5"
+ HREF="../man/options.svas.html">options(SVAS)</A> for
+a description of all the configuration options.
+<P>
+See the manual page
+<A NAME="tex2html6"
+ HREF="../man/environment.svas.html">environment(SVAS)</A> for
+a description of all the environment variables used by the SVAS.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html65"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html62"
+ HREF="running.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html56"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html64"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html66"
+ HREF="node4.html">Running a Shore Server</A>
+<B> Up:</B> <A NAME="tex2html63"
+ HREF="running.html">Configuring and Running the Server</A>
+<B> Previous:</B> <A NAME="tex2html57"
+ HREF="node2.html">Introduction</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

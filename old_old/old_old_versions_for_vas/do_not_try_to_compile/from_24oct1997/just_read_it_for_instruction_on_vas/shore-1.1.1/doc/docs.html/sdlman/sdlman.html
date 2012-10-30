@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Shore Data Language Reference Manual</TITLE>
+<META NAME="description" CONTENT="Shore Data Language Reference Manual">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node1.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html11"
+ HREF="node1.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif_gr.gif"> 
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif_gr.gif"> 
+<A NAME="tex2html10"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html12"
+ HREF="node1.html">Contents</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="sdlman:TOP">&#160;</A><H1 ALIGN="CENTER">Shore Data Language Reference Manual<A NAME="tex2html1"
+ HREF="footnode.html#10"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A></H1>
+<P ALIGN="CENTER"><STRONG>The Shore Project Group <BR>
+Computer Sciences Department
+<BR>
+UW-Madison
+<BR>
+Madison, WI <BR>
+Version 1.1.1 <BR>
+<em>Copyright &#169; 1994-7
+<br> Computer Sciences Department, University of Wisconsin-Madison.
+<br> All Rights Reserved.</em>
+<P></STRONG></P>
+<P ALIGN="CENTER"><STRONG>October 27, 1997</STRONG></P>
+<P ALIGN="LEFT"></P>
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS">&#160;</A>
+<UL>
+<LI><A NAME="tex2html13"
+ HREF="node1.html#SECTION00010000000000000000000">
+Contents</A>
+<LI><A NAME="tex2html14"
+ HREF="node2.html#SECTION00020000000000000000000">
+Introduction</A>
+<LI><A NAME="tex2html15"
+ HREF="node3.html#SECTION00030000000000000000000">
+Lexical Syntax</A>
+<LI><A NAME="tex2html16"
+ HREF="node4.html#SECTION00040000000000000000000">
+Grammatical Conventions</A>
+<LI><A NAME="tex2html17"
+ HREF="node5.html#SECTION00050000000000000000000">
+Objects and Values</A>
+<LI><A NAME="tex2html18"
+ HREF="node6.html#SECTION00060000000000000000000">
+Modules</A>
+<UL>
+<LI><A NAME="tex2html19"
+ HREF="node6.html#SECTION00061000000000000000000">
+Examples</A>
+</UL>
+<LI><A NAME="tex2html20"
+ HREF="node7.html#SECTION00070000000000000000000">
+Linking</A>
+<LI><A NAME="tex2html21"
+ HREF="node8.html#SECTION00080000000000000000000">
+Name Scopes</A>
+<UL>
+<LI><A NAME="tex2html22"
+ HREF="node8.html#SECTION00081000000000000000000">
+Examples</A>
+</UL>
+<LI><A NAME="tex2html23"
+ HREF="node9.html#SECTION00090000000000000000000">
+Interfaces</A>
+<UL>
+<LI><A NAME="tex2html24"
+ HREF="node9.html#SECTION00091000000000000000000">
+Example</A>
+<LI><A NAME="tex2html25"
+ HREF="node9.html#SECTION00092000000000000000000">
+More Examples</A>
+</UL>
+<LI><A NAME="tex2html26"
+ HREF="node10.html#SECTION000100000000000000000000">
+Constants</A>
+<UL>
+<LI><A NAME="tex2html27"
+ HREF="node10.html#SECTION000101000000000000000000">
+Examples</A>
+</UL>
+<LI><A NAME="tex2html28"
+ HREF="node11.html#SECTION000110000000000000000000">
+Types</A>
+<UL>
+<LI><A NAME="tex2html29"
+ HREF="node11.html#SECTION000111000000000000000000">
+Examples</A>
+<LI><A NAME="tex2html30"
+ HREF="node11.html#SECTION000112000000000000000000">
+External Types</A>
+<LI><A NAME="tex2html31"
+ HREF="node11.html#SECTION000113000000000000000000">
+Examples</A>
+</UL>
+<LI><A NAME="tex2html32"
+ HREF="node12.html#SECTION000120000000000000000000">
+Attributes</A>
+<LI><A NAME="tex2html33"
+ HREF="node13.html#SECTION000130000000000000000000">
+Indexes</A>
+<LI><A NAME="tex2html34"
+ HREF="node14.html#SECTION000140000000000000000000">
+References and Relationships</A>
+<LI><A NAME="tex2html35"
+ HREF="node15.html#SECTION000150000000000000000000">
+Operations</A>
+<LI><A NAME="tex2html36"
+ HREF="node16.html#SECTION000160000000000000000000">
+Appendix A:  Collected Grammar</A>
+<LI><A NAME="tex2html37"
+ HREF="node17.html#SECTION000170000000000000000000">
+Appendix B:  Grammar in YACC Syntax</A>
+</UL>
+<!--End of Table of Child-Links-->
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

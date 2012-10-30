@@ -1,0 +1,67 @@
+#!/bin/sh 
+#export contents of repository into an archive
+
+PATH=/bin/:usr/bin:/usr/ucb
+pn=`basename $0`
+echo $pn 
+t=/tmp/$pn.$$
+echo $t
+trap "rm -rf $t; exit 2" 1 2 3 15
+rm -rf $t
+trap "mkdir $t; exit 2" 1 2 3 15
+mkdir $t
+
+if [ $# -lt 2 -o ! -d "$1" ]
+then
+	echo "usage: $pn repository archive"
+	exit 1
+fi
+
+n=1
+for i in $1/*.o
+do
+	echo "copying " $i " to " $t/${n}.o
+	cp $i $t/${n}.o
+	n=`expr $n + 1`
+done
+
+echo "Done with stage 1"
+
+dest=$2
+if [ $# -gt 2 ]
+then
+	shift 2
+	echo $# ":" $1
+	while [ $# -ge 1 ]
+	do
+		if [ -s $1 ]
+		then
+			for i in `ar t $1`
+			do
+				if [ "__.SYMDEF" != $i ]
+				then
+					echo "merging " $1 "--" $i
+					ar x $1 $i
+					mv $i $t/${n}.o
+					n=`expr $n + 1`
+				fi
+			done
+		fi
+		shift
+	done
+fi
+
+echo "Done with stage 2"
+
+rm -f $dest
+ar cr $dest $t/*.o
+if [ -x /bin/ranlib -o -x /usr/bin/ranlib ]
+then
+	ranlib $dest
+fi
+
+echo "Done with stage 3"
+
+rm -rf $t
+exit 0
+

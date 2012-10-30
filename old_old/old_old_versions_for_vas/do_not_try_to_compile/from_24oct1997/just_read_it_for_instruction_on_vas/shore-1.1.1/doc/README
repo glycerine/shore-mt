@@ -1,0 +1,37 @@
+# ------------------------------------------------------------------------ #
+# -- Copyright (c) 1994, 1995, 1996, 1997 Computer Sciences Department, -- #
+# -- University of Wisconsin-Madison, subject to the terms conditions   -- #
+# -- given in the file COPYRIGHT.  All Rights Reserved.                 -- #
+# ------------------------------------------------------------------------ #
+
+Shore is a persistent object system (object-oriented database)
+from the Computer Sciences department of the University of Wisconsin--Madison. 
+
+This README file is part of the Documentation or Source release 1.1.1 of Shore.
+
+To install and use the Shore software, you should read the document
+titled, "The Shore Release".  This document points to all of the rest of the
+release documentation.  A copy of this document is available on the
+World-Wide Web at
+    http://www.cs.wisc.edu/shore/doc/release/
+See also the release homepage at
+    http://www.cs.wisc.edu/shore/doc/
+
+Copies of these documents are also included in this release as
+    docs.html/release/release.html
+and
+    docs.html/homepage.html
+respectively.
+
+Postscript versions are available in the directory docs.ps.
+
+If you have questions, comments or bug reports, please mail
+them to shore_support@cs.wisc.edu.  For instructions on how to
+report problems, see one of the following.
+    http://www.cs.wisc.edu/shore/doc/bugreport/
+    docs.html/bugreport/bugreport.html
+    docs.ps/bugreport.ps
+
+Information on Shore-related publications, mailing lists
+and project status is available on the Shore project homepage at:
+    http://www.cs.wisc.edu/shore/

@@ -1,0 +1,739 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+# $Header: /p/shore/shore_cvs/src/sdl/metatypes.sdl,v 1.30 1996/07/01 18:23:04 schuh Exp $
+
+// this file is meant to encapsulate, as closely as possible, the
+// sdl metatype data types, in the format used by the compiled-in
+// type system.
+
+// for now, use char * instead of sdl string type.
+module metatypes {
+// save the rcs version
+external enum HeapOps; // defined externally.
+external enum aqua_op;
+external class app_class; // defined externally.
+// external class Pool; // duh.
+external class ostream; // yuck, for output.
+typedef lref<char> CString;
+// memberId: is it really an offset? 
+typedef long MemberID;
+enum DeclKind 
+{  ERROR, Constant, TypeName, Alias, Member, Arm, Attribute, Op, 
+	OpOverride, Param,Mod, BaseType, EnumName, Exception, 
+	InterfaceName, Relationship,  UnboundRelationship, ImportMod,
+	ExportName, ExportAll, UseMod,ExternType, SuppressedBase};
+
+
+// note: we add InterfaceName, StructName, etc. to handle decls uniformly
+// this is perhaps dangeros.
+
+enum Zone { Public, Private, Protected };
+// enum Boolean { False, True }; // I hate this.
+enum Mode { In, Out, InOut };
+// the following are possible operations in binary expressions
+enum ExprOp { EError, CName,Literal,CDefault, 
+// arithimetic & logical . ops
+Plus,Minus,Mult,Div,ModA,Or,And,Xor,Complement,Comma, LShift, RShift,
+// query expression ops (will include real operators eventually...
+SelectExpr, ProjectList, Assign, Select, RangeExpr, RangeVar , Group,
+// additional ops for oql
+Dot, Sum, Avg, Min, Max
+
+};
+// predicate should fall out of normal usage.
+
+enum Swap {None, EveryTwo, EveryFour, Constructed };
+// this is bogus for floats.
+
+// moved due to dependency problems...
+enum TypeTag { 
+	NO_Type ,	// null instance
+	Sdl_any,
+	// primitive types
+	Sdl_char, Sdl_short, Sdl_long, Sdl_float, Sdl_double,
+	Sdl_boolean, Sdl_octet, Sdl_unsigned_short, Sdl_unsigned_long,
+	Sdl_void,
+	Sdl_pool, 	// predefined shore pool type, only usable as ref??
+	// composed types
+	Sdl_enum, Sdl_struct, Sdl_union, Sdl_interface,
+	Sdl_array,
+	Sdl_string, Sdl_sequence, Sdl_text,
+	// template types
+	Sdl_ref, Sdl_lref, Sdl_set,Sdl_bag,Sdl_list,Sdl_multilist,
+	// other stuff
+	Sdl_NamedType, // type named; not linked.
+	Sdl_ExternType, // externally specified( e.g. a C++ type name...)
+	// e.g. this is a type->sdldeclaration->type thing in cfront style.
+	Sdl_Index, //late addition.
+	Sdl_Class,  // externally defined (C++) class
+	Sdl_CUnion  // externally defined (C++) union (not sdl union)
+};
+// expressions can be named constants, literal constants, or compositions
+// of the above by unary or binary operations.  There should be some
+// derivation here...
+// note: for the time being, we only allow integer-valued expressions;
+// floats may be immediate litterals but not expressions; strings
+// obviously may not be expressions.
+interface sdlType;
+interface sdlInterfaceType;
+interface sdlModule;
+interface sdlNameScope;
+interface sdlDeclaration;
+// sdlNameScope is used as a base for module and types.
+interface sdlNameScope
+{
+	public:
+	relationship bag<sdlDeclaration> decls inverse scope;
+	attribute ref<sdlDeclaration> myDecl;
+};
+
+// redo sldExpr's to handle values, consts, queries better.
+interface sdlExprNode
+//
+{
+public:
+	attribute ExprOp etag;
+	attribute ref<sdlType>type; // if known
+	attribute long lineno;
+	// attribute ref<any> value; // if known
+	union val_u switch (TypeTag tagval) {
+		// signed integeral types
+		case Sdl_char: case Sdl_short: case Sdl_long:
+			long long_val;
+		case Sdl_boolean: case Sdl_octet: case Sdl_unsigned_short: 
+		case Sdl_unsigned_long: case Sdl_enum:
+			unsigned long ulong_val;
+		case Sdl_float: case Sdl_double:
+			double double_val;
+		case Sdl_string: // could just use im_val??
+			string str_val;
+		// unsigned integral values
+	};
+	attribute val_u tvalue;
+	long fold() const; // really, need a multi-type return type for this.
+	// really really, should use a union.
+	// or perhaps not; fold is only needed for type decls??
+	void print_sdl() const; // print in sdl format.
+	void print_cxx() const;
+	string op_name() const; // for opa exprs.
+	void resolve_names(in ref<sdlModule> p1 , in ref<sdlInterfaceType> p2) const; 
+	void print_error_msg(in string msg) const;
+	void Apply(in lref<app_class> apt) const;
+	// bind in environment.
+};
+
+interface sdlLitConst : public sdlExprNode // literal constant.
+{
+public:
+	attribute string imm_value; // litteral string used as lang. input.
+	override resolve_names;
+	override print_sdl;
+	override print_cxx;
+	override Apply;
+};
+
+interface sdlConstName: public sdlExprNode
+// this is per use of a variable/scoped name; it sucks.
+// eventually, dpt is a resolved decl.
+{
+	public:
+	attribute ref<sdlConstDecl> dpt; // for named constants
+	// before binding, we need a string for the name, and
+	// an extra ref for possible scope...
+	attribute string name;
+	attribute ref<sdlConstName> scope;
+	override resolve_names;
+	override print_sdl;
+	override print_cxx;
+	override Apply;
+};
+
+
+interface sdlNameExpr: public sdlExprNode
+// this is per use of a name in an oql expr;.
+// eventually, dpt is a resolved decl.
+// note: long range plan, make Expr. & decl a common base.
+// this looks
+{
+	public:
+	attribute string name;
+	// we'd changed this to sdlArgDecl, but why?
+	attribute ref<sdlConstDecl> dpt; // pointer to eventual declaration.
+	attribute ref<sdlExprNode> val_expr; // expression to get value.
+	// before binding, we need a string for the name, and
+	// an extra ref for possible scope...
+	// override resolve_names;
+	// override print_sdl;
+	// override print_cxx;
+	override Apply;
+};
+
+
+interface sdlArithOp: public sdlExprNode
+{
+	public:
+	attribute aqua_op aop;
+	attribute ref<sdlExprNode> e1;
+	attribute ref<sdlExprNode> e2;
+	override resolve_names;
+	override print_sdl;
+	override print_cxx;
+	override Apply;
+};
+
+interface sdlSelectExpr: public sdlExprNode
+{
+	public:
+	attribute ref<sdlExprNode> ProjList;
+	attribute ref<sdlConstDecl> RangeList;
+	attribute ref<sdlExprNode> Predicate;
+	override resolve_names;
+	override Apply;
+	override print_sdl;
+	override print_cxx;
+};
+
+interface sdlProjectExpr: public sdlExprNode
+{
+	public:
+	// attribute sequence<sdlExprNode> initializers;
+	attribute ref<sdlConstDecl> initializers;
+	attribute ref<sdlExprNode> source;
+	override print_sdl;
+	override Apply;
+	override resolve_names;
+	// this can be plugged directly into the 
+	// elements of the struct, I think???
+};
+
+interface sdlJoinExpr: public sdlExprNode
+{
+	public:
+	attribute ref<sdlExprNode> predicate;
+	// we used sdlRangeDecl here but go back to sdlConstName for now.
+	attribute ref<sdlConstDecl> left; // range var name + range expr.
+	attribute ref<sdlConstDecl> right; // range var name + range expr.
+	override print_sdl;
+	override Apply;
+	override resolve_names;
+};
+	
+// opa style expressions. We  cheat in some places with respect
+// there is, approximately, an sdl expr node for each opa class,
+// but we try to use the appropriate metatype object for each attr.. 
+// we also compress out a bunch of stuff that doesn't really contribute.
+// to avoid conflics with C++ classes, we precede everything with d
+// for dan, who couldn't resist typing dOPA all over the place.
+// o
+// interface OPA_OP: public sdlExprNode
+// { public: string op_name() const ; // derived from expr tag etag.
+		// we might want a print method here; for now
+// };	
+// just build the op_name into sdlExprNode.
+typedef sdlExprNode dOPA_OP;
+// 
+// interface ZARY_OP : public OPA_OP
+// there's really nothing in zary_op, so we ignore it.
+// base class for operators with no (query expr) input.  These
+// are root expresions in the database or constants, i.e leaf
+// exprs with respect to join (operator) trees;
+typedef dOPA_OP dZARY_OP;
+// the ZARY_OP's ar FILE_SCAN, CONST_INT_OP, CONST_STR_OP, ATTR_OP,jjj
+interface dFILE_SCAN: public dZARY_OP
+{
+public:
+	attribute string collection;
+	attribute string range_var;
+	// derived forms
+	attribute ref<sdlExprNode> col_ref;
+	// attribute ref<sdlVarDecl>  range_decl;
+	attribute ref<sdlConstDecl>  range_decl;
+};
+
+interface sdlFctExpr : public sdlExprNode
+// oql lambda fct thingy.
+{
+public:
+	attribute ref<sdlConstName> arg;
+	attribute ref<sdlExprNode> body;
+	override print_sdl;
+	override resolve_names;
+	override Apply;
+};
+
+external class proj_list_t; // defined externally.
+external class exec_info_t; // defined externally.
+external class op_t; // defined externally.
+
+interface oqlProjList : public sdlExprNode
+// relatively bogus: save pointer to oql proj. list.
+{
+	public: attribute lref<proj_list_t> proj;
+};
+		
+interface oqlExecInfo : public sdlExprNode
+{
+	public: attribute lref<exec_info_t > exec;
+};
+
+interface oqlPredicate: public sdlExprNode
+{
+	public: attribute lref<op_t> op;
+};
+	
+
+interface sdlDeclaration 
+{
+public: // shoudl be:private: 
+	attribute ref<sdlDeclaration> next; // pretty bogus.
+	attribute string name;
+	attribute ref<sdlType>  type; // was: HREF<sdlType>
+	attribute DeclKind kind;
+	attribute Zone zone; // always put this here, so we can. set it uniformly.
+	attribute long offset; // really only for attr. and struct members.
+	attribute set<sdlDeclaration> dependsOn;
+	attribute long lineno;
+	relationship ref<sdlNameScope> scope inverse  decls;
+
+public:
+	CString getName();
+	ref<sdlType>  getTypeRef();
+	DeclKind getkind();
+// this seciton has functions used by sdl parsing; not part of real 
+// definition
+	void ApplyBaseType(in ref<sdlType> p1);
+	ref<sdlDeclaration> ListAppend(in ref<sdlDeclaration> p1);
+	// check for any unresolved names and set appropriately
+	// for the current scope.
+	void resolve_names(in ref<sdlModule> mscope, 
+			in ref<sdlInterfaceType> iscope) const;
+	void print_sdl() const; // print in sdl format
+	void print_cxx() const; // print in c++ format.
+	void sdl_apply(in HeapOps op, in lref<any> ptr) const;
+	void Apply(in lref<app_class> apt) const;
+	// long print_obj() const; // print C++ type object.
+	// parsing thi
+	void print_cxx_support() const;
+	void print_access_fcts() const; // if needed; currently just unions;
+	void print_error_msg(in string msg) const;
+
+};
+
+interface sdlAliasDecl : public sdlDeclaration
+// a misc. forwarding node, used for export, typedef??, undeclared??
+{
+public:
+	attribute ref<sdlDeclaration> realDecl;
+	override  resolve_names;
+	override Apply;
+};
+
+interface sdlTypeDecl : public sdlDeclaration
+{
+public:
+	override resolve_names;
+	override print_cxx_support;
+	override Apply;
+};
+
+interface sdlExtTypeDecl : public sdlDeclaration
+{
+// externally defined type
+public:
+	override print_sdl;
+	override Apply;
+};
+
+
+interface sdlConstDecl: public sdlDeclaration
+{
+public:
+	// attribute ref<any>  value; // lref<any>
+	// attribute long value;
+	attribute ref<sdlExprNode> expr; // original expression
+	Zone getZone();
+	// ref<any> is fairly meaningless, since ref inplies 
+	// an interface class.
+	override print_sdl;
+	override resolve_names;
+	override print_cxx_support;
+	override Apply;
+	// void print_cxx();
+};
+
+// class TypeAlias:TypeDecl{};
+typedef sdlTypeDecl TypeAlias;
+// ignore unions for now; there's a botch wrt # of values.
+// ok a hack
+interface sdlArmDecl: public sdlDeclaration
+{
+public:
+	attribute ref<sdlExprNode >  CaseList; 
+	// it is actually a list of constant expressions.
+	override print_sdl;
+	override resolve_names;
+	override  print_access_fcts;
+	override Apply;
+	// void print_cxx();
+};
+
+
+interface sdlAttrDecl: public sdlDeclaration
+{
+	public: // private
+	// readonly?? does this exist?s
+	attribute boolean readOnly;
+	attribute MemberID myMid;
+	attribute boolean Indexable;
+	Zone getZone();
+	boolean isReadOnly();
+	boolean isIndexable();
+	MemberID getMid();
+	override print_sdl;
+	override sdl_apply;
+	override Apply;
+};
+
+interface sdlRelDecl : public sdlAttrDecl
+{
+	public:
+	attribute ref<sdlDeclaration> inverseDecl;
+	attribute ref<sdlDeclaration> orderDecl;
+	override print_sdl;
+	override sdl_apply;
+	override Apply;
+	override resolve_names;
+	override print_cxx_support;
+};
+	
+
+// relationships ignored for now.
+
+interface sdlParamDecl: public sdlDeclaration
+{
+private:
+public:
+	attribute Mode mode; // in,out,inout
+	Mode getMode();
+	void setMode(in Mode mval);
+	override print_sdl;
+	override Apply;
+};
+
+//  module
+interface sdlModDecl: public sdlDeclaration
+{
+public:
+
+	attribute ref<sdlModule>  dmodule;
+	override print_sdl;
+	override Apply;
+};
+
+	
+
+
+// G++ won't allow static initialization of derived classes, so we
+// make struct versions of sdlConstDecl, sdlAttrDecl, and sdlParamDecl
+
+
+
+	
+// class PrimitiveType: sdlType{};
+// why is this? leaf business apparently.
+
+// we orignally had sdlStructType:sdlType, sdlUnionType:sdlType,sdlEnumType:sdlType
+// sdlArrayType:type , etc. but we better do sdlType first, nicht war?
+// the actual object types
+interface sdlType : public sdlNameScope
+{
+private:
+public:
+	// note: this isn't in the spec, but I am a lot more
+	// comfortable with a tag for types...
+	attribute TypeTag tag;
+	attribute string name;
+	attribute long version; // evolution
+	attribute long size;	// we really need this, not?
+	attribute long alignment; // 0/2/4/8/16?
+	attribute Swap swap;
+	attribute ref<sdlDeclaration> scope; // can be mod or interface??
+	// template types; these may need explicit instantiation.
+	attribute ref<sdlType> bagOf;	// bag of this type
+	attribute ref<sdlType> setOf;	// set of this type
+	attribute ref<sdlType> sequenceOf;	// sequence  of this type
+	// sdl only
+	void print_sdl_dcl() const; // print dcl in sdl format
+	// void print_cxx_dcl() const; // print dcl in c++ format
+	void print_sdl_var(in CString p1) const; // print instance in sdl format
+	// void print_cxx_var(in CString p1); // print instance in c++ format
+	// long print_obj() const; // returns index value for unnamed types.
+	long has_refs() const; // 1 if instance contains refs; else 0
+	long has_heapsp() const; // 1 if instance contains heap ptr; else 0
+	void compute_size(); // during processing, compute the size.
+	// try to resolve any unbound type names in the definition
+	// of this type; return a new ref if this type object itself
+	// must be replaces as the result of the binding.
+	ref<sdlType> resolve_names(in ref<sdlModule> mscope, 
+			in ref<sdlInterfaceType> iscope) const;
+	// why is there a resolve_fields and a resolve_names??
+	void resolve_fields(in ref<sdlModule> mscope, 
+			in ref<sdlInterfaceType> iscope) const;
+	// look for a decl of a particular type.
+	// this 
+	ref<sdlDeclaration> lookup_name(in CString p1,in DeclKind p2) const;
+	long count_fields(in TypeTag p1) const; // utility to count attributes of some type.
+	void sdl_apply(in HeapOps op, in lref<any> vpt) const;
+	void Apply(in lref<app_class> apt) const;
+	// type rebinding routine: return a new type ref if binding
+	// pass requires it; returns null if this type ref is adequate.
+
+	// print any static code needed for the type.
+	void print_cxx_support() const;
+	boolean is_objtype() const; // true if the type is an interface type.
+	ref<sdlType> get_dtype(in TypeTag kind) const; 
+	//  return a ref/set/bag/lref??/sequence of this type.
+	void print_error_msg(in string msg) const;
+	// yucky built in print method; dumps a value in listed c++ ostream file.
+	void print_val(in lref<ostream> file, in CString op) const;
+
+};
+
+// the NamedType type is used as a level of indirection as needed;
+// it is the type given to an unbound name when first encounterd.
+interface sdlNamedType : public sdlType
+{
+public:
+	override resolve_names;
+	override print_error_msg;
+	attribute long lineno;
+	attribute ref<sdlType> real_type;
+};
+
+
+interface sdlStructType: public sdlType
+{
+public:
+	attribute ref<sdlDeclaration>  members;
+	// for in memory version, use an array of pointers.
+	// sdl: Set<sdlDeclaration>, but is that allowed?
+	ref<sdlDeclaration>  findMember(in CString p1) const;
+	// member iterator needed also
+	ref<sdlDeclaration>  memberIterator();
+	override print_sdl_dcl;
+	override compute_size;
+	override count_fields;
+	override sdl_apply;
+	override Apply;
+	override resolve_fields;
+	override print_cxx_support;
+	override lookup_name;
+	override print_val;
+};
+
+// ignore unions..
+
+interface sdlEnumType: public sdlType
+// just a list of declarations...
+{
+public:
+	attribute ref<sdlDeclaration>  consts;
+	attribute ref<sdlDeclaration> tag_decl;
+	ref<sdlDeclaration>  enumIterator();
+	override print_sdl_dcl;
+	override print_cxx_support;
+	override print_val;
+};
+
+// a common base type for things that have an elementType
+// field. should never declare this directly.
+interface sdlEType : public sdlType
+{
+public:
+	attribute ref<sdlType>  elementType;
+	ref<sdlType>  getElementType() const;
+	void SetElementType(in ref<sdlType> bt);
+};
+
+
+interface sdlArrayType: public sdlEType
+{
+private:
+public:
+	attribute long dim;
+	attribute ref<sdlExprNode>  dim_expr; // to store original expr.
+	long getLength() const;
+	override print_sdl_var; 
+	override compute_size;
+	override count_fields;
+	override sdl_apply;
+	override Apply;
+	override resolve_names;
+	override print_val;
+};
+
+
+interface sdlSequenceType: public sdlArrayType
+// yuck, it has the same data fields but otherwise bogus.
+{
+public:
+	override print_sdl_var; 
+	// void print_cxx_var(in CString p1); // print instance in c++ format
+	override sdl_apply;
+	override Apply;
+	override print_val;
+};
+
+// temporarily fudge SequenceType==sdlArrayType.
+// typedef sdlArrayType SequenceType;
+
+
+
+interface sdlCollectionType:public sdlEType
+{
+public:
+	override sdl_apply;
+	override Apply;
+	override resolve_names;
+	override print_val;
+};
+
+// we may want to generalize this to TemplateType, or something.
+interface sdlRefType:public sdlEType
+{
+public:
+	override print_sdl_dcl;
+	override sdl_apply;
+	override Apply;
+	override resolve_names;
+	override print_val;
+	// void print_cxx_dcl();
+};
+
+interface sdlIndexType:public sdlEType
+{
+public:
+	attribute ref<sdlType> keyType;
+	// attribute ref<sdlType> valueType; now, sdlEtype::elementType.
+	override print_sdl_dcl;
+	override sdl_apply;
+	override Apply;
+	override resolve_names;
+	override print_val;
+};
+
+interface sdlOpDecl : public sdlDeclaration
+{
+public:
+	attribute boolean isConst;
+	// has it's own list of decls.
+	attribute ref<sdlParamDecl>  parameters;
+	ref<sdlParamDecl>   parametersIterator();
+	override print_sdl;
+	override resolve_names;
+	override Apply;
+	// void print_cxx();
+};
+
+
+interface sdlInterfaceType : public sdlType
+{
+public:
+	// any direct base classes of the interface
+	attribute ref<sdlDeclaration>  Bases;
+
+	// all decls associated  with this interface.
+	attribute ref<sdlDeclaration >  Decls; // everything folded together?
+
+	// pointer with inverse to module containing this innterface.
+	relationship ref<sdlModule> myMod inverse interfaces;
+
+	attribute long coresize;
+	attribute long initialHeapSize;
+	attribute long numIndexes;
+	attribute ref<sdlType> refTo; // ref type for this class.
+	ref<sdlType>  resolve_typename(in CString p1) const; // look up a type name.
+	ref<sdlDeclaration> resolve_decl(in CString p1) const;
+	// look for a declaration of any kind with the given name.
+	 ref<sdlDeclaration> resolve_name(in CString p1,in DeclKind p2) const;
+	// look for a declaration of a particular kind.
+	// replaced by lookup_name, defined in sdlType & overridden here.
+	// but leave in temporarily...
+	override print_sdl_dcl;
+	override print_cxx_support;
+	override compute_size;
+	override count_fields;
+	override sdl_apply;
+	override Apply;
+	override resolve_fields;
+	override lookup_name;
+	override is_objtype;
+	override get_dtype;
+	override print_val;
+} ;
+
+// this is baciclly a placeholder; fix up in node.C under sdl_module
+// when we have a better definition.
+interface sdlModule : public sdlNameScope
+{
+private:
+public:
+	attribute long ref_count;
+	attribute string name;
+	attribute string mt_version;
+	attribute string src_file;
+	attribute ref<sdlDeclaration> export_list;
+	attribute ref<sdlDeclaration> import_list;
+	attribute ref<sdlDeclaration> decl_list;
+	attribute set<sdlType> Unresolved;
+	attribute bag<sdlDeclaration> Resolved; // orderd list
+	attribute bag<sdlDeclaration> Unresolved_decls;
+	// set with inverse of all object (interface) types in this module.
+	relationship set<sdlInterfaceType> interfaces inverse myMod;
+	attribute bag<sdlDeclaration> print_list;
+	attribute ref<Pool> my_pool;
+	ref<sdlType> resolve_typename(in CString p1) const; // look up a type name.
+	ref<sdlDeclaration> resolve_name(in CString p1,in DeclKind p2) const;
+	void resolve_scope(in CString scope, out ref<sdlModule> modref, 
+			   out ref<sdlInterfaceType> iref) const;
+	void resolve_types();
+	void compute_dependencies();
+	void increment_refcount(in long ref_inc);
+	void print_cxx_binding() const;
+	void add_dmodules(inout set<sdlModule> mset) const;
+	ref<sdlType> add_unresolved(in ref<sdlType> urname) const;
+	void print_error_msg(in string msg) const;
+};
+
+interface sdlUnionType: public sdlType 
+{
+public:
+	attribute ref<sdlDeclaration> TagDecl;
+	attribute ref<sdlArmDecl> ArmList;
+	override print_sdl_dcl;
+	override compute_size;
+	override count_fields;
+	override sdl_apply;
+	override Apply;
+	override resolve_fields;
+	override print_cxx_support;
+	override lookup_name;
+	override print_val;
+};
+
+interface sdlClassType: public sdlType
+{
+// this may only be used for externally declared types, which can
+// be used for method args but not for actual data attributes.
+public:
+	override print_sdl_dcl;
+	override compute_size;
+};
+
+
+}

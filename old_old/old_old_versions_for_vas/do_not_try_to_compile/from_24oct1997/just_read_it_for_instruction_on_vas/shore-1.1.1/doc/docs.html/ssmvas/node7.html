@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Compiling the Example</TITLE>
+<META NAME="description" CONTENT="Compiling the Example">
+<META NAME="keywords" CONTENT="ssmvas">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmvas.css">
+<LINK REL="next" HREF="node8.html">
+<LINK REL="previous" HREF="node6.html">
+<LINK REL="up" HREF="ssmvas.html">
+<LINK REL="next" HREF="node8.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html244"
+ HREF="node8.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html241"
+ HREF="ssmvas.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html235"
+ HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html243"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html245"
+ HREF="node8.html">Running the Example</A>
+<B> Up:</B> <A NAME="tex2html242"
+ HREF="ssmvas.html">Writing Value-Added Servers with Manager</A>
+<B> Previous:</B> <A NAME="tex2html236"
+ HREF="node6.html">Implementing Clients</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="ssmvas:compiling">&#160;</A><H1><A NAME="SECTION00070000000000000000000">
+Compiling the Example</A>
+</H1>
+The Shore documentation release contains the source code for the examples
+in this tutorial.
+Assuming you have fetched and unpacked the documentation release as
+described in the
+<A HREF="../installation/node4.html#installation:docs"><EM>Shore Software Installation Manual</EM> </A>,
+you will have a directory <TT>$SHROOT/examples</TT>, where
+<TT>$SHROOT</TT> is the root directory of the documentation relase.
+<P>
+You must set the environment variable <TT>$SHORE</TT> to point to the
+location where you have installed the Shore binaries and libraries.
+If you are using a binary distribution, that would be the same as
+<TT>$SHROOT</TT>.  If you built the binaries from sources, it would be
+<TT>$SHROOT/installed</TT>.
+<P><PRE>
+    mkdir grid
+    cp -R $SHROOT/examples/vas/grid/* grid
+    cd grid
+    make all
+</PRE>
+<P>
+You should see something like this:
+<PRE>
+    cp /usr/local/shore/include/ShoreConfig.h .
+    /usr/local/shore/bin/rpcgen msg.x
+    rm -f msg_svc.c
+    /usr/local/shore/bin/rpcgen -m -o msg_svc.c msg.x
+    g++ -g -I/usr/local/shore/include   -c grid.C 
+    g++ -g -I/usr/local/shore/include   -c rpc_thread.C 
+    g++ -g -I/usr/local/shore/include   -c server.C 
+    g++ -g -I/usr/local/shore/include   -c command_server.C 
+    g++ -g -I/usr/local/shore/include   -c server_stubs.C 
+    g++ -g -I/usr/local/shore/include   -c options.C 
+    g++ -g -I/usr/local/shore/include   -c command.C 
+    g++ -g -I/usr/local/shore/include   -c grid_basics.C 
+    gcc -g -traditional -I/usr/local/shore/include   -c msg_xdr.c 
+    gcc -g -traditional -I/usr/local/shore/include   -c msg_svc.c 
+    g++ -g -I/usr/local/shore/include    -o server msg_svc.o grid.o \
+        rpc_thread.o server.o command_server.o server_stubs.o options.o \
+        command.o grid_basics.o msg_xdr.o /usr/local/shore/lib/libsm.a \
+        /usr/local/shore/lib/libshorecommon.a -lnsl
+    g++ -g -I/usr/local/shore/include   -c client.C 
+    g++ -g -I/usr/local/shore/include   -c command_client.C 
+    gcc -g -traditional -I/usr/local/shore/include   -c msg_clnt.c 
+    g++ -g -I/usr/local/shore/include    -o client client.o \
+        command_client.o options.o command.o grid_basics.o msg_clnt.o \
+        msg_xdr.o /usr/local/shore/lib/libshorecommon.a -lnsl
+    sed -e &quot;s,DISKRW,/usr/local/shore/bin/diskrw,&quot; exampleconfig &gt; config
+    mkdir log.grid
+</PRE>
+<P>
+Notice that the modified <TT>rpcgen</TT> shipped with Shore is used
+by default.  The make target &quot;all&quot; also customizes the <TT>config</TT>
+file to indicate the location of the <TT>diskrw</TT> program and
+makes a directory <TT>log.grid</TT> to hold the log file for running the grid
+VAS server (the name of this directory is set by the <TT>wm_logdir</TT> option
+in <TT>config</TT>).
+When the compilation is complete, you should have a two
+executables, <TT>server</TT> and <TT>client</TT>.
+<P>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,132 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# create a simple btree, try several different erroneous
+# scans, and see if we get decent error-handling....
+#
+
+# start up
+#
+source $script_dir/vol.init
+
+set keydesc b*1000
+set old_short_form $short_form
+set short_form %d
+
+set nrec 9
+#
+# create index 
+#
+sm begin_xct
+verbose creating index index  $keydesc
+set ndx [sm create_index $volid uni_btree regular $keydesc small]
+verbose created index $ndx
+sm commit_xct
+
+
+#
+# load
+#
+set keylist {}
+sm begin_xct
+for {set i 1} {$i <= $nrec} {incr i} {
+    set key $i
+    verbose inserting $i: $key -> [format $short_form $i]
+    lappend keylist $key
+    sm create_assoc $ndx $key [format $short_form $i] $keydesc
+}
+sm commit_xct
+
+proc testscan { name c1 low c2 high nrec } {
+    set scan 0
+    set r 0
+    set el 0
+    set key 0
+    global keydesc ndx
+    verbose
+    verbose SCAN $name: $ndx $c1 $low $c2 $high  -- expect $nrec record
+    set scan [sm create_scan $ndx $c1 $low $c2 $high t_cc_kvl $keydesc]
+    # set max high just to be sure that the scan reaches eof
+    # at the right time
+    set max [expr $nrec + 3]
+    set j 0
+    for {set j 1} {$j <= $max} {incr j} {
+	set r [sm scan_next $scan $keydesc]
+    verbose $j: $r
+	if {$r == "eof"} then { break }
+	set key [string trimleft [lindex $r 0] 0]
+	verbose "scanned ($key, $el)"
+    }
+    assert {expr {$j == [expr $nrec+1]} }
+    verbose scanned [expr $j-1] records
+    sm destroy_scan $scan
+}
+
+sm begin_xct
+set r 0
+set scan 0
+set el 0
+set key 0
+
+testscan AD >= 1 == 99 0
+testscan AA == 9 < 99 1
+testscan AC >= 9 < 99 1
+testscan AB > 9 <= 9 0
+
+testscan A >= neg_inf <= pos_inf $nrec
+
+set lowest [lindex $keylist 0]
+set highest [lindex $keylist [expr { $nrec - 1 }]]
+
+testscan B >= $lowest <= $highest $nrec
+
+verbose
+verbose SCAN C: $ndx <= $highest >= $lowest  -- should get error: E_BADCMPOP
+set scan [sm create_scan $ndx <= $highest >= $lowest t_cc_kvl $keydesc]
+set j 0
+for {set j 1} {$j <= $nrec} {incr j} {
+    catch {sm scan_next $scan $keydesc} r
+verbose $j: $r
+    if [error_is $r E_BADCMPOP] then { break }
+    assert {[expr 0 == 1]}
+}
+verbose scanned [expr $j-1] records
+sm destroy_scan $scan
+
+verbose
+verbose SCAN D: $ndx <= neg_inf >= pos_inf -- should get error: E_BADCMPOP
+catch {set scan [sm create_scan $ndx <= neg_inf >= pos_inf t_cc_kvl $keydesc]} err
+catch {sm scan_next $scan $keydesc} r
+verbose $r
+sm destroy_scan $scan
+
+verbose
+verbose SCAN E: $ndx == 20 == 30 -- should get error: E_BADCMPOP
+catch {set scan [sm create_scan $ndx == 20 == 30 t_cc_kvl $keydesc]} err
+catch {sm scan_next $scan $keydesc} r
+verbose $r
+sm destroy_scan $scan
+
+
+testscan G  >= 6 <= 8 3
+testscan H  >= 8 <= 8 1
+testscan I  == 8 == 8 1
+testscan J  >= 8 == 8 1
+
+testscan K  >= 6 == 8 1
+testscan L  >= 8 == 9 1
+testscan M  == $lowest <= $highest 1
+testscan N >= $lowest == $highest 1
+testscan O  >= 6 < 8 2
+
+sm commit_xct
+
+unset r scan el key keylist keydesc
+unset ndx nrec i j highest lowest err
+set short_form $old_short_form
+unset old_short_form

@@ -1,0 +1,69 @@
+#!/bin/csh  -f 
+# 
+# Script for running subordinates with crashes
+# USES tcl scripts subord.start subonly.3
+
+set me=`pwd`
+set me=$me:t
+
+set ok=0
+
+echo "STARTING WITH CLEAN DISK"
+/bin/rm -f log/* volumes/* ssh.log
+
+echo creating file
+set file=`ssh -f ../scripts/subord.start`
+set file=`echo $file | awk -e '{print $(NF)}'`
+if ($0 =~ gdb.subord) then
+  set quote=\"
+  echo FILE $file
+  set file=$quote$file$quote
+  echo FILE $file
+endif
+
+echo FILE=$file
+
+set always="-t subname=$me -t coname=coord -t f0=$file -f ../scripts/subonly.3"
+set forward="$always"
+set crashrecovery="-t nocrash=1 $always"
+
+
+echo "STARTING LOOP. FILE=$file"
+
+set badnews=0
+while ($badnews == 0)
+	echo RUNNING ssh $forward
+	if ($0 =~ gdb.subord) then
+	    echo run $forward > .gdbrun
+	    gdb ssh -x .gdbrun
+	    set ok=$status
+	else
+	    ssh $forward
+	    set ok=$status
+	endif
+	echo F-EXIT STATUS $ok
+
+	if ($ok == 44) then 
+		ssh $crashrecovery
+		if ($0 =~ gdb.subord) then
+		    echo run $crashrecovery > .gdbrun
+		    gdb ssh -x .gdbrun
+		else
+		    echo RUNNING FOR RECOVERY ssh $crashrecovery
+		    ssh $crashrecovery
+		endif
+		ssh $crashrecovery
+		set ok=$status
+		echo R-EXIT STATUS $ok
+		if ($ok == 44) then 
+		    echo PREVENTION OF CRASHING FAILED! Stopping.
+		else if($ok != 0) then
+		    set badnews=1
+		endif
+	else if ($ok != 0) then 
+		echo STOPPED: EXIT STATUS: $ok
+		set badnews=1
+        endif
+end
+
+

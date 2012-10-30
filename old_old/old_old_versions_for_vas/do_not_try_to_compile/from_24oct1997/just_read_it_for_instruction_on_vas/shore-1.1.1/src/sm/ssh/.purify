@@ -1,0 +1,102 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# Normally "umc *" is suppressed by the default .purify file
+# This can hide some important problems in the SM.  So, for
+# now we unsuppress them and only suppress those we can't get around.
+#
+unsuppress umc *
+
+# for gcc library:
+suppress umc istream::operator>>(unsigned short&)
+suppress umc decimal_to_double; strtod; ExprLex
+
+#
+# Needed for the sthread package
+#
+suppress fmw sthread_core_switch
+suppress fmr sthread_core_switch
+suppress abr sthread_core_switch
+suppress bsr sthread_core_switch
+
+## This thread package suppression is for versions of purify
+## newer than 3.0a.  These versions of purify don't handle the
+## register window changes "correctly".
+ignore sthread_core_switch stcore.o
+ignore _sthread_core_switch stcore.o
+
+# these are regular expr functions
+suppress umc bcopy ; re_match_2_internal
+suppress umc memcpy ; re_match_2_internal
+
+suppress umc qsort
+## this is needed due to problems with the quick sort in the
+## rtree code.  I'm not sure if it is padding in the things
+## being sorted, or something is wrong.
+suppress umc qst
+
+# suppress assignment operators which often copy uninitialized
+# alignment padding.
+suppress umc *operator=
+
+#
+# Needed for Tcl
+#
+suppress umc *; strtod; ExprParseString
+suppress umc *; *; strtod; ExprParseString
+
+
+#
+# These used to be needed since some logged structures
+# had unitialized data.
+#
+#suppress mse memchr; fwrite
+#suppress umr  write;_xflsbuf;...;fflush;log_m::flush
+#suppress umr  write;_xflsbuf;...;fflush;log_m::fetch
+#suppress umr  write;_xflsbuf;...;fwrite; ... ; log_m::insert
+#suppress umr  write;_xflsbuf;...;fflush; ... ; log_m::insert
+
+# for pvm
+suppress umr write; ... ; pvm_*
+
+# for gdbm
+suppress umr write; ... ; gdbm_store
+suppress umr  write;gdbm_open
+
+#for ssh (shell.c)
+suppress umc istream::operator>>*; ... ; cvt2lockid_t(char*)
+
+# for some ssh scripts (mainly the lock tests) where multiple
+# threads are used, I had to turn off a lot for Tcl
+suppress umr MakeUpvar
+suppress umr ExprLex
+suppress umr *;Expr*
+suppress um* CallTraces
+suppress um* *;InterpProc
+suppress um* InterpProc
+suppress um* SetupAppendBuffer
+suppress umr HashString
+suppress umr StringFind
+suppress umr StringCreate
+suppress umr ... ; LookupVar
+suppress umr *; *; Tcl_DeleteInterp 
+suppress umr *; Tcl_DeleteInterp 
+suppress umr TclDeleteVars
+suppress umr TclParseWords
+suppress umr *;TclParseWords
+suppress umr *;TclParseQuotes
+suppress umc TclParseQuotes
+suppress um* Tcl_*
+suppress umc  *;decimal_to_double 
+
+suppress umc istream::operator>>(unsigned short&)
+suppress umc TcpTransport::_inbound(sfile_t&)
+
+suppress umc decimal_to_double; strtod
+suppress um* qst; qsort
+suppress umc _libc_sigaction; signal; Tcl_CreateInterp

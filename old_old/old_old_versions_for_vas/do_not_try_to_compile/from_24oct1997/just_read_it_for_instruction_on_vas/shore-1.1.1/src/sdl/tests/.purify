@@ -1,0 +1,4 @@
+suppress umc cvec_t::grow();cvec_t::put();ObjCache::writeback()
+suppress umc sdl_heap_base::init(); 
+suppress abr memcpy; cvec_t::copy_to; shm_batch::push; batcher::push;svas_client::updateObj
+suppress abr memcpy; cvec_t::copy_to; shm_batch::push; batcher::push;svas_client::mkAnonymous

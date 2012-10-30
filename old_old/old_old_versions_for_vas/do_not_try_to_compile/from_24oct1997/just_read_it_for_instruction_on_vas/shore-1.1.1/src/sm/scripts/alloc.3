@@ -1,0 +1,125 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test allocation & deallocation of pages1
+#
+
+source $script_dir/vol.init
+
+# format for body size -- >= one page
+set form %0${lg_rec_page_space}d
+
+
+proc scanit { f } {
+    set scan [sm scan_file_create $f t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+	set rec [sm pin_rid $pin]
+	verbose rec: $rec
+	# definitely don't -- it screws up the context
+	# sm pin_unpin $pin
+	set pin [sm scan_file_next $scan 0]
+	set i [expr {$i+1} ]
+    }
+    sm scan_file_destroy $scan
+    verbose scan found $i records
+}
+proc t1 {} {
+    global volid  f0 r0 form
+    sm begin_xct
+    verbose xact [sm xct]
+    verbose t1-sync-1
+sync
+    verbose creating 10 more recs ...
+    for { set i 1} { $i <= 10} { incr i} {
+	set j [sm create_rec $f0 h$i 1000 [format $form $i] ] 
+	verbose created rec $j
+    }
+    verbose created 10 recs file $f0 -- committing
+    sm commit_xct
+    verbose t1-sync-2
+sync
+}
+proc t2 {} {
+    global volid  f0 logging
+    sm begin_xct
+    verbose xact [sm xct]
+    verbose destroying all records ...
+    set scan [sm scan_file_create $f0 t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+	set rec [sm pin_rid $pin]
+	verbose about to destroy $rec
+	catch { sm destroy_rec $rec } err
+	verbose destroy $rec yields $err
+	catch {sm scan_file_next $scan 0} err
+	verbose scan_file_next yields $err
+	if {[string compare $err "{update success}"] != 0} {
+	   verbose Error: $err
+	   break
+	}
+	set pin [sm scan_file_cursor $scan ]
+	verbose scan_file_cursor yields $pin
+	set i [expr {$i+1} ]
+    }
+    sm scan_file_destroy $scan
+    verbose destroyed $i recs file $f0
+    verbose t2-sync-1
+sync
+    if {$logging==0} {
+	verbose Logging off: substituting commit for abort
+	sm commit_xct
+    } else {
+	verbose aborting...
+	sm abort_xct
+    }
+    verbose t2-sync-2
+sync
+}
+
+
+sm begin_xct
+set f0 [sm create_file $volid]]
+verbose created file $f0
+for { set i 1} { $i <= 10} { incr i} {
+    set j [sm create_rec $f0 h$i 1000 [format $form $i] ]
+    verbose created rec $j
+}
+verbose created 10 recs file $f0
+verbose committing
+sm commit_xct
+
+verbose dstats $volid
+dstats $volid
+
+verbose forking t1
+set y1 [fork_thread t1 {}]
+verbose forking t2
+set y2 [fork_thread t2 {}]
+
+
+
+verbose sync_thread $y1 $y2
+sync_thread $y1 $y2
+verbose sync_thread $y1 $y2
+sync_thread $y1 $y2
+verbose join_thread $y1 $y2
+join_thread $y1 $y2
+
+sm begin_xct
+scanit $f0
+sm commit_xct
+
+dstats $volid
+
+unset form f0 i j
+unset y1 y2
+
+pstats

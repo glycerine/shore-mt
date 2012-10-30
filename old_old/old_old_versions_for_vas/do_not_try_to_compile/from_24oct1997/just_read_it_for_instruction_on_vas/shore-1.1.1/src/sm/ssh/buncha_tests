@@ -1,0 +1,69 @@
+#/bin/csh -f
+
+
+# set list="1 2 3 4 5 6 7 8 9 10"
+set list="1 2 3 4"
+
+set file="-f ../scripts/c.perf"
+echo "/************************************************************/"
+echo "/***  CREATE: " $file
+echo "/************************************************************/"
+
+set options="-v -sm_prefetch yes  -sm_logging no"
+foreach a ($list)
+    /bin/rm -f log/* volumes/* *.out
+    echo -- options: $options
+    ssh $options $file
+end
+
+# turn back on logging
+
+set options="-v -sm_prefetch yes  -sm_logging yes"
+foreach a ($list)
+    /bin/rm -f log/* volumes/* *.out
+    echo -- options: $options
+    ssh $options $file
+end
+
+set file="-f ../scripts/read2.perf"
+echo "/************************************************************/"
+echo "/***  SCAN :" $file
+echo "/************************************************************/"
+
+set options="-v -sm_prefetch yes "
+foreach a ($list)
+    echo -- options: $options
+    ssh $options $file
+end
+
+set options="-v -sm_prefetch no "
+foreach a ($list)
+    echo -- options: $options
+    ssh $options $file
+end
+
+
+echo "/**** SKIPPING UPDATES ****/"
+exit
+
+set file="-f ../scripts/write.perf"
+echo "/************************************************************/"
+echo "/***  UPDATE: " $file 
+echo "/************************************************************/"
+
+
+set options="-v -sm_prefetch yes -sm_logging no"
+foreach a ($list)
+    echo -- options: $options
+    ssh $options $file
+end
+
+# turn back on logging
+
+set options="-v -sm_prefetch yes -sm_logging yes"
+
+echo -- prefetch no
+foreach a ($list)
+    echo -- options: $options
+    ssh $options $file
+end

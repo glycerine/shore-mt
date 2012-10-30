@@ -1,0 +1,319 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Introduction</TITLE>
+<META NAME="description" CONTENT="Introduction">
+<META NAME="keywords" CONTENT="overview">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="overview.css">
+<LINK REL="next" HREF="node3.html">
+<LINK REL="previous" HREF="node1.html">
+<LINK REL="up" HREF="overview.html">
+<LINK REL="next" HREF="node3.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html108"
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html105"
+ HREF="overview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html99"
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html107"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html109"
+ HREF="node3.html">Basic Shore System Concepts</A>
+<B> Up:</B> <A NAME="tex2html106"
+ HREF="overview.html">An Overview of Shore</A>
+<B> Previous:</B> <A NAME="tex2html100"
+ HREF="node1.html">Contents</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html110"
+ HREF="node2.html#SECTION00021000000000000000000">
+EXODUS</A>
+<LI><A NAME="tex2html111"
+ HREF="node2.html#SECTION00022000000000000000000">
+How Shore differs from EXODUS</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="overview:intro">&#160;</A><H1><A NAME="SECTION00020000000000000000000">
+Introduction</A>
+</H1>
+<P>
+Shore (Scalable Heterogeneous Object REpository) is
+a new persistent object system under development at the University of
+Wisconsin that represents a merger of object-oriented database (OODB)
+and file system technologies.  While the past few years have seen
+significant progress in the OODB area, most
+applications (and application areas) have not chosen to leave
+file systems behind in favor of OODBs.  We feel that more applications could
+benefit from OODB support, but are impeded by limitations in current
+technology.
+<DL COMPACT>
+<DT>1.
+<DD>Many current OODBs are closed and restricted to one language (most
+often persistent C++ or Smalltalk), unlike both file systems and relational
+database systems. Large-scale applications often require multilingual
+data access.
+<DT>2.
+<DD>With most current OODBs, application programmers face an ``either/or''
+decision--either they put their data in the OODB, in which case all
+of their existing file-based applications must be rewritten, or they
+leave their data in files.
+<P><DT>3.
+<DD>Most current OODBs provide a fairly ``heavy'' solution in the area of
+transaction management, dictating the adoption of serializability and
+up-to-the-last-transaction data recoverability.
+<P><DT>4.
+<DD>Most current OODBs have strongly client-server architectures, and
+are thus inappropriate for execution in peer-to-peer distributed systems
+or on the kinds of high-performance multicomputer hardware needed for
+certain large scale applications.
+</DL>
+<P>
+The goal of the Shore project is to provide a system that addresses these
+issues, thereby enabling ``holdout'' applications to finally move their data
+(incrementally) out of files and into a modern persistent object repository.
+We also expect many current OODB clients to find Shore to be an attractive
+alternative.
+<P><A NAME="overview:EXODUS">&#160;</A><H2><A NAME="SECTION00021000000000000000000">
+EXODUS</A>
+</H2>
+<P>
+Many of us were involved in an earlier object-oriented database effort
+called <A NAME="tex2html1"
+ HREF="http://www.cs.wisc.edu/p/exodus/html/exodus.home.html">EXODUS</A>
+&nbsp;[<A
+ HREF="node7.html#cdfgmrs:the">CDF+86</A>].
+<A NAME="tex2html1"
+ HREF="ftp://ftp.cs.wisc.edu/exodus">Version 3.0 of EXODUS</A>
+provides a client-server architecture with
+page-level locking,
+log-based recovery based on the ARIES algorithm&nbsp;[<A
+ HREF="node7.html#fztcd:cra">FZT+92</A>], and support
+for multiple servers and distributed transactions.
+The EXODUS package includes the 
+<A NAME="tex2html1"
+ HREF="ftp://ftp.cs.wisc.edu/exodus">E programming language</A>
+&nbsp;[<A
+ HREF="node7.html#rcs:the">RCS93</A>], a
+variant of C++ that supports convenient creation and manipulation of persistent
+data structures.
+The functionality,
+performance, robustness, and low cost (free!)  of EXODUS has made it a popular
+piece of software.  EXODUS and its associated toolkit have been used in
+several projects at Wisconsin and elsewhere.  Over 350 different
+groups from over 30 countries have taken copies of it from our ftp
+site, it is used as the storage manager in the TI Open Object-Oriented
+Database System, it serves as the storage engine for at least one
+commercial product (MediaDB, a recently announced multi-media DBMS), and it has
+been shown to have commercially competitive performance on an
+OODBMS benchmark&nbsp;[<A
+ HREF="node7.html#cdn:the">CDN93</A>].
+Nonetheless, EXODUS suffers from several limitations shared by many
+current persistent object stores.
+An exploration of these limitations may help to explain the motivation for
+Shore.
+EXODUS storage objects are untyped arrays of bytes;
+correct interpretation of their contents is the responsibility of application
+programs.  Although E allows instances of any C++ type to be stored in
+the database, no type information is stored.  This ``compile-time'' approach
+to data types has several disadvantages including the following:
+<UL>
+<LI> It is too easy to access objects under the wrong type, because of
+programming or configuration errors such as version mismatch.
+<LI> Restricting type support to the compiler locks users into single-language
+solutions.
+<LI> Sharing data between applications is difficult.
+<LI> Lack of stored types prevents the DBMS from providing such facilities as
+support for heterogeneous hardware platforms, data browsers, or garbage
+collectors.
+</UL>
+At the time we designed EXODUS, we felt there was too much variability
+in type systems to legislate a common solution.
+Since then, there has been a growing
+consensus on the level of type support that an OODBMS system should
+provide&nbsp;[<A
+ HREF="node7.html#c:ods">Cat93</A>].
+A second limitation of the EXODUS storage manager (ESM) is its
+client-server architecture.  Users have constructed database servers
+or object servers as EXODUS client processes, leading to the
+``client-level server'' problem illustrated in
+Figure <A HREF="node2.html#fig:clilev">1</A>.
+Even a query-shipping (as opposed to
+data-shipping) SQL server would be difficult construct efficiently with the
+existing software base.  In contrast, a more open architecture would have
+allowed clients to customize the ESM server process directly.
+The ESM process architecture also fails to support a clean mapping onto
+parallel processors such as the Intel Paragon or
+IBM SP/2.  Although one could simply run an EXODUS server on each node
+with mass storage attached, support for distributed transactions is not
+sufficient; efficient parallelism also requires the availability of
+extensive server-to-server communication facilities.
+<P>
+<BR>
+<DIV ALIGN="CENTER"><A NAME="fig:clilev">&#160;</A><A NAME="45">&#160;</A>
+<TABLE>
+<CAPTION><STRONG>Figure 1:</STRONG>
+The client-level server problem.</CAPTION>
+<TR><TD><IMG WIDTH="377" HEIGHT="128"
+ SRC="img1.gif"
+ ALT="\begin{figure}
+ \centerline{
+ \epsfxsize=3.3in\epsfbox{fig/clientlevelserver.ps}
+ }\end{figure}"></TD></TR>
+</TABLE>
+</DIV>
+<BR>
+<P>
+A third limitation of EXODUS is its lack of support for access control.
+As with other aspects of the system, our original thinking was that
+different clients might wish to implement very different protection
+models, and thus we provided no built-in protection support.
+Furthermore, EXODUS allows client processes to manipulate objects
+directly in cached copies of database pages, so an errant pointer can
+destroy not only client data but also metadata, rendering the entire database
+unusable.  The original design of EXODUS envisioned
+client processes as being database systems and object servers (i.e.,
+other trusted software layers).
+Shore aims to support environments in which a single storage volume
+may be shared by mutually mistrusting applications.
+<P>
+Finally, while EXODUS objects are similar to Unix files (they are untyped
+sequences of bytes), the interface for manipulating them is completely
+different.  As a result, existing applications built around
+Unix files cannot easily use EXODUS.
+<P>
+The design of Shore strives to retain the good features of the
+EXODUS Storage Manager (such as transactions, performance, and robustness) while
+eliminating some of these limitations.
+<P><A NAME="overview:differences">&#160;</A><H2><A NAME="SECTION00022000000000000000000">
+How Shore differs from EXODUS</A>
+</H2>
+<P>
+Each object in Shore contains a pointer to a <EM>type</EM> object that
+defines its structure and interface.  
+The 
+Shore Data Language
+provides a single
+language-neutral notation for describing the types of all persistent
+data<A NAME="tex2html5"
+ HREF="footnode.html#307"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+<P>
+Shore's process architecture is different from that of EXODUS in two
+key ways.  First, Shore has a symmetric, peer-to-peer 
+<A NAME="tex2html6"
+ HREF="footnode.html#52"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A> 
+structure.
+Every participating processor runs a Shore server process regardless whether
+it has local disks.  A client process interacts with Shore by communicating
+with the local Shore server (see 
+Figure <A HREF="node2.html#fig:shorearch">2</A>
+).
+The design is scalable; it can run on a single
+processor, a network of workstations, or a large parallel processor
+such as the Intel Paragon or IBM SP/2.  (For more on parallel Shore,
+the reader is referred to [<A
+ HREF="node7.html#dns:parset">DNSV94</A>]).
+Second, Shore supports the notion
+of a ``value-added'' server.  The server code is modularly constructed
+to make it relatively
+simple for users to build application-specific servers without facing
+the ``client-level server'' problem.  For example, the Paradise
+project&nbsp;[<A
+ HREF="node7.html#dlpy:par">DLPY93</A>] is already using the Shore
+storage manager to build a geographic information system.
+<P>
+<BR>
+<DIV ALIGN="CENTER"><A NAME="fig:shorearch">&#160;</A><A NAME="58">&#160;</A>
+<TABLE>
+<CAPTION><STRONG>Figure 2:</STRONG>
+The Shore process architecture.</CAPTION>
+<TR><TD><IMG WIDTH="376" HEIGHT="295"
+ SRC="img2.gif"
+ ALT="\begin{figure}
+ \centerline{
+ \epsfxsize=3.3in\epsfbox{fig/processes.ps}
+ }\end{figure}"></TD></TR>
+</TABLE>
+</DIV>
+<BR>
+<P>
+Finally, Shore is intended to be much more of a
+complete system than ESM.  In addition to a more flexible process structure
+and support for typed objects, Shore provides other services
+that end users should find attractive, including a
+name space and access-control model similar to Unix, a Unix-compatible
+interface for legacy
+software tools, openness in the area of language bindings, and traditional
+database services such as associative data access, indexing, and clustering.
+<P>
+The remainder of this document is organized as follows.
+Section&nbsp;<A HREF="node3.html#overview:basicconcepts">2</A>
+provides an overview of the services
+provided by Shore, including both its file system and database
+features.  The Shore process architecture is described in
+Section&nbsp;<A HREF="node4.html#overview:architecture">3</A>.
+Section&nbsp;<A HREF="node5.html#overview:status">4</A>
+describes the state of the system's various
+features as of the time of this Shore release.
+Finally, we conclude in
+Section&nbsp;<A HREF="node6.html#overview:concl">5</A>.
+The software described here is not simply
+``paperware.''
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html108"
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html105"
+ HREF="overview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html99"
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html107"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html109"
+ HREF="node3.html">Basic Shore System Concepts</A>
+<B> Up:</B> <A NAME="tex2html106"
+ HREF="overview.html">An Overview of Shore</A>
+<B> Previous:</B> <A NAME="tex2html100"
+ HREF="node1.html">Contents</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,114 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+############################################################################
+#
+#  This script tests hierarchical locking:  when a {IS,SH} or {IX,SIX,UD,EX}
+#  lock is acquired on a record (file), IS or IX lock is put on the file and
+#  volume (volume) that contain the record (file).
+#
+############################################################################
+
+sm begin_xct
+set old_level [sm get_lock_level]
+sm abort_xct
+
+set rec_modes 		{ SH EX }
+set page_modes          { IS IX }
+set file_modes 		{ IS IX SH SIX UD EX }
+set kvl			"k(s(10.33).100.200)"
+set rid			"r(10.33.356.200)"
+set pid			"p(10.33.356)"
+set fid			"s(10.33)"
+set vid			"10"
+
+set table(IS)	IS
+set table(IX)	IX
+set table(SH)	IS
+set table(SIX)	IX
+set table(UD)	IX
+set table(EX)	IX
+
+proc lockit {obj modes ll parents} {
+    global table
+    global verbose_flag 
+
+    foreach x $modes {
+	sm begin_xct
+	set level [sm get_lock_level]
+	if { [string compare $ll level] != 0 } {
+	    sm set_lock_level $ll
+	}
+	sm lock $obj $x LONG
+
+	set obj_lock  [ sm query_lock $obj ]
+	if { $verbose_flag } { puts stdout "$x" nonewline}
+
+	foreach p $parents {
+	    set parent_lock [ sm query_lock $p ]
+	    if { $verbose_flag } { puts stdout "\t$parent_lock" nonewline }	
+	    if { [string compare $ll "t_cc_record"] == 0 } {
+		assert { expr [string compare $parent_lock $table($x)] == 0}
+	    }
+	}
+	verbose ""
+
+	sm commit_xct
+    }
+}
+
+#####  main  #####
+
+
+if { [string compare $old_level t_cc_record] == 0 } {
+    verbose "TEST:\tHierarchical Locking on Record, Page and File : $old_level"
+
+    verbose "********  Set lock on record  ********"
+    verbose "record   page   file    volume"
+    lockit $rid $rec_modes $old_level "$pid $fid $vid" 
+
+    verbose "********  Set lock on page  ********"
+    verbose "page   file    volume"
+    lockit $rid $page_modes $old_level "$fid $vid"
+
+    verbose "********  Set lock on file  ********"
+    verbose "file    volume"
+    lockit $fid $file_modes $old_level "$vid"
+
+    verbose "********  Set kvl lock ********"
+    verbose "kvl      file    volume"
+    lockit $kvl $rec_modes $old_level "$fid $vid"
+}
+
+
+if { [string compare $old_level "t_cc_page"] != 0 } {
+    set page_modes          { SH EX }
+
+    set ll t_cc_page
+    verbose "TEST:\tHierarchical Locking on Record, Page and File : $ll"
+
+    verbose "********  Set lock on record  ********"
+    verbose "record   page   file    volume"
+    lockit $rid $rec_modes $ll "$pid $fid $vid"
+
+    verbose "********  Set lock on page  ********"
+    verbose "page   file    volume"
+    lockit $rid $page_modes $ll "$fid $vid"
+
+    verbose "********  Set lock on file  ********"
+    verbose "file    volume"
+    lockit $fid $file_modes $ll "$vid"
+
+    verbose "********  Set kvl lock ********"
+    verbose "kvl      file    volume"
+    lockit $kvl $rec_modes $ll "$fid $vid"
+}
+
+verbose "STATUS:\tOK"
+
+unset table rec_modes file_modes page_modes
+unset rid fid vid pid kvl old_level ll

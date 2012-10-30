@@ -1,0 +1,21 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# $Header: /p/shore/shore_cvs/src/vas/server/.minimumrc,v 1.2 1995/04/24 19:45:56 zwilling Exp $
+#
+# Minimum .rc file for shore server
+# To see what the default values are, do "shore -h"
+#
+#
+# location of log
+*.sm_logdir: ./log
+
+# Specify the sm buffer pool size for any program
+*.sm_bufpoolsize: 320
+
+# gets shell rc file: shore.rc in ./

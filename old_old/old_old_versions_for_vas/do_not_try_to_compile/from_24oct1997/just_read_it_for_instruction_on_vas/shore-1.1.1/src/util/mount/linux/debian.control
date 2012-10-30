@@ -1,0 +1,5 @@
+PACKAGE: mount
+DESCRIPTION: mount, umount, swapon, and swapoff.
+MAINTAINER: Ian Murdock <imurdock@debian.org>
+VERSION: =V
+PACKAGE_REVISION: =D

@@ -1,0 +1,284 @@
+source $script_dir/trans.lib
+
+allow_remote_command no
+
+# for internal use:
+# run a transaction in this thread, detach
+# and let the tx be resolved by 2PC.
+# We grab a lock on a global lockid, so that
+# another thread will run when this tx is finally
+# finished.
+
+proc clearit { fid } {
+    set scan [sm scan_file_create $fid t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    while {$pin != "NULL"} {
+	sm destroy_rec [sm pin_rid $pin]
+	set pin [sm scan_file_next $scan 0]
+    }
+    sm scan_file_destroy $scan
+}
+
+proc read_one { f } {
+    set scan [sm scan_file_create $f t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set result "none"
+    if {$pin != "NULL"} {
+	set rec [sm pin_rid $pin]
+	set result [sm read_rec_body $rec 0 0]
+    }
+    sm scan_file_destroy $scan
+    return $result 
+}
+
+proc txthread {gtid i action finish} {
+    global x tid page_size f0 
+
+    # clear stats for test
+    sm gather_stats reset
+
+    # make sure no active txs to start with 
+    # assert {expr [sm num_active] == 0}
+    # set na [sm num_active]
+    # if {$na != 0} {
+    	# return "assert NA: num_active ($na) == 0"
+    # }
+
+    verbose starting: GTID $gtid THREAD: $i 
+
+    catch {co gtid2tid $gtid} err
+    verbose LOCAL tx:  $err
+    verbose ACTION: $action 
+    verbose FINISH: $finish  
+
+    assert {expr [sm xct] == 0}
+    sm begin_xct
+    assert {expr [sm xct] != 0}
+    set x($i) [sm xct]
+    set tid($i) [sm xct_to_tid $x($i) ]
+    verbose $x($i) $tid($i)
+
+    # grab the global lock -- don't use EX because of
+    # debugging check in xct.c -- just prevent anyone else
+    # from getting an EX lock
+    # sm lock $global_lockid IX LONG
+
+
+    # action:
+	set nrecs [scanit $f0]
+	if { $action == "readonly" } {
+	    set nrecsnow $nrecs
+	}
+	if { $action == "readwrite" } {
+	    if { $nrecs==0 } {
+		verbose CREATING RECS
+		set nrecsnow $nrecs
+		for {set k 0} {$k < 100} {incr k} {
+		    set rec [sm create_rec $f0 hdr 100 $gtid ]
+		    incr nrecsnow
+		}
+		assert {expr [scanit $f0] == $nrecsnow}
+	    } else {
+		verbose DESTROYING RECS
+		clearit $f0
+		set nrecsnow 0
+	    }
+	    verbose NRECSNOW : $nrecsnow
+	}
+    co addlocal $gtid $tid($i)
+    sm enter2pc $gtid 
+
+    case $finish in {
+	{ "commit" } {
+	    sm detach_xct $x($i)
+	} 
+	{ "abort" } {
+	    sm abort_xct
+	    set nrecsnow $nrecs
+	} 
+    }
+    assert {expr [sm xct] == 0}
+    return "$nrecs $nrecsnow"
+}
+
+proc checktxthread {nrecsnow resolution myactivity didcrash gtid} {
+    global f0 verbose_flag
+    verbose CHECKTHREAD  $nrecsnow $resolution $myactivity $didcrash $f0
+
+    assert {expr [sm xct] == 0}
+
+    # gather the stats first
+    set verbose_flag_save $verbose_flag 
+    set verbose_flag 1
+    set st [sm gather_stats]
+    set verbose_flag $verbose_flag_save 
+
+    set abort_xct_cnt [select_stat $st abort_xct_cnt]
+    set abort_xct_cnt [lindex $abort_xct_cnt 1]
+    set commit_xct_cnt [select_stat $st commit_xct_cnt]
+    set commit_xct_cnt [lindex $commit_xct_cnt 1]
+    set s_aborted [select_stat $st s_aborted]
+    set s_aborted [lindex $s_aborted 1]
+    set s_prepared [select_stat $st s_prepared]
+    set s_prepared [lindex $s_prepared 1]
+    set s_committed [select_stat $st s_committed]
+    set s_committed [lindex $s_committed 1]
+
+    # make sure no active txs left 
+    # assert {expr [sm num_active] == 0}
+    set na [sm num_active]
+    if {$na != 0} {
+	if {$didcrash==0} {
+	    return "assert NA: num_active ($na) == 0"
+	} else {
+	    # never got prepared!  We have to attach it and abort
+	    # it, but the coordinator didn't log anything
+	    # on prepare, so we can't do that.
+	    if { $s_prepared != 0 } {
+		return "assert NA-2: s_prepared ($s_prepared) == 0"
+	    }
+	    if {$na != 1} {
+		return "assert NA-1: num_active ($na) == 1"
+	    } else {
+		co print
+		if [catch {co gtid2tid $gtid]} t] {
+		    return "gtid2tid: cannot find tid:  $t"
+		}
+	verbose CHECKTHREAD  t=$t
+		if [catch {sm tid_to_xct $t} tx] {
+		    return "tid_to_xct: cannot find xct:  $tx"
+		}
+	verbose CHECKTHREAD  tx=$tx
+		set err 0
+		if [catch {sm attach_xct $tx} err] {
+		    return "cannot attach : $err"
+		}
+
+		if {[string compare $resolution aborted] == 0} {
+		    catch {sm abort_xct} err
+		} else {
+		    catch {sm commit_xct} err
+		}
+		if { $err } {
+		    return "assert NA-2: cleanup failed: $t "
+		}
+	verbose CHECKTHREAD  err=$err
+	    }
+	}
+    }
+
+    sm begin_xct
+    set tid [sm xct_to_tid [sm xct]] 
+    set scanres [scanit $f0]
+    set committedgtid [read_one $f0]
+    sm commit_xct
+    set result [string compare $scanres $nrecsnow]
+    verbose CHECKTHREAD compare ($scanres,$nrecsnow) == $result
+
+    if {$result != 0 } {
+	assert {expr [sm xct] == 0}
+	return "scan $f0 ($scanres) != nrecsnow ($nrecsnow)"
+    }
+
+
+    if {[string compare $resolution aborted] == 0} {
+	# abort_xct_cnt > 0 or it was a readonly xct
+
+	if {[string compare $myactivity readwrite] == 0} {
+	    # This is appropriate iff we didn't crash before
+	    # prepare; in that one case, we will have aborted
+	    # in the prior execution of the subordinate process.
+	    # assert {expr {$abort_xct_cnt > 0}}
+	    if [expr {$abort_xct_cnt <= 0}] {
+		if {$didcrash==0} {
+		    return "assert A.1: abort_xct_cnt ($abort_xct_cnt) > 0"
+		}
+	    }
+	} else {
+	    # internal consistency check:
+	    if {[string compare $myactivity readonly] != 0} {
+		return "assert A.2: $myactivity == readonly""
+	    }
+
+	    # was readonly, but was resolved by prepare
+	    # assert {expr {$s_prepared == 0}}
+	    if [expr {$s_prepared != 0}] {
+		return "assert A.3: s_prepared ($s_prepared) == 0"
+	    }
+	}
+
+	# whatever was prepared was aborted
+
+	# assert {expr {$s_prepared == $s_aborted}}
+	if [expr {$s_prepared != $s_aborted}] {
+	    if {$didcrash==0} {
+		return "assert A.4: s_prepared ($s_prepared) == s_aborted ($s_aborted)"
+	    }
+	}
+
+    } else {
+	# internal consistency
+	if { $myactivity == "readwrite" } {
+	    # we should have updated the file - either
+	    # destroyed all records or written our gtid into them
+	    if {[string compare $committedgtid $gtid] != 0} {
+		if {[string compare $committedgtid "none"] != 0} {
+		    return "assert C.0.a: $committedgtid != $gtid"
+		} else {
+		    if {[string compare $nrecsnow 0] != 0} {
+			return "assert C.0.b: $committedgtid != $gtid"
+		    }
+		}
+	    }
+	}
+
+	if {[string compare $resolution committed] != 0} {
+	    return "assert C.1: $resolution == committed"
+	}
+
+	# commits > 0
+	# assert {expr {$commit_xct_cnt > 0}}
+	if [expr {$commit_xct_cnt <= 0}] {
+	    return "assert C.2: commit_xct_cnt ($commit_xct_cnt) > 0"
+	}
+
+	# whatever was prepared was committed
+
+	# assert {expr {$s_prepared == $s_committed}}
+	if [expr {$s_prepared != $s_committed}] {
+	    # SUBORD CRASH CASE:
+	    # prepared will be 0 if it was rebooted after a crash,
+	    # we can't expect s_prepared to be == s_committed in that case
+	    if {$didcrash==0} {
+		return "assert C.3: s_prepared ($s_prepared) == s_committed ($s_committed)"
+	    }
+	}
+    }
+
+    # make sure no prepared txs left 
+    # assert {expr [sm num_prepared] == 0}
+    set np [sm num_prepared]
+    if {$np != 0} {
+	return "assert NP: num_prepared ($np) == 0"
+    }
+
+    assert {expr [sm xct] == 0}
+    return $result 
+}
+
+proc forever {ignored} {
+    while {1} { sm sleep 10000 }
+}
+
+# if [is_set nocrash] {
+#     allow_remote_command no
+# } else {
+#     allow_remote_command yes
+# }
+
+if [is_set recoveronly] {
+    set recoveronly 1
+} else {
+    set recoveronly 0
+}
+

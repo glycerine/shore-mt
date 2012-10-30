@@ -1,0 +1,17 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+# Options Settings for the Example VAS Programs
+
+# set the location of the diskrw program
+# NOTE: This must be changed to point to your installed bin directory
+?.server.*.sm_diskrw: DISKRW
+
+# set the buffer pool size and log directory for all example servers
+?.server.*.sm_bufpoolsize: 100
+?.server.*.sm_logdir: ./log.hello
+

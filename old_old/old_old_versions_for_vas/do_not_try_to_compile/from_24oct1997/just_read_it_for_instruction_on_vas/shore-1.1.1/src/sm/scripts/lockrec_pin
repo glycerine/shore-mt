@@ -1,0 +1,164 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  This script tests 2x2 (SH and EX) lock compatibility on record. 
+#
+#  The operations to set a SH lock on a record are
+#	pin_pin
+#
+#  The operations to set an EX lock on a record are
+#	pin_update_rec	
+#	pin_update_rec_hdr
+#	pin_append_rec
+#	pin_truncate_rec
+#  (these operations must be preceded by a pin_pin call)
+#
+
+proc req_lock { id type op } {
+    sm begin_xct
+
+    set pin [sm pin_create]
+    sm pin_pin $pin $id 0
+
+    if { "$type" == "EX" } {
+	case $op in {
+	    update 		{ sm pin_update_rec $pin 3 DEFG }
+	    update_rechdr 	{ sm pin_update_rec_hdr $pin 2 DEF }
+	    append 		{ sm pin_append_rec $pin 12345 }
+	    truncate 		{ sm pin_truncate_rec $pin 4 }
+	}
+    }
+    return $pin
+}
+
+proc rel_lock { pin } {
+    sm pin_unpin $pin
+    sm pin_destroy $pin
+    sm commit_xct
+}
+
+proc holder { id type op me } {
+    sync
+
+    verbose "$me: $type ($op) requesting lock on $id"
+    set pin [req_lock $id $type $op]
+    verbose "$me: $type ($op) lock on $id granted"
+
+    sync
+    sync
+
+    verbose "$me: $type ($op) releasing lock on $id"
+    rel_lock $pin
+}
+
+proc requester { id type op me } {
+    sync
+    sync
+
+    verbose "$me: $type ($op) requesting lock on $id"
+    set pin [req_lock $id $type $op]
+    verbose "$me: $type ($op) lock on $id granted"
+
+    sync
+
+    verbose "$me: $type ($op) releasing lock on $id"
+    rel_lock $pin
+}
+
+proc sh_sh { id } {
+    set x [ fork_thread holder $id SH pin 1 ]
+    set y [ fork_thread requester $id SH pin 2 ]
+
+    sync_thread $x $y
+    sync_thread $x $y
+    sync_thread $x $y
+    join_thread $x $y
+}
+
+proc sh_ex { id } {
+    global ex_ops
+    foreach i $ex_ops {
+
+	set x [ fork_thread holder $id SH pin 1 ]
+	set y [ fork_thread requester $id EX $i 2 ]
+
+	sync_thread $x $y
+	sync_thread $x $y
+	sync_thread $x $y
+	join_thread $x $y
+	verbose "----------------"
+    }
+}
+
+proc ex_sh { id } {
+    global ex_ops
+    foreach i $ex_ops {
+
+	set x [ fork_thread holder $id EX $i 1 ]
+	set y [ fork_thread requester $id SH pin 2 ]
+
+	sync_thread $x $y
+	sync_thread $x $y
+	sync_thread $x $y
+	join_thread $x $y
+	verbose "----------------"
+    }
+}
+
+proc ex_ex {id} {
+    global ex_ops
+    foreach i $ex_ops {
+    	foreach j $ex_ops {  
+
+	    set x [ fork_thread holder $id EX $i 1 ]
+	    set y [ fork_thread requester $id EX $j 2 ]
+
+	    sync_thread $x $y
+	    sync_thread $x $y
+	    sync_thread $x $y
+	    join_thread $x $y
+	    verbose "----------------"
+	}
+    }
+}
+
+####  global variables  ####
+
+set ex_ops { update update_rechdr append truncate }
+
+##########  main  ########## 
+
+source $script_dir/vol.init
+
+
+sm begin_xct
+set fid [sm create_file $volid]
+set rid [sm create_rec $fid hdr12345 11 hellodata]
+sm commit_xct
+
+verbose "TEST:\tRecord Locking with SM Pin Record Operations  *******\n"
+
+verbose "SH SH"
+sh_sh $rid
+verbose "=================================================="
+
+verbose "SH EX"
+sh_ex $rid
+verbose "=================================================="
+
+verbose "EX SH"
+ex_sh $rid
+verbose "=================================================="
+
+verbose "EX EX"
+ex_ex $rid
+verbose "=================================================="
+
+unset fid
+unset rid
+unset ex_ops

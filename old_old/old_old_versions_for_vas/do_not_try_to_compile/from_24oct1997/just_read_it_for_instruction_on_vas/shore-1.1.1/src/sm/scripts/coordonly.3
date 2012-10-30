@@ -1,0 +1,456 @@
+set  PROTO pa
+set file run2pc.recs.tmp
+
+verbose PROTOCOL= $PROTO 
+verbose COORDINATOR= $coname 
+verbose GTID=$gtid
+verbose SUBS=$subs 
+verbose ACTIONS=$actions
+verbose FINISHES=$finishes
+verbose DINFO=$dinfo
+verbose LOCAL CRASH=$clinfo
+verbose REMOTE CRASH=$crinfo
+
+set volid 1
+source $script_dir/vol.init
+source $script_dir/coord.lib
+allow_remote_command yes
+verbose REMOUNTED
+
+# DINFO
+# sort out debugging info
+set elem [split $dinfo @] 
+set what [lindex $elem 0]
+set v1 [lindex $elem 1]
+set v2 [lindex $elem 2]
+
+set debugcmd 0
+if {[string compare $what none] != 0} {
+    verbose debuginfo $what $v1 $v2
+    debuginfo $what $v1 $v2
+    set debugcmd "debuginfo $what $v1 $v2"
+    verbose DEBUG COMMAND: $debugcmd 
+}
+
+# CINFO
+# sort out local & remote crash info
+if { 1} {
+    set elem [split $clinfo @] 
+    set what [lindex $elem 0]
+    set v1 [lindex $elem 1]
+    set v2 [lindex $elem 2]
+
+    set crashcmd 0
+    if {[string compare $what none] != 0} {
+	# local: crash only if we're not in
+	# 	crash-recovery mode
+	if {$recoveronly==0} {
+	    verbose debuginfo $what $v1 $v2
+	    debuginfo $what $v1 $v2
+	}
+    }
+
+    set elem [split $crinfo @] 
+    set what [lindex $elem 0]
+    set v1 [lindex $elem 1]
+    set v2 [lindex $elem 2]
+
+    set crashcmd 0
+    if {[string compare $what none] != 0} {
+	# remote: 
+	verbose debuginfo $what $v1 $v2
+	set crashcmd "debuginfo $what $v1 $v2"
+	verbose CRASH COMMAND: $crashcmd 
+    }
+}
+
+#
+# split actions list into an array
+# take note if they're all read-only
+#
+set i 0
+set allreadonly 1
+set anyreadonly 0
+set actions [split $actions .]
+foreach j $actions {
+   if {[string compare $j "readonly"] != 0} {
+	set allreadonly 0
+   } else {
+	set anyreadonly 1
+    }
+   set action($i) $j
+   incr i
+}
+
+#
+# split finishes list into an array
+# take note if any one is an abort
+#
+set i 0
+set willabort 0
+set finishes [split $finishes .]
+foreach j $finishes {
+   if {[string compare $j "abort"] == 0} {
+	set willabort 1
+   }
+   set finish($i) $j
+   incr i
+}
+
+# Crashes in certain places will force an abort
+# with presumed abort:
+set forceabort 0
+set crash_affect_stats 0
+set badcase 0
+if [expr {[string compare $PROTO "pa"]==0}] {
+    #
+    # recognize the bad cases with PA: 
+    # coord crashes before any commit votes are recorded, or
+    # if the only votes are readonly
+    #
+
+    if [expr {[string first "before.prepare" $clinfo] >= 0}] {
+       # coord crashes before prepare is done; on recovery
+       # it aborts
+       verbose FORCING ABORT WITH COORDINATOR CRASHES
+       incr badcase 
+    }
+    if [expr {[string first "before.prepare" $crinfo] >= 0}] {
+       # subord crashes before prepare is done; on recovery
+       # it already has aborted the local xct
+       verbose FORCING ABORT WITH SUBORDINATE CRASHES
+       incr badcase 
+    }
+    if [expr {[string first "after.prepare" $crinfo] >= 0}] {
+	# Subord crashes after preparing, before voting. If it's 
+	# a readonly xct, the xct is immediately forgotten.
+	# When the subord recovers, the coordinator discovers
+	# that fact, and # re-sends its prepare message. (If the
+	# subord HAD prepared -- i.e., it's not readonly, it would 
+	# the subord would simultaneously send a status message -- in
+	# that case it would commit.)  
+	# The readonly case ends up aborting.
+	#
+       set badcase [expr {$badcase + $anyreadonly}]
+    }
+    if [expr {[string first "co.after.vote" $clinfo] >= 0}] {
+       # Coord crashes after preparing, and after logging
+       # a vote (but only logs the vote if it's an update xct).
+       # therefore, it's got the same result: abort if readonly,
+       # commit if readwrite.
+       set badcase [expr {$badcase + $anyreadonly}]
+    }
+    if [expr {[string first "co.after.prepare" $clinfo] >= 0}] {
+	# coord crashes after issuing prepare messages, but
+	# before logging the votes.   On recovery, the coord
+	# won't have written any log record for this xct,
+	# and the subordinates will discover that fact with
+	# the status message (this is essential PA).
+       incr badcase
+    }
+    if [expr {[string first "co.got.vote" $clinfo] >= 0}] {
+       # same as above case co.after.prepare
+       incr badcase
+    }
+
+    if {$badcase != 0} {
+       set forceabort 1
+       set crash_affect_stats 1
+    }
+}
+
+# setting crash_affect_stats is only necessary for subordinate
+# crashes - since it's sent to the subordinate in the check function
+# to avoid bogus asserts on the subordinate's stats
+if [expr {[string first "after" $crinfo] >= 0}] {
+   set crash_affect_stats 1
+}
+
+if [expr {[string first ".resolve" $crinfo] >= 0}] {
+   set crash_affect_stats 1
+}
+
+
+# 
+# compute expected resolution of the
+# transaction, based on actions and finishes
+#
+# If told to abort, subord will abort early,
+# and the fact that it's readonly is immaterial
+# here
+# if { $allreadonly } {
+  #   # commit if all readonly
+   #  set willabort 0
+# }
+
+sm coord $volid
+co startns ns_file
+verbose RECONNECTED TO NS...
+
+set err 1
+while {$err != 0} {
+    set err [catch {co startco $coname} result]
+    if {$err == 0} {
+        verbose COORD STARTED
+    } else {
+	verbose COULD NOT START COORDINATOR: error : $result
+	verbose (exiting.)
+	exit 100
+    }
+    set result ""
+}
+
+# update coordinator's mapping
+set i 0
+set list ""
+foreach j $subs {
+    set err 1
+    while {$err != 0} {
+	set err [catch {co addmap 1 $j} result]
+	if {$err == 0} {
+	    verbose NS FOUND $j
+	} else {
+	    verbose error : $result
+	    if [error_is $result NS_NOTFOUND] {
+		verbose AWAITING STARTUP OF $j
+		sm sleep 1000
+	    } else {
+		if [error_is $result FC_FOUND] {
+		    set err 0
+		} else {
+		    verbose (exiting..)
+		    exit 100
+		}
+	    }
+	}
+    }
+   set list "$list $j"
+   incr i
+}
+set result ""
+
+# co print
+
+# recover prepared txs if necessary
+set n  [sm num_prepared]
+while {$n > 0} {
+    verbose RECOVERING $n PREPARED TRANSACTIONS
+    co print
+    sm sleep 10000
+    set n  [sm num_prepared]
+    if {$n == 0} break;
+}
+assert {expr [sm num_prepared] == 0}
+
+proc makecmd {gtid action finish} {
+    set open \[
+    set close \]
+    set nl "\n"
+
+    set cmd "txthread \"$gtid\" 1 "
+    append cmd $action 
+    append cmd " "
+    append cmd $finish
+    return $cmd
+}
+
+# TODO: distinguish coord crashes from subord crashes
+# and execute coord crashes locally
+if {$recoveronly==1} {
+    verbose RECOVERONLY
+    if { [catch { open $file r } fileid ] == 0 } {
+	set i 0
+	foreach j $subs {
+	    gets $fileid nrecs($i)
+	    incr i
+	}
+	close $fileid
+    } else {
+	verbose Failed to read $file:  $fileid
+	exit 100
+    }
+
+} else {
+    foreach j $subs {
+	if {$crashcmd != 0} {
+	    verbose CRASH COMMAND: $crashcmd --> $j
+	    set err [catch {co sendtcl $j $crashcmd} result]
+	    if {$err != 0} {
+		verbose COULD NOT REMOTELY EXECUTE DEBUG COMMAND:
+		verbose err = $err result = $result
+		verbose (exiting....)
+		exit 100
+	    }
+	}
+	if {$debugcmd != 0} {
+	    verbose DEBUG COMMAND: $debugcmd --> $j
+	    set err [catch {co sendtcl $j $debugcmd} result]
+	    if {$err != 0} {
+		verbose COULD NOT REMOTELY EXECUTE DEBUG COMMAND:
+		verbose err = $err result = $result
+		verbose (exiting....5)
+		exit 100
+	    }
+	}
+    }
+
+    set i 0
+    foreach j $subs {
+	set cmd [makecmd $gtid $action($i) $finish($i)]
+
+	verbose COMMAND: $cmd --> $j
+	set err [catch {co sendtcl $j $cmd} result]
+	if {$err != 0} {
+	    verbose COULD NOT REMOTELY EXECUTE COMMAND:
+	    verbose err = $err result = $result
+	    verbose (exiting....5.)
+	    exit 100
+	} else {
+	    verbose RESULT "(if-abort if-commit):" $result
+	    set nrecs($i) $result
+	}
+	incr i
+    }
+    if { [catch { open $file w } fileid ] == 0 } {
+	verbose WRITING $i recs -> $file
+	set i 0
+	foreach j $subs {
+	    puts $fileid $nrecs($i)
+	    incr i
+	}
+	close $fileid
+    } else {
+	verbose Failed to write $file:  $file
+	exit 100
+    }
+
+
+    set cmd "co commit \"$gtid\" $i $list"
+    verbose EXECUTING $cmd
+    set err [catch {eval $cmd} result]
+    verbose RESULT OF COMMIT: err=$err, result = $result
+}
+
+# forceabort: 1 if forced crash will cause abort
+# set willabort: 1 if expect it to have aborted
+#
+if { $forceabort } {
+    verbose FORCED ABORT WITH CRASH TEST
+    set willabort 1
+}
+
+# 
+# figure out what the resolution WAS
+#
+set mixed 0
+if {$recoveronly==1} {
+    set cmd "co retry_commit \"$gtid\" "
+    verbose RETRYING COMMIT
+    set err [catch {eval $cmd} result]
+    verbose RESULT OF $cmd: err=$err, result = $result
+} else {
+    if {$err == 1} {
+	# use abort case unless retry works
+	if [error_is $result ST_TIMEOUT] {
+	    # retry 
+	    if { $willabort==1 } {
+		set cmd "co unilateral_abort \"$gtid\" "
+		verbose UNILATERAL ABORT
+	    } else {
+		set cmd "co retry_commit \"$gtid\" "
+		verbose RETRYING COMMIT
+	    }
+	    set err [catch {eval $cmd} result]
+	    verbose RESULT OF $cmd: err=$err, result = $result
+
+	    if {$err == 1} {
+		if [error_is $result ST_TIMEOUT] {
+		    verbose GIVING UP
+		    set cmd "co unilateral_abort \"$gtid\" "
+		    set err [catch {eval $cmd} result]
+		    verbose RESULT OF $cmd: err=$err, result = $result
+		    set willabort 1
+		}
+		if [error_is $result E_MIXED] {
+		    set mixed 1
+		}
+		if [error_is $result FC_NOTFOUND] {
+		    verbose ABORTED
+		    set willabort 1
+		}
+	    }
+	}
+    }
+}
+
+if {$err == 1} {
+    set resolution aborted
+} else {
+    set resolution $result
+}
+verbose resolution $resolution
+
+# index (into result of COMMAND) is 1 for commit case
+set index 1
+if {[string compare $resolution "aborted"] == 0} {
+    set index 0
+}
+
+# 
+# see if the resolution is what was expected
+# string compare $resolution "aborted" : 0 iff it aborted
+set didabort [expr [string compare $resolution "aborted"] == 0] 
+if { $didabort != $willabort } {
+    if { $willabort } {
+	set e "abort"
+    } else {
+	set e "commit"
+    }
+    verbose UNEXPECTED RESULT ($resolution): expected $e
+    exit 100
+}
+if { $mixed } {
+    verbose MIXED RESULT ($resolution)
+}
+
+# verbose [sm gather_stats]
+
+# 
+# Now have the subordinates check some results
+
+set i 0
+foreach j $subs {
+    set arg [lindex $nrecs($i) $index]
+    set cmd "checktxthread $arg $resolution $action($i) $crash_affect_stats $gtid"
+    sm sleep 1000
+    verbose CHECK: $cmd --> $j
+    set err 1
+    while {$err != 0} {
+	set err [catch {co sendtcl $j $cmd} result]
+	if {$err != 0} {
+	    verbose error: err = $err result = $result
+	    if [error_is $result SC_DEAD] {
+		verbose AWAITING RESTART OF $j
+		sm sleep 1000
+	    } else {
+		verbose COULD NOT REMOTELY EXECUTE CHECK:
+		verbose (exiting....5..)
+		exit 100
+	    }
+	} else {
+	    if {[string compare $result 0 ]!=0} {
+	       verbose CHECK FAILED ($j): $result 
+	       verbose (exiting....5...)
+	       exit 100
+	    }
+	}
+    }
+    incr i
+}
+
+#  co clearmap 
+verbose RETIRING...
+co retire
+verbose FINISHED WITH TEST $gtid
+# unset cmd
+# unset list gtid i 

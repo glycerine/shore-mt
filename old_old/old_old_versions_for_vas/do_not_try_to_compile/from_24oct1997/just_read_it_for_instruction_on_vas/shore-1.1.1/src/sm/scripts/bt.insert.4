@@ -1,0 +1,22 @@
+source $script_dir/vol.init
+source $script_dir/bt.lib
+
+if {$logging==0} {
+    echo "Logging off: script not run. "
+} else {
+set keylist { 300 200 50 104 101 190 320 330 310 440 430 420 66 67 68 }
+
+proc mkval { i e } {
+    global max_btree_entry_size
+    set maxsize [expr {$max_btree_entry_size - 30}]
+    if {$max_btree_entry_size <= 4048} {
+	set res [format "%0*s" $maxsize a]
+    } else {
+	set res [format "%0*s" $e a]
+    }
+    return $res
+}
+
+source $script_dir/bt.insert.0
+unset keylist unique
+}

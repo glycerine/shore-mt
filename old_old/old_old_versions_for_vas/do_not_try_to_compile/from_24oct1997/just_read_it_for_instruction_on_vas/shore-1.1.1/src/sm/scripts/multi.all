@@ -1,0 +1,23 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+set scripts [ list	multi.1 multi.2 ]
+
+echo $scripts
+
+echo CLEANUP BEFORE multi.all :
+cleanup stdout
+addcleanupvars {script}
+
+foreach script $scripts {
+    echo
+    echo "RUNNING:  $script"
+    source $script_dir/$script
+    checkstats  $script
+    puts stdout [concat CLEANUP AFTER  $script  : ]
+    cleanup stdout
+}

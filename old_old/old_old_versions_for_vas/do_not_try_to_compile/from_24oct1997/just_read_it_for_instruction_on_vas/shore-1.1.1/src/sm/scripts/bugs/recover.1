@@ -1,0 +1,8 @@
+source $script_dir/vol.init
+
+# for some reason (maybe having to do with logging mounts)
+#  this order fails, but when run alone, all ok:
+
+source $script_dir/recovery.1
+source $script_dir/record_create_abort.1
+

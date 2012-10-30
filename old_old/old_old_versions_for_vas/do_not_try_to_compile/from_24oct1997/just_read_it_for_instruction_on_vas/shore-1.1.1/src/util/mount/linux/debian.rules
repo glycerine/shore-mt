@@ -1,0 +1,79 @@
+#! /usr/bin/make -f
+#
+# Last updated: Sat Dec 17 10:52:20 EST 1994 by imurdock.
+#
+# To make the binary distribution package, the ``Debianized'' source package
+# and the context diff to the original package, type `./debian.rules dist'.
+# Make sure that `debian.rules' is executable before the final distribution
+# is made.
+#
+# Invoke each target with `./debian.rules <target>'.  All targets should be
+# invoked with the package root as the current directory.
+#
+# The `binary' target must be run as root, as it needs to install files with
+# specific ownerships.  The `diff' target assumes that you have the original
+# source package available, unpacked, in ../$(p)-$(v).orig, or that you have
+# the previous revision of the ``Debianized'' source package and context diff
+# in the parent directory.
+
+# The name of the package (for example, `emacs').
+p = mount
+# The version of the package (for example, `19.28').
+v = 2.2
+# The Debian revision of the package (for example, `2').
+d = 1
+
+build:
+# Builds the binary package.
+	make CFLAGS="-O2" LDFLAGS="-s"
+	touch stamp-build
+
+clean:
+# Undoes the effect of `make -f debian.rules build'.
+	make clean
+	rm -f stamp-build
+	rm -rf debian-tmp
+
+binary:
+# Makes a binary package.
+	test -f stamp-build || make -f debian.rules build
+	install -d -g root -m 755 -o root debian-tmp
+	chmod g-s debian-tmp
+	install -d -g root -m 755 -o root debian-tmp/DEBIAN
+	install -d -g root -m 755 -o root debian-tmp/bin
+	install -g root -m 4755 -o root mount debian-tmp/bin/mount
+	install -g root -m 4755 -o root umount debian-tmp/bin/umount
+	install -d -g root -m 755 -o root debian-tmp/etc
+	install -g root -m 644 -o root fstab.sample debian-tmp/etc/fstab.sample
+	install -d -g root -m 755 -o root debian-tmp/sbin
+	install -g root -m 755 -o root swapon debian-tmp/sbin/swapon
+	ln -f debian-tmp/sbin/swapon debian-tmp/sbin/swapoff
+	install -d -g root -m 755 -o root debian-tmp/usr/man/man5
+	install -g root -m 644 -o root fstab.5 \
+	  debian-tmp/usr/man/man5/fstab.5
+	install -g root -m 644 -o root nfs.5 \
+	  debian-tmp/usr/man/man5/nfs.5
+	install -d -g root -m 755 -o root debian-tmp/usr/man/man8
+	install -g root -m 644 -o root mount.8 \
+	  debian-tmp/usr/man/man8/mount.8
+	install -g root -m 644 -o root swapoff.8 \
+	  debian-tmp/usr/man/man8/swapoff.8
+	install -g root -m 644 -o root swapon.8 \
+	  debian-tmp/usr/man/man8/swapon.8
+	install -g root -m 644 -o root umount.8 \
+	  debian-tmp/usr/man/man8/umount.8
+	sed -e '4s/=V/$(v)/' -e '5s/=D/$(d)/' debian.control \
+	  > debian-tmp/DEBIAN/control
+	chmod 644 debian-tmp/DEBIAN/control
+	install -g root -m 644 -o root debian.conffiles \
+	  debian-tmp/DEBIAN/conffiles
+	dpkg --build debian-tmp
+	mv debian-tmp.deb ../$(p)-$(v)-$(d).deb
+
+source:
+# Makes a source package.
+	-test -f stamp-build && make -f debian.rules clean
+	( cd .. && tar cf - $(p)-$(v) | gzip -9f > $(p)-$(v)-$(d).tar.gz )
+
+dist: binary source
+# Prepares the package for distribution.

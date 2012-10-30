@@ -1,0 +1,212 @@
+#
+# UNDER CONSTRUCTION
+#
+set maxnum 4044
+
+set unique uni_btree
+
+proc mkval { e } {
+    verbose make value from $e
+    set res [format "%0*s" $e a]
+    return $res
+}
+
+proc mkkey { k l } {
+    set res [format "%s%0*s" $k $l ""]
+    return $res
+}
+
+proc middle  { a b } {
+    set m [expr $a + $b]
+    set m [expr $m / 2]
+    set c [ascii_char $m]
+    return $c
+}
+
+
+# 
+# insert values in list
+#
+# arguments:
+#   ndx -- index id (global)
+#   uniq -- 1 if unique, 0 otherwise (global)
+#   klen -- key size : s/m/l/v for small,med,large,vbl
+#   elen -- element size :  s/l/v
+#           small, large, varying
+#   nsame -- number in sequence of this operation
+#		with same key
+#   op --   i/d/s/c insert, delete, search, combination
+#   term --   a/c/r  abort, commit, restart
+#
+
+proc doop { op nsame klen elen term } {
+    global ndx
+    global uniq
+    global keylist
+    global maxnum
+
+    set i 0
+    set listlen [llength $keylist]
+
+    verbose sm begin_xct
+    sm begin_xct
+
+    while {$i < $listlen} {
+	# figure out key length
+	# and value length
+	switch $klen {
+	    s { set kl 0 }
+	    v { set kl $i }
+	    m { set kl [expr $maxnum / 2] }
+	    l { set kl $maxnum }
+	    default { 
+		verbose bad value for kl: $klen 
+		assert {0}
+	    }
+	}
+	verbose kl = $kl
+	switch $elen {
+	    s { set el 0 }
+	    v { set el $i
+	       if [expr $el > $maxnum / 2] {
+		   set el [expr $maxnum / 2]
+	       }
+	    }
+	    m { set el [expr $maxnum / 2 - $kl] }
+	    l { set el [expr $maxnum - $kl] }
+	    default {
+		verbose bad value for el: $elen 
+		assert {0}
+	    }
+	}
+
+	verbose el = $el
+	set key [mkkey [lindex $keylist $i] $kl]
+	set value [mkval $el]
+
+	for {set k 0} {$k < $nsame} {incr k} {
+	    switch  $op  {
+		insert {
+		    verbose sm create_assoc $ndx $key (elen= $elen)
+		    catch {sm create_assoc $ndx $key $value } catcherr
+		    verbose $catcherr
+		    if [error_is $err E_DUPLICATE] {
+		       verbose ERROR: $catcherr ( uniq= $uniq )
+		       break
+		    }
+		}
+		remove {
+		    verbose sm destroy_assoc $ndx $key <value>
+		    sm destroy_assoc $ndx $key $value
+		}
+		search {
+		    verbose sm find_assoc $ndx $key 
+		    sm find_assoc $ndx $key $value
+		}
+		combo {
+		    verbose sm create_assoc $ndx $key (elen= $elen)
+		    catch {sm create_assoc $ndx $key $value } catcherr
+
+		    verbose sm find_assoc $ndx $key 
+		    sm find_assoc $ndx $key $value
+
+		    verbose sm destroy_assoc $ndx $key 
+		    sm destroy_assoc $ndx $key $value
+		}
+		default {
+		    verbose bad value for op: $op
+		    assert {0}
+		}
+	    }
+	    incr k
+	}
+
+	# gather stats, see if we are done
+
+	incr i
+    }
+
+    switch $term {
+	commit {
+	    verbose sm commit_xct
+	    sm commit_xct
+	} 
+	abort {
+	    if {$logging==0} {
+		verbose "Logging off: sm abort_xct not done.  Committing instead."
+		sm commit_xct 
+	    } else {
+		verbose sm abort_xct 
+		sm abort_xct 
+	    }
+	} 
+	restart.clean {
+	    verbose random_restart true
+	    random_restart true
+	}
+	restart {
+	    verbose random_restart false
+	    random_restart false
+	}
+	default {
+	    verbose bad value for term: $term
+	    assert {0}
+		
+	}
+    }
+}
+
+# repeat op until
+# given stat is reached
+# interesting stats include
+#   u_long bt_splits		Btree pages split (interior and leaf)
+#   u_long bt_cuts		Btree pages removed (interior and leaf)
+#   u_long bt_grows		Btree grew a level
+#   u_long bt_shrinks		Btree shrunk a level
+
+proc do_until_stat { stat val op nsame klen elen term } {
+   verbose stat $stat
+   verbose val $val
+   verbose op $op
+   verbose nsame $nsame
+   verbose klen $klen
+   verbose elen $elen
+   verbose term $term
+
+   clearstats
+
+   while {1} {
+       verbose doop $op $nsame $klen $elen $term 
+       doop $op $nsame $klen $elen $term 
+
+       verbose sm gather_stats 
+       set stats [sm gather_stats ]
+       set wanted [select_stat $stats $stat]
+       verbose wanted $wanted
+       set total [lindex $wanted 1]
+       verbose total $total
+       if [expr $total >= $val] break;
+   }
+}
+
+proc test_scan {ndx nrec} {
+    global volid
+    dstats $volid
+    set scan [sm create_scan $ndx >= neg_inf <= pos_inf]
+    set res {}
+    for {set i 1} {$i <= $nrec} {incr i} {
+	set r [sm scan_next $scan]
+	if {$r == "eof"} then { break }
+	set key [string trimleft [lindex $r 0] 0]
+	set el [lindex $r 1]
+	set ellength [string length $el]
+	verbose "scanned ($key, <$ellength chars>)"
+	lappend res $key
+    }
+    verbose done with scan of $ndx,  $i items, expected $nrec
+    assert {expr [string compare [sm scan_next $scan] eof]==0}
+    assert {expr $i >= $nrec}
+    sm destroy_scan $scan
+    verbose "-- successful scan: " 
+    return $res
+}

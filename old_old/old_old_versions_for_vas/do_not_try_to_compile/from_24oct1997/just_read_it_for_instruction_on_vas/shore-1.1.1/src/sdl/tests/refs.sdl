@@ -1,0 +1,16 @@
+// PR 255
+module m1 {
+	interface a; // necessary forward decl
+
+	interface btype {
+	public:
+		relationship set<ref<atype> > a_set inverse b_ref;
+	};
+
+	interface atype {
+	public:
+        attribute long longattr;
+		relationship ref<btype>	b_ref inverse a_set;
+	};
+
+}

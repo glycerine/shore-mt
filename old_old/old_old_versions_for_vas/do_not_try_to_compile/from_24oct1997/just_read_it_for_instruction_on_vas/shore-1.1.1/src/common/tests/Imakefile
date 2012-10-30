@@ -1,0 +1,33 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * $Id: Imakefile,v 1.13 1997/06/13 22:31:12 solomon Exp $
+ */
+
+SRC = testserial.C  stats.C test_stat.C  errcodes.C errlogtest.C kvl.C %
+	vectors.C opaque.C
+OBJ= $(SRC.C:.C=.o)
+
+all_local:: testserial stats errcodes errlogtest vectors
+
+CPPFLAGS = -I.. -I../../fc -I../../sthread -I../../sm
+LIBS = ../libcommon.a ../../fc/libfc.a
+
+%GEN depend_target($(SRC))
+%GEN tags($(SRC) $(HDR))
+
+%GEN stats(test_stat.dat,test_stat)
+
+%GEN c_plus_program(testserial, testserial.o, $(LIBS))
+%GEN c_plus_program(stats, stats.o test_stat.o, $(LIBS))
+%GEN c_plus_program(errcodes, errcodes.o, $(LIBS))
+%GEN c_plus_program(kvl, kvl.o, $(LIBS))
+%GEN c_plus_program(errlogtest, errlogtest.o, $(LIBS))
+%GEN c_plus_program(opaque, opaque.o, $(LIBS))
+%GEN c_plus_program(bitmap, bitmap.o, $(LIBS))
+%GEN c_plus_program(vectors, vectors.o, $(LIBS))

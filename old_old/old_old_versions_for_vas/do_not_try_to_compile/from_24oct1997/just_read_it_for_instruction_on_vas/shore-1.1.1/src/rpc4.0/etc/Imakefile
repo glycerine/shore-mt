@@ -1,0 +1,41 @@
+#
+# $RCSfile: Imakefile,v $
+# $Revision: 1.8 $
+# $Date: 1997/06/13 22:32:47 $
+# $Author: solomon $
+#
+#
+DESTDIR=.
+
+CPPFLAGS = -I..
+AUXFLAGS = -I.. -DUW
+
+EXEC = portmap rpcinfo
+MISC= rpc
+
+SRC.portmap= portmap.c 
+SRC.rpcinfo= rpcinfo.c
+SRC = $(SRC.portmap) $(SRC.rpcinfo)
+
+SRC.cvs = $(SRC) $(HFILES)
+# getopt.c
+HFILES=
+
+OBJ.portmap = $(SRC.portmap:.c=.o)
+OBJ.rpcinfo = $(SRC.rpcinfo:.c=.o)
+
+DISPOSABLE=
+
+%GEN depend_target($(SRC) $(HFILES))
+
+PURE_OPT=-inuse_at_exit
+
+LIB = ../rpc/librpclib.a
+
+%GEN c_plus_program(portmap, $(OBJ.portmap), $(LIB))
+%GEN purify_c_plus_program(portmap, $(OBJ.portmap), $(LIB), $(PURE_OPT))
+%GEN c_plus_program(rcpinfo, $(OBJ.rpcinfo), $(LIB))
+%GEN purify_c_plus_program(rcpinfo, $(OBJ.rpcinfo), $(LIB), $(PURE_OPT))
+
+%GEN clean_files($(DISPOSABLE))
+

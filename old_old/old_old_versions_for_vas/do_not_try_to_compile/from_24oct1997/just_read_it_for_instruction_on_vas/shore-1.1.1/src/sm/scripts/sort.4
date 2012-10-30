@@ -1,0 +1,40 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test sort on integers and floats -- this is called by sort.4
+#    This assumed that $ktype and $nrec  are set by calling script
+#
+
+source $script_dir/vol.init
+
+set nrec 40
+
+set pattern_block ".123456789"
+set pattern ""
+for {set i 0} {$i < 900} {incr i} {
+    set pattern $pattern$pattern_block
+    #verbose $pattern
+}
+
+set typelist { u1 u2 u4 i1 i2 i4 f4 f8 b1 }
+# sort does not work for variable-length keys, since
+# the key lengths then need to be stored with each key
+# set typelist { b*1000 }
+#
+
+set len [llength $typelist]
+
+for {set k 0} {$k < $len} {incr k} {
+    set ktype [lindex $typelist $k] 
+    verbose "---- testing -- $ktype"
+
+    source $script_dir/sort.4a
+}
+
+
+unset nrec pattern pattern_block len k typelist ktype

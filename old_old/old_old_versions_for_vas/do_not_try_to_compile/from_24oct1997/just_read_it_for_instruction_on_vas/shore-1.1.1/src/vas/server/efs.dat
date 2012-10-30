@@ -1,0 +1,12 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+
+NFSD NFS server = 0x00100000 efs_stats {
+int lock_timeouts; RPCs rejected because of lock timeouts
+int nosuch_errors; Errs that don't xlate to NFS errs (incl lock timeouts)
+}

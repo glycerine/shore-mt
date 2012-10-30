@@ -1,0 +1,126 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# Test for recovery bug with page flags.
+# Tests involve creating index/file, destroying it and
+# creating a different store type (file/index) to reuse the space.
+#
+source $script_dir/vol.init
+
+verbose LOGGING = $logging
+if { $logging == 1 } {
+
+
+sm begin_xct
+verbose tid [sm xct_to_tid [sm xct]]
+# create index and put enough things in it to require >1 page
+set ndx [sm create_index $volid btree]
+verbose created index $ndx
+set nrec 10;
+for {set i 1} {$i <= $nrec} {incr i} {
+    verbose inserting $i
+    sm create_assoc $ndx [format $short_form $i] [format %01000d $i]
+}
+verbose index id: $ndx
+sm commit_xct
+
+verbose forcing buffers...
+sm force_buffers
+
+sm begin_xct
+verbose tid [sm xct_to_tid [sm xct]]
+verbose destroyng $ndx
+sm destroy_index $ndx
+sm commit_xct
+verbose forcing buffers...
+sm force_buffers
+
+sm begin_xct
+verbose tid [sm xct_to_tid [sm xct]]
+
+verbose creating file
+set f1 [sm create_file $volid ]
+verbose file id: $f1
+
+#change body width
+set id_body_width %0100d
+
+verbose creating r1 and r2
+set r1 [ sm create_rec $f1 "" 11 [format $id_body_width 1] ]
+#set r2 [ sm create_rec $f1 "" 11 [format $id_body_width 2] ]
+#set r3 [ sm create_rec $f1 "" 11 [format $id_body_width 2] ]
+#set r4 [ sm create_rec $f1 "" 11 [format $id_body_width 2] ]
+verbose $r1 
+
+sm commit_xct
+
+verbose forcing buffers...
+sm force_buffers
+
+#sm dismount_dev /local.caseus/zwilling/shore_vol/dev1
+verbose restarting
+restart
+
+sm begin_xct
+verbose tid [sm xct_to_tid [sm xct]]
+verbose destroying file
+sm destroy_file $f1
+sm commit_xct
+
+sm begin_xct
+verbose tid [sm xct_to_tid [sm xct]]
+
+verbose creating file
+set f1 [sm create_file $volid ]
+verbose file id: $f1
+set id_body_width %0100d
+
+verbose creating r1 and r2
+set r1 [ sm create_rec $f1 "" 11 [format $id_body_width 1] ]
+verbose $r1 
+
+sm commit_xct
+
+sm force_buffers
+
+sm begin_xct
+verbose tid [sm xct_to_tid [sm xct]]
+sm destroy_file $f1
+sm commit_xct
+sm force_buffers
+
+sm begin_xct
+verbose tid [sm xct_to_tid [sm xct]]
+# create index and put enough things in it to require >1 page
+set ndx [sm create_index $volid btree]
+verbose created index $ndx
+set nrec 10;
+for {set i 1} {$i <= $nrec} {incr i} {
+    verbose inserting $i
+    sm create_assoc $ndx [format $short_form $i] [format %01000d $i]
+}
+verbose index id: $ndx
+sm commit_xct
+
+sm force_buffers
+
+#sm dismount_dev /local.caseus/zwilling/shore_vol/dev1
+restart
+
+verbose recovering
+sm begin_xct
+verbose tid [sm xct_to_tid [sm xct]]
+verbose destroying file
+sm destroy_index $ndx
+sm commit_xct
+
+unset nrec f1 ndx r1 i
+
+} else {
+    echo "Script not run: logging is off."
+}

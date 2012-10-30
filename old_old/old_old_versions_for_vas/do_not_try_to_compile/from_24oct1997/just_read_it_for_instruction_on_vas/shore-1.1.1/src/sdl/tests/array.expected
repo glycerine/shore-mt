@@ -1,0 +1,4 @@
+1. error in sdl_support.C:928 Invalid object
+	called from:
+	0) sdl_support.C:929
+

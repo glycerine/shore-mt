@@ -1,0 +1,44 @@
+
+// example from sdl manual -- the sdl manual
+// uses the definition of AtomicPart -- the rest
+// is fudged
+
+
+module m1 {
+	const long TypeSize = 100;
+
+	interface Connection {
+	public:
+		attribute long junk;
+	};
+	interface CompositePart {
+	public:
+		attribute long junk;
+	};
+
+	enum BenchmarkOp { t1, t2a, t2b, t2c };
+	enum PartIdSet { p1, p2, p3 };
+
+    interface AtomicPart {
+    public:
+        attribute long               id;
+        attribute char               type[TypeSize];
+        attribute long               buildDate;
+        attribute long               x, y;
+        attribute long               docId;
+
+        attribute set<Connection>    to;   // to connection objs
+        attribute set<Connection>    from; // back pointers
+
+        attribute ref<CompositePart> partOf; // up pointer
+
+        void swapXY();
+        void toggleDate();
+        void DoNothing() const;
+
+        long traverse(in BenchmarkOp op,
+                inout PartIdSet visitedIds) const;
+        void init(in long ptId, in ref<CompositePart> cp);
+        void Delete();
+    };
+}

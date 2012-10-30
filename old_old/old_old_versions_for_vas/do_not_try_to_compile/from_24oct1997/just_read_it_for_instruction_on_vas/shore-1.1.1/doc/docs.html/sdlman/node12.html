@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Attributes</TITLE>
+<META NAME="description" CONTENT="Attributes">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node13.html">
+<LINK REL="previous" HREF="node11.html">
+<LINK REL="up" HREF="sdlman.html">
+<LINK REL="next" HREF="node13.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html200"
+ HREF="node13.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html197"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html191"
+ HREF="node11.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html199"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html201"
+ HREF="node13.html">Indexes</A>
+<B> Up:</B> <A NAME="tex2html198"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html192"
+ HREF="node11.html">Types</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="sdlman:attribute">&#160;</A><H1><A NAME="SECTION000120000000000000000000">
+Attributes</A>
+</H1>
+<P><PRE>
+    attr_dcl : [ 'indexable' ] 'attribute' type_spec declarators
+</PRE>
+<P>
+An
+<TT>attr_dcl</TT>
+defines one or more
+<EM>attributes</EM>
+of the enclosing
+<TT>interface</TT>.
+The attribute names defined by the
+<TT>attr_dcl</TT>
+are the
+<TT>ID</TT>s
+appearing in the
+<TT>declarators</TT>.
+The type of each attribute is the type that would have been bound to the
+name if the keyword
+<TT>attribute</TT>
+were replaced by
+<TT>typedef</TT>.
+If the
+<TT>type_spec</TT>
+is a
+<TT>constructed_type</TT>,
+the
+<TT>attr_dcl</TT>
+is equivalent to a
+<TT>type_dcl</TT>
+followed by a
+<TT>attr_dcl</TT>;
+that is,
+<BLOCKQUOTE>
+<TT>attribute</TT><EM>S D</EM>;
+</BLOCKQUOTE>
+where
+<EM>S</EM>
+is a
+<TT>constructed_type</TT>,
+is equivalent to
+<BLOCKQUOTE>
+<EM>S</EM>;
+<P><TT>attribute</TT> <EM>N D</EM>;
+</BLOCKQUOTE>
+where
+<EM>N</EM>
+is the type defined by
+<EM>S</EM>.
+<em>
+The word
+<TT>indexable</TT>
+indicates that this attribute may be used in the
+<TT>indexed_by</TT>
+clause of a relationship (see the next section).
+</em>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

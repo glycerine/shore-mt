@@ -1,0 +1,470 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Building and Running the Example Program</TITLE>
+<META NAME="description" CONTENT="Building and Running the Example Program">
+<META NAME="keywords" CONTENT="stree">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="stree.css">
+<LINK REL="next" HREF="node7.html">
+<LINK REL="previous" HREF="node5.html">
+<LINK REL="up" HREF="stree.html">
+<LINK REL="next" HREF="node7.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html171"
+ HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html168"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html162"
+ HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html170"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html172"
+ HREF="node7.html">Using Indexes</A>
+<B> Up:</B> <A NAME="tex2html169"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html163"
+ HREF="node5.html">The Main Program</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html173"
+ HREF="node6.html#SECTION00061000000000000000000">
+Starting the Shore Server</A>
+<LI><A NAME="tex2html174"
+ HREF="node6.html#SECTION00062000000000000000000">
+Building the Application</A>
+<LI><A NAME="tex2html175"
+ HREF="node6.html#SECTION00063000000000000000000">
+Running Some Examples</A>
+<UL>
+<LI><A NAME="tex2html176"
+ HREF="node6.html#SECTION00063100000000000000000">
+A Small Example</A>
+<LI><A NAME="tex2html177"
+ HREF="node6.html#SECTION00063200000000000000000">
+A Larger Example</A>
+</UL></UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="stree:building">&#160;</A><H1><A NAME="SECTION00060000000000000000000">
+Building and Running the Example Program</A>
+</H1>
+<P><A NAME="stree:runserver">&#160;</A><H2><A NAME="SECTION00061000000000000000000">
+Starting the Shore Server</A>
+</H2>
+<P>
+To build the example program, you must have a copy of the Shore server running.
+The document
+<A NAME="tex2html15"
+ HREF="../installation/installation.html"><EM>Shore Software Installation Manual</EM></A>,
+particularly the section <EM>Testing Your Installation</EM>,
+gives simple instructions on how to start a server.
+You probably want to do this in a separate window.
+The server will accept interactive commands from the keyboard.
+The only one you will need for this demonstration is &quot;bye&quot;, which
+causes the server to shut down cleanly and exit.
+The server may also occasionally produce debugging output.
+<P><A NAME="stree:application">&#160;</A><H2><A NAME="SECTION00062000000000000000000">
+Building the Application</A>
+</H2>
+<P>
+The Shore documentation release contains the source code for the examples
+in this tutorial.
+Assuming you have fetched and unpacked the documentation release as
+described in the
+<A HREF="../installation/node4.html#installation:docs"><EM>Shore Software Installation Manual</EM> </A>,
+you will have a directory <TT>$SHROOT/examples</TT>, where
+<TT>$SHROOT</TT> is the root directory of the documentation relase.
+<P><PRE>
+    mkdir stree
+    cp -R $SHROOT/examples/stree/* stree
+    cd stree
+    make stree
+</PRE>
+<P>
+You should see something like this.
+<PRE>
+    rm -f stree.h
+    /usr/local/shore/bin/sdl -f -s stree.sdl -B -L -o stree.h
+    g++ -g -I/usr/local/shore/include -c main.C
+    g++ -g -I/usr/local/shore/include -c tree.C
+    g++ -g -I/usr/local/shore/include -c word.C
+    g++ -g -I/usr/local/shore/include -c cite.C
+    g++ -g -I/usr/local/shore/include -c document.C
+    g++ -g -I/usr/local/shore/include -c stree_defs.C
+    g++ -g -I/usr/local/shore/include -o stree main.o stree_defs.o
+        tree.o word.o cite.o document.o
+        /usr/local/shore/lib/libshore.a -lnsl
+</PRE>
+<P>
+The second line invokes the SDL compiler.
+The command-line options ask it to perform several functions.
+The option <TT>-s stree.sdl</TT> asks it to parse the specification and install
+the resulting compiled versions of the module <TT>stree</TT> in the Shore database
+(you must have a Shore server running when you do this).
+The module is a registered object named <TT>/type/stree</TT>.
+Other options can be used to put it elsewhere in the Shore database.
+See the
+<A NAME="tex2html16"
+ HREF="../man/sdl.sdl.html"><EM>sdl(sdl)</EM></A>
+manual page for more details.
+The <TT>-L</TT> option asks SDL to link all the modules together
+(in this case, there is only one module), the <TT>-B</TT> option
+tells it to generate a C++ language
+binding from the module just generated, and the
+<TT>-o stree.h</TT> option directs it to place the results into the file
+file <TT>stree.h</TT> in the current directory.
+This file is included by all of our source files.
+We then compile all of the source files and link them together, along
+with the Shore runtime support library.
+Any C++ compiler should be usable, but the current release is only tested
+to work with the GNU compiler (g++) listed in the
+<A HREF="../release/node2.html#release:requirements"><EM>Requirements</EM> </A>
+section of the <EM>Shore Release 1.1.1</EM>  manual.
+<P>
+We have already explained the source files
+<A HREF="node8.html#stree:mainSRC">main.C</A>,
+<A HREF="node8.html#stree:treeSRC">tree.C</A>,
+<A HREF="node8.html#stree:wordSRC">word.C</A>,
+<A HREF="node8.html#stree:citeSRC">cite.C</A>,
+and
+<A HREF="node8.html#stree:documentSRC">document.C</A>.
+The first of these is the main program, while the rest define the
+member functions for each of the classes corresponding to interfaces
+defined in <TT>stree.sdl</TT>.
+The file
+<A HREF="node8.html#stree:streedefsSRC">stree_defs.C</A>
+is a small file containing just two lines:
+<PRE>
+    #define MODULE_CODE
+    #include &quot;stree.h&quot;
+</PRE>
+<P>
+The generated file <TT>stree.h</TT> contains some function definitions
+and initializations of global variables.
+Compiling it with <TT>MODULE_CODE</TT> defined generates these functions
+and initializations for linking with the rest of the program.
+<P><A NAME="stree:examples">&#160;</A><H2><A NAME="SECTION00063000000000000000000">
+Running Some Examples</A>
+</H2>
+<P><A NAME="stree:smallexample">&#160;</A><H3><A NAME="SECTION00063100000000000000000">
+A Small Example</A>
+</H3>
+<P>
+First use <TT>stree</TT> to add the files
+<TT>test1</TT>,
+<TT>test2</TT>,
+and
+<TT>test3</TT> to the repository.
+<PRE>
+    % stree -aV test?
+</PRE>
+The output should look like this
+<PRE>
+    Indexing file test1
+    Indexing file test2
+    Indexing file test3
+    about to commit
+    committed
+</PRE>
+Next, use the <TT>-lV</TT> (list verbose) option to look up some words.
+<PRE>
+    % stree -lV six
+    ========== six
+    test2: two six
+    test2: three six
+    test2: six two
+    test2: six three
+    test2: six six
+    test2: six seven
+    test2: seven six
+    test3: four six
+    test3: five six
+    test3: six four
+    test3: six five
+    test3: six six
+    test3: six seven
+    test3: seven six
+    **** 14 citations
+
+    % stree -lV eight
+    ========== eight
+    **** Not found
+</PRE>
+Use the <TT>-d</TT> option to remove some of the documents.
+<PRE>
+    % stree -d test2
+
+    % stree -lV six
+    ========== six
+    test3: four six
+    test3: five six
+    test3: six four
+    test3: six five
+    test3: six six
+    test3: six seven
+    test3: seven six
+    **** 7 citations
+
+    % stree -d test1
+
+    % stree -lV seven
+    ========== seven
+    test3: four seven
+    test3: five seven
+    test3: six seven
+    test3: seven four
+    test3: seven five
+    test3: seven six
+    test3: seven seven
+    **** 7 citations
+</PRE>
+Use the <TT>-p</TT> option to see what anonymous objects remain in the pool.
+<PRE>
+    % stree -p
+    Word 'one' occurs on 0 lines
+    Word 'three' occurs on 0 lines
+    Word 'five' occurs on 7 lines
+    Word 'seven' occurs on 7 lines
+    Word 'two' occurs on 0 lines
+    Word 'six' occurs on 7 lines
+    Cite, offset 0 in file test3 cites four
+    Word 'four' occurs on 7 lines
+    Cite, offset 10 in file test3 cites four five
+    Cite, offset 20 in file test3 cites four six
+    Cite, offset 29 in file test3 cites four seven
+    Cite, offset 40 in file test3 cites five four
+    Cite, offset 50 in file test3 cites five
+    Cite, offset 60 in file test3 cites five six
+    Cite, offset 69 in file test3 cites five seven
+    Cite, offset 80 in file test3 cites six four
+    Cite, offset 89 in file test3 cites six five
+    Cite, offset 98 in file test3 cites six
+    Cite, offset 106 in file test3 cites six seven
+    Cite, offset 116 in file test3 cites seven four
+    Cite, offset 127 in file test3 cites seven five
+    Cite, offset 138 in file test3 cites seven six
+    Cite, offset 148 in file test3 cites seven
+</PRE>
+Remove the remaining document from the repository and verify that the pool
+contains only <TT>Word</TT> objects.
+<PRE>
+    % stree -d test3
+
+    % stree -p
+    Word 'one' occurs on 0 lines
+    Word 'three' occurs on 0 lines
+    Word 'five' occurs on 0 lines
+    Word 'seven' occurs on 0 lines
+    Word 'two' occurs on 0 lines
+    Word 'six' occurs on 0 lines
+    Word 'four' occurs on 0 lines
+</PRE>
+<P><A NAME="stree:sonnets">&#160;</A><H3><A NAME="SECTION00063200000000000000000">
+A Larger Example</A>
+</H3>
+<P>
+The <TT>stree</TT> directory has a sub-directory called <TT>sonnets</TT> which
+contains all 154 of Shakespeare's sonnets, one per file.
+For this test, add sonnets 10 through 19 to the repository.
+<PRE>
+    % stree -aV sonnets/sonnet01?
+    Indexing file sonnets/sonnet010
+    Indexing file sonnets/sonnet011
+    Indexing file sonnets/sonnet012
+    Indexing file sonnets/sonnet013
+    Indexing file sonnets/sonnet014
+    Indexing file sonnets/sonnet015
+    Indexing file sonnets/sonnet016
+    Indexing file sonnets/sonnet017
+    Indexing file sonnets/sonnet018
+    Indexing file sonnets/sonnet019
+    about to commit
+    committed
+
+    % stree -lV summers
+    ========== summers
+    sonnet012:   And summer's green all girded up in sheaves
+    sonnet018:   Shall I compare thee to a summer's day?
+    sonnet018:   And summer's lease hath all too short a date:
+
+    % stree -l summers
+    sonnet012
+    sonnet018
+    sonnet018
+</PRE>
+Note that sonnet 18 is listed twice, since &quot;summers&quot; appears
+on two different lines in that sonnet.
+<P>
+To illustrate access to the Shore database from existing Unix utilities,
+mount the Shore database as a Unix file system, as explained in the
+<A NAME="tex2html17"
+ HREF="../installation/installation.html"><EM>Shore Software Installation Manual</EM></A>,
+in the section
+<A HREF="../installation/node7.html#installation:nfs"><EM>NFS-Mounting the Shore File System</EM></A>.
+If you follow the instructions there, you will have the Shore database
+mounted as /shoremnt.
+<PRE>
+    % ls -l /shoremnt
+    total 2
+    drwxr-xr-x   1 solomon  solomon        12 Aug  6 16:33 stree/
+    prwxr-xr-x   1 solomon  solomon         0 Aug  6 15:50 testpool|
+    drwxr-xr-x   1 solomon  solomon        12 Aug  6 16:23 types/
+    % ls -l /shoremnt/stree
+    total 6
+    prw-r--r--   1 solomon  solomon         0 Aug  6 16:33 pool|
+    -rw-r--r--   1 solomon  solomon         0 Aug  6 16:33 repository
+    -rw-r--r--   1 solomon  solomon       650 Aug  6 16:33 sonnet010
+    -rw-r--r--   1 solomon  solomon       709 Aug  6 16:33 sonnet011
+    -rw-r--r--   1 solomon  solomon       657 Aug  6 16:33 sonnet012
+    -rw-r--r--   1 solomon  solomon       637 Aug  6 16:33 sonnet013
+    -rw-r--r--   1 solomon  solomon       623 Aug  6 16:33 sonnet014
+    -rw-r--r--   1 solomon  solomon       647 Aug  6 16:33 sonnet015
+    -rw-r--r--   1 solomon  solomon       630 Aug  6 16:33 sonnet016
+    -rw-r--r--   1 solomon  solomon       677 Aug  6 16:33 sonnet017
+    -rw-r--r--   1 solomon  solomon       656 Aug  6 16:33 sonnet018
+    -rw-r--r--   1 solomon  solomon       662 Aug  6 16:33 sonnet019
+</PRE>
+<P>
+Note that there are 12 registered objects in the directory <TT>stree</TT>:
+10 sonnets (objects of class <TT>Document</TT>),
+the object <TT>repository</TT> (of class <TT>SearchTree</TT>), and
+the <TT>pool</TT> object.
+The <TT>pool</TT> and <TT>repository</TT> show up under Unix as having zero size,
+since neither has a <TT>text</TT> member, but each of the sonnets shows up
+as a file whose contents are the same as its <TT>text</TT> member <TT>body</TT>.
+<P><PRE>
+    % cat /shoremnt/stree/sonnet018
+      Shall I compare thee to a summer's day?
+      Thou art more lovely and more temperate:
+      Rough winds do shake the darling buds of May,
+      And summer's lease hath all too short a date:
+      Sometime too hot the eye of heaven shines,
+      And often is his gold complexion dimmed,
+      And every fair from fair sometime declines,
+      By chance, or nature's changing course untrimmed:  
+      But thy eternal summer shall not fade,
+      Nor lose possession of that fair thou ow'st,
+      Nor shall death brag thou wand'rest in his shade,
+      When in eternal lines to time thou grow'st,
+        So long as men can breathe or eyes can see,
+        So long lives this, and this gives life to thee.
+</PRE>
+<P>
+The shell script
+<A HREF="node8.html#stree:swcSRC">swc</A>
+illustrates how
+Shore applications can be combined with &quot;legacy&quot;
+Unix programs.
+<PRE>
+    % swc summers
+         14     118     657 sonnet012
+         14     114     656 sonnet018
+         28     232    1313 total
+</PRE>
+This script uses the output of <TT>stree -l</TT> (piped through <TT>sort -u</TT>
+to remove duplicates) as the list of arguments to a standard Unix utility
+(in this case <TT>wc</TT>) which accesses the objects as if they were
+ordinary Unix files.
+Note that there is no need to use a special version of <TT>wc</TT> or even
+to re-link <TT>wc</TT> with a special library.
+<P>
+A slightly more sophisticated example is afforded by
+<A HREF="node8.html#stree:seditSRC">sedit</A>,
+which invokes an editor on the set of sonnets containing a given word.
+If your editor (as indicated by the <TT>EDITOR</TT> environment variable)
+is emacs, you will see this:
+<PRE>
+  % sedit summers
+  MR Buffer         Size   Mode           File
+  -- ------         ----   ----           ----
+ .   sonnet018      656    Text          /shoremnt/stree/sonnet018
+     sonnet012      657    Text          /shoremnt/stree/sonnet012
+     *scratch*      0      Lisp Interaction
+  *  *Buffer List*  274    Text
+
+
+
+
+ --%%-Emacs: *Buffer List*   6:54am 0.23   (Buffer Menu)--All--------------------
+   Shall I compare thee to a summer's day?
+   Thou art more lovely and more temperate:
+   Rough winds do shake the darling buds of May,
+   And summer's lease hath all too short a date:
+   Sometime too hot the eye of heaven shines,
+   And often is his gold complexion dimmed,
+   And every fair from fair sometime declines,
+   By chance, or nature's changing course untrimmed:
+   But thy eternal summer shall not fade,
+   Nor lose possession of that fair thou ow'st,
+   Nor shall death brag thou wand'rest in his shade,
+ -----Emacs: sonnet018      6:54am 0.23   (Text Fill)--Top-----------------------
+ Commands: d, s, x, u; f, o, 1, 2, m, v; ~, %; q to quit; ? for help.
+</PRE>
+<P>
+To clean up after this test, you can remove all the documents from the
+repository and then remove the repository itself with the <TT>-c</TT> option
+<PRE>
+    % stree -d sonnet010 sonnet011 sonnet012 sonnet013 sonnet014
+    % stree -d sonnet015 sonnet016 sonnet017 sonnet018 sonnet019
+    % stree -c
+</PRE>
+or you can simply remove the repository through the Unix compatibility
+interface
+<PRE>
+    % rm -rf /shoremnt/stree
+</PRE>
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html171"
+ HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html168"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html162"
+ HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html170"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html172"
+ HREF="node7.html">Using Indexes</A>
+<B> Up:</B> <A NAME="tex2html169"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html163"
+ HREF="node5.html">The Main Program</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

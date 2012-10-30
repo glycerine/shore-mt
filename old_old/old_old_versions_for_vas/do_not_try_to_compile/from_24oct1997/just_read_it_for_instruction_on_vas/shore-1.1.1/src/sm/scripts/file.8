@@ -1,0 +1,65 @@
+
+
+source $script_dir/vol.init
+set_config_info
+
+# test for bug PR 307  (overwriting last slot)
+
+set id_body_1216 [format %01216d 1]
+set id_body_400 [format %0400d 1]
+
+sm begin_xct
+set fid [sm create_file $volid regular]
+sm commit_xct
+
+sm begin_xct
+
+echo THE FOLLOWING MIGHT CAUSE ERROR :record does not fit
+echo THIS IS OK as long as it does not get an assertion failure.
+
+set tot 1216
+# 4 for slot, 16 for tag , 0 for header
+set slotsize 4
+set tagsize 16
+set tot [expr { $tot + $slotsize + $tagsize }]
+
+verbose creating r0 size 1216
+set r0 [sm create_rec $fid "" 0 $id_body_1216]
+for {set i 0} {$i < 300} {incr i} {
+    sm create_rec $fid "" 0 "01234567"
+    set tot [expr { $tot + 8 + $slotsize + $tagsize }]
+}
+
+set catcherr 0
+verbose appending 400 to $r0 while total = $tot
+set res [catch { sm append_rec $r0  $id_body_400 } catcherr] 
+verbose $res
+if { $res == 1 } {
+	verbose Error is: $catcherr
+} else {
+	set tot [expr { $tot + 400 }]
+
+	for {set i 0} {$i < 100} {incr i} {
+		set tot [expr { $tot + 8 + $slotsize + $tagsize }]
+		sm create_rec $fid "" 0 "01234567"
+	}
+
+	verbose appending 400 to $r0 while total = $tot
+	set res [catch { sm append_rec $r0  $id_body_400 } catcherr] 
+	if { $res == 1 } {
+		verbose Error is: $catcherr
+	} else {
+		set tot [expr { $tot + 400 }]
+
+		for {set i 0} {$i < 100} {incr i} {
+			set tot [expr { $tot + 8 + $slotsize + $tagsize }]
+			sm create_rec $fid "" 0 "01234567"
+		}
+	}
+}
+sm destroy_file $fid
+sm commit_xct
+
+unset r0 res i
+unset tot fid id_body_1216 id_body_400 catcherr
+unset slotsize tagsize

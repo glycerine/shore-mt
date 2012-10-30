@@ -1,0 +1,37 @@
+#!/bin/sh -- # do not change this line, it mentions perl and prevents looping
+eval 'exec perl $0 ${1+"$@"}'
+	if 0;
+
+($#ARGV == 0) || die "Usage: $0 baseline \n";
+$baseline = shift @ARGV;
+
+$workspace = `pwd`;
+chop $workspace;
+
+require "find.pl";
+$pass = 0;
+&find($baseline);
+$pass = 1;
+&find($workspace);
+if (! -e $baseline) {
+    symlink($baseline, 'baseline') || die "symlink($baseline): $!\n";
+}
+
+
+sub wanted {
+	if ($pass == 0 && /RCS$/)  {
+	    $dest = $dir;
+	    $dest =~ s#$baseline#$workspace#;
+	    if (! -e $dest) {
+	        (mkdir($dest, 0777) || die "mkdir($dest): $!\n");
+	    }
+	    if (! -e "$dest/RCS") {
+	        (symlink($name, "$dest/RCS") || die "symlink($name): $!\n");
+	    }
+	} elsif ($pass == 1 && /RCS$/) {
+	    `co RCS/*,v`;
+	    `touch .depend`;
+	}
+}
+
+

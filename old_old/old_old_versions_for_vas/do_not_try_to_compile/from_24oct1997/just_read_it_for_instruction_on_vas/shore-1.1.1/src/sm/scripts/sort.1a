@@ -1,0 +1,89 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test sort on integers -- this is called by sort.1
+#    to test multiple integer and unsigned key types.
+#    This assumed that $ktype and $nrec  are set by calling script
+#
+
+if {$Use_logical_id==1} {
+    echo Sort not supported for logical ids
+} else {
+
+# len hint < page size
+set lenhint 100
+
+#
+# Create and load a file with typed keys in reverse order
+# Create duplicates: ($nrecs - $i) copies of $i for i=0...$nrec-1
+#
+
+sm begin_xct
+set f1 [sm create_file $volid]
+verbose populating f1 = $f1
+for {set i 0} {$i < $nrec} {incr i} {
+    for {set j 0} {$j <= $i } {incr j} {
+	set data [expr { $nrec - $i } ]
+	set hdr $data
+	if { $ktype == "b*1000" } {
+	    for {set c 0} {$c < $i} {incr c} {
+		set hdr "$hdr$data"
+	    }
+	}
+	set data "$data.$j"
+	#   args: fid hdr len_hint data type [universe]
+        verbose sm create_typed_hdr_rec $f1 $hdr $ktype $lenhint $data b*1000
+        sm create_typed_hdr_rec $f1 $hdr $ktype $lenhint $data b*1000
+    }
+}
+verbose scans on f1... UNSORTED, DUPLICATES
+verbose [sm scan_sorted_recs $f1 $ktype b*1000]
+sm commit_xct
+
+#sort distinct and display
+sm begin_xct
+    verbose sort ... 
+    set f2 [sm sort_file $f1 $volid 3 $ktype distinct keep]
+    verbose f2 = $f2 
+
+    verbose scans on f2 ... ASCENDING, DISTINCT
+    verbose [sm scan_sorted_recs $f2 $ktype b*1000]
+    verbose destroying $f2
+    sm destroy_file $f2
+    verbose destroyed $f2
+sm commit_xct
+
+#sort non-distinct and display
+sm begin_xct
+    verbose sort ... 
+    set f2 [sm sort_file $f1 $volid 3 $ktype normal keep]
+    verbose f2 = $f2 
+
+    verbose scans on f2 ... ASCENDING, DUPLICATES
+    verbose [sm scan_sorted_recs $f2 $ktype b*1000]
+    sm destroy_file $f2
+sm commit_xct
+
+# sort distinct and display, destruct
+sm begin_xct
+    verbose sort ...
+    set f3 [sm sort_file $f1 $volid 3 $ktype distinct destruct]
+    verbose f3 = $f3
+
+    verbose scans on f3 ... ASCENDING, DISTINCT
+    verbose [sm scan_sorted_recs $f3 $ktype b*1000]
+
+    catch {sm destroy_file $f1} err
+    assert { expr {[error_is $err E_BADSTID] == 1} }
+    sm destroy_file $f3
+
+sm commit_xct
+
+unset f1 f3 i f2 j lenhint data err hdr
+
+}

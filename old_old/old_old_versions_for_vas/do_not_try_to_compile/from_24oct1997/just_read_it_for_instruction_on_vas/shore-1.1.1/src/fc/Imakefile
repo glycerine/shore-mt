@@ -1,0 +1,62 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ *  $Id: Imakefile,v 1.58 1997/06/16 21:35:54 solomon Exp $
+ */
+
+#define Tests tests
+
+/* CHEAP_RC is defined in ../config/config.h */
+#ifdef CHEAP_RC
+#define Rc w_cheaprc.cc
+#else
+#define Rc w_rc.cc
+#endif
+
+#ifdef IS_SOLARIS2
+#define Stats solaris_stats.cc
+#else
+#define Stats unix_stats.cc
+#endif
+
+#define Hdr \
+	w_base.h w_error.h w_list.h w_rc.h w_sptr.h w_fastnew.h w_boolean.h \
+	w_statistics.h w_autodel.h w_workaround.h w_vector.h w_ref.h w_shmem.h \
+	stime.h w_timer.h w_cirqueue.h w_ref_counted.h w_bitmap.h w_bitmap_space.h \
+	w_minmax.h w_hash.h w.h unix_error.h copyright.h nbox.h
+
+SRC = w_base.cc w_listm.cc w_error.cc w_shmem.cc w_fastnew.cc stime.cc w_timer.cc %
+	w_bitmap.cc w_statistics.cc common_tmpl.cc nbox.cc Rc Stats
+
+
+%GEN c_to_o(OBJ,$(SRC))
+
+all_local:: libfc.a
+
+ShoreConfig.h:
+	echo "#ifndef " Arch > ShoreConfig.h
+	echo "#define " Arch >> ShoreConfig.h
+	echo "#endif " >> ShoreConfig.h
+	echo "#ifndef " OpSys >> ShoreConfig.h
+	echo "#define " OpSys >> ShoreConfig.h
+	echo "#endif " >> ShoreConfig.h
+	echo "#ifndef SM_PAGESIZE" >> ShoreConfig.h
+	echo "#define SM_PAGESIZE" SM_PAGESIZE >> ShoreConfig.h
+	echo "#endif " >> ShoreConfig.h
+%GEN generated_headers(ShoreConfig.h)
+
+%GEN error_enum(fc_error.dat,fc)
+
+%GEN library(libfc.a, $(OBJ))
+
+%GEN install(include, Hdr fc_error.h ShoreConfig.h
+				w_list.cc w_hash.cc w_cheaprc.h w_cheaprc.cc)
+%GEN install_as(include,config.h,ShoreConfig.h)
+
+%GEN depend_target($(SRC))
+%GEN tags(Hdr $(SRC))

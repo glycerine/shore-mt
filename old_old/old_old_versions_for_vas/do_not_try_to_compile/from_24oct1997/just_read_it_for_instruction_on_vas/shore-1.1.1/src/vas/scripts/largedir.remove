@@ -1,0 +1,23 @@
+# source ../scripts/setup.all
+
+cd /small
+
+global verbose
+set st 0123456789
+set med $st.$st.$st.$st.$st
+set long $med.$med
+set nent  [expr {$pagesize / 100}]
+set nent  [expr {$nent * 2}]
+set nent  [expr {$nent + 2}]
+
+begin
+	for {set i 0} {$i < $nent} {incr i} {
+		if ($verbose) {
+			cout "rmdir " $long.$i 
+		}
+		rmdir $long.$i
+		ls -ldi .
+	}
+	ls -ldi .
+	ls
+commit

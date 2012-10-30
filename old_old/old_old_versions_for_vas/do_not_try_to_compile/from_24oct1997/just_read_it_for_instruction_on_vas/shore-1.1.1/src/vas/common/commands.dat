@@ -1,0 +1,987 @@
+! # --------------------------------------------------------------- #
+! # -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+! # -- University of Wisconsin-Madison, subject to the terms     -- #
+! # -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+! # -- Reserved.                                                 -- #
+! # --------------------------------------------------------------- #
+
+
+! COMMAND <name>
+! ALIAS <alias> ... optional
+! USAGE  arguments ... required    
+! KEYWORDS  optional
+! HELP  required
+! %% required at end of listing for command
+! 
+
+%COMMAND trunc
+%USAGE <path|oid> final-size [newtstart [newtsize]]
+%HELP
+where
+\"oid\" is the logical object id of an anonymous object
+    or
+\"path\" is the pathname of a registered object
+
+\"final-size\" is the size of the object after the truncate.
+If the final-size is larger than the current size of the object,
+null bytes are appended to the object.
+
+\"newtstart\" is the new start location of the text portion
+
+\"newtsize\" is the new size of the text portion
+
+Returns error message if error occurs, otherwise null string.
+
+%KEYWORDS truncate expand update object
+%%
+
+
+
+%COMMAND append
+%USAGE <path|oid> #bytes [newtstart [newtsize]]
+%HELP
+where
+\"oid\" is the logical object id of an anonymous object
+    or
+\"path\" is the pathname of a registered object
+
+\"#bytes\" is the number of bytes to append
+
+\"newtstart\" is the new start location of the text portion
+
+\"newtsize\" is the new size of the text portion
+
+Returns error message if error occurs, otherwise null string.
+
+See also: trunc.
+
+%KEYWORDS truncate expand update object
+%%
+
+%COMMAND lock
+%USAGE <path|oid> <NL | IS | IX | S | SIX | U | X> [Nonblocking | Blocking]
+%HELP Acquire the given lock mode on
+the indicated object.
+By default, the request will block if the lock cannot
+be acquired immediately.
+NB: Nonblocking mode is not implemented. (TODO)
+
+Returns error message if error occurs, otherwise null string.
+
+%%
+
+%COMMAND mkzanon
+%KEYWORDS anonymous object create pool zeroed
+%USAGE <pool path|oid> <objsize> [type]
+%HELP Create an anonymous object of the given
+type (default=UnixFile), of the indicated
+size (core:heap:tstart), in the pool identified
+by <pool path> or by <oid>.
+This uses a \"uninitialized\" (zeroed) data. 
+
+Returns error message if error occurs, otherwise OID of object created.
+%%
+
+%COMMAND mkanon
+%KEYWORDS anonymous object create pool
+%USAGE <pool path|oid> <objsize> [type]
+%HELP Create an anonymous object of the given
+type (default=UnixFile), of the indicated
+size (core:heap:tstart), in the pool identified
+by <pool path> or by <oid>.
+
+Returns error message if error occurs, otherwise OID of object created.
+%%
+
+%COMMAND mkanonwithref
+%KEYWORDS anonymous object create pool reference serial
+%USAGE <pool path|oid> <serial> <objsize> [type]
+%HELP Create an anonymous object of the given
+type (default=UnixFile), 
+with the given serial #,
+of the indicated size (core:heap:tstart), in the pool identified
+by <pool path> or by <oid>.
+
+Returns error message if error occurs, otherwise OID of object created.
+
+%%
+
+%COMMAND mkpool
+%USAGE <path> [mode]
+%KEYWORDS  registered pool
+%HELP Create a pool with the given pathname.
+<Path> can be relative or absolute.
+
+Returns error message if error occurs, otherwise OID of object created.
+%%
+
+%COMMAND mkuserdef
+%USAGE <path> objsize [mode]
+%KEYWORDS object registered user-defined
+%HELP Create an object of a \"user-defined\"
+type, with the given pathname.
+<Path> can be relative or absolute.
+
+Objsize is of the form <core:heap:tstart>
+where tstart can be \"NoText\" 
+
+Returns error message if error occurs, otherwise OID of object created.
+%%
+
+%COMMAND mkuserdefnodata
+%USAGE <path> objsize [mode]
+%KEYWORDS object registered user-defined
+%HELP
+Create an object of a \"user-defined\"
+type, with the given pathname.
+<Path> can be relative or absolute.
+
+The object will have uninitialized data.
+
+Objsize is of the form <core:heap:tstart>
+where tstart can be \"NoText\" 
+
+Returns error message if error occurs, otherwise OID of object created.
+%%
+
+%COMMAND scanindex
+%USAGE <oid,int> [compareop lbound] [compareop ubound]
+%KEYWORDS index find search scan
+%HELP Find all the key,value pairs within the
+given lower and upper bounds.
+
+Compareops are:
+    <=, <, >=, >, or ==
+If a [compareop bound] pair is missing, + or - infinity is
+used.
+
+Returns number of entries if verbose is turned off;
+lists the values if verbose is on.
+%%
+
+%COMMAND find
+%USAGE <oid,int> key-string
+%KEYWORDS index find search 
+%HELP Find all the key,value pairs with the
+given key in 
+the index identified by <oid,int>.
+
+Returns the value found.
+%%
+
+%COMMAND removeall
+%USAGE <oid,int> key-string
+%KEYWORDS index remove 
+%HELP 
+Remove all the key,value pairs with the given key from 
+the index identified by <oid,int>.
+
+Returns the value found if only one, number of key-value pairs
+removed if more than one.
+%%
+
+%COMMAND remove
+%USAGE <oid,int> key-string value-string
+%KEYWORDS index remove  
+%HELP Remove the key,value pair from 
+the index identified by <oid,int>.
+
+Returns null string unless error occurs.
+%%
+
+%COMMAND insert
+%USAGE <oid,int> key-string value-string
+%KEYWORDS index insert add  
+%HELP Insert the key,value pair in the
+index identified by <oid,int>.
+
+Returns null string unless error occurs.
+%%
+
+%COMMAND news
+%USAGE bugs
+%HELP Tells you what is new with this version.
+%%
+
+%COMMAND read
+%USAGE <path|oid> [start [#bytes]]
+%HELP Read the object named by <path>
+or <oid>.
+Read <#bytes> bytes (default = WholeObject)
+beginning <start> bytes into the object.
+
+<#bytes> may be more than the size of the object,
+in which case, the object is read up to its end.
+
+If no <#bytes> is given, the object is read
+in chunks of 10000 bytes.
+
+If verbose is on, it displays the bytes read.
+(To display the object when it is read,  you
+must have \"set verbose 1\" before using the
+read command.)
+
+If verbose is not on, it returns a null string,
+unless n error occurs.
+
+%%
+
+%COMMAND write
+%USAGE <path|oid> [start [#bytes]]
+%KEYWORDS write update object 
+%HELP Update the object named by <path>
+or <oid>.
+Write <#bytes> bytes (default = WholeObject)
+beginning <start> bytes into the object.
+
+The tester generates a pattern of bytes to write.
+
+Returns the null string unless an error occurs.
+%%
+
+%COMMAND rmanon
+%KEYWORDS remove anonymous object destroy
+%USAGE <oid>
+%HELP Remove the anonymous object identified by <oid>.
+The may be of a user-defined type or a  UnixFile.
+
+Returns the null string unless an error occurs.
+%%
+
+%COMMAND addmindex
+%KEYWORDS index btree lhash rtree
+%USAGE <path|oid> <i> kind 
+%HELP Create a manual index and attach it to the
+given object, at the <i>th slot.
+The object must have been created with > 0 indexes,
+and the object must not already have an index in that
+slot.
+
+Returns the null string unless an error occurs.
+%%
+
+%COMMAND dropmindex
+%KEYWORDS index 
+%USAGE <path|oid> <i> 
+%HELP Drop the manual index attached to the 
+given object at the <i>th slot.
+The object must have been created with > 0 indexes,
+and the object must have an index in that slot.
+
+Returns the null string unless an error occurs.
+%%
+
+%COMMAND statmindex
+%KEYWORDS index 
+%USAGE <path|oid> <i> kind 
+%HELP Print information about the manual index in the
+<i>th slot of the given object.
+%%
+
+%COMMAND scanpool
+%KEYWORDS pool anonymous scan
+%USAGE <path|oid> [read | scandata [sysprops] | count] 
+%HELP
+Scan the given pool, and do one of the following:
+1.    count the objects in it (count, default),
+2.    read the objects in it while scanning (scandata [sysprops]).
+        If \"sysprops\"  is used, the sysprops are also returned
+        while the pool is scanned.
+3.    read the objects in it with a separate read call(read).
+
+Returns number of objects in the pool.
+If the read or sysprops options are used, it
+prints more information during the scan.
+If verbose is on, it prints even more details.
+%%
+
+%COMMAND snapref
+%USAGE <path|oid>
+%KEYWORDS reference chain snap remote indirect serial
+%HELP
+Follow a chain of indirect or off-volume references
+until the last logical oid in the chain is reached,
+an return that.
+If the reference is identified by a pathname,
+the pathname can be relative or absolute, but it must
+name to a cross-reference.
+
+Returns the OID at the end of the chain of references. 
+%%
+
+%COMMAND offvolref
+%USAGE <path|oid>
+%KEYWORDS reference chain remote indirect serial
+%HELP
+Create an indirect or off-volume reference
+to the object named by <path> or <oid>.
+All references are made in the context
+of a volume; the volume used for this command
+is the volume of the current working directory.
+
+Returns the resulting reference.
+%%
+
+%COMMAND mkvolref
+%USAGE [number]
+%KEYWORDS local reference serial
+%HELP
+Create a set of one or more continguous
+local references (serial numbers) on the
+volume indicated by \".\" (current working
+directory).
+If no [number] is given, 1 is used.
+The serial numbers generated are not
+associated with any objects.  The first
+reference in the set is returned.
+
+All references are made in the context
+of a volume; the volume used for this command
+is the volume of the current working directory.
+
+Returns the resulting reference.
+%%
+
+%COMMAND verify
+%USAGE 
+%HELP
+Verifies that everything in one of the 
+object verification tables (OVT) matches the
+database.
+
+If \"verify\" is run inside a transaction, it
+compares the database with the active OVT.
+If it is run outside a transaction, it compares
+the database with the committed OVT.
+%%
+
+%COMMAND printovt
+%USAGE <option>
+%HELP
+Where <option> is one of these characters:
+    c -- to print committed data
+    a -- to print active data
+    p -- to print prepared data
+%%
+
+%COMMAND locktable
+%KEYWORDS debug dump
+%USAGE 
+%HELP Dump the lock table.
+(only available when compiled with -DDEBUG)
+%%
+
+%COMMAND threads
+%KEYWORDS debug dump
+%USAGE 
+%HELP Dump what we know about threads
+(only available when compiled with -DDEBUG)
+%%
+
+%COMMAND interrupt
+%KEYWORDS abort transaction clients
+%USAGE [file descriptor]
+%HELP Interrupts the client that is communicating with
+the server on the given file descriptor,
+by telling it to abort its transaction.
+Use the \"clients\" command to find out what file descriptors
+are associated with the clients.
+Privileged operation, available only on the server.
+%%
+
+%COMMAND cd
+%KEYWORDS change directory current working Shore
+%USAGE <path-in-Shore-namespace>
+%HELP The Tcl command \"cd\" has been renamed \"_cd\"
+for changing your current working Unix directory.
+
+Returns the null string unless an error occurs.
+%%
+
+%COMMAND clients
+%USAGE [verbose]
+%HELP Prints a list of the client connections.
+%KEYWORDS connection connections transactions debug
+%%
+
+
+%COMMAND config
+%HELP Prints configuration information from the SM.
+%USAGE
+%KEYWORDS pagesize object size
+%%
+
+%COMMAND send
+%HELP Stops batching update commands and sends what's queued
+%USAGE
+%KEYWORDS trunc append write update mkanon batch send
+
+Returns a list of the results.
+%%
+
+%COMMAND start
+%HELP Begins batching update commands
+%USAGE
+%KEYWORDS trunc append write update mkanon batch send
+
+Returns the null string unless an error occurs.
+%%
+
+%COMMAND disconnect
+%USAGE
+%HELP Disconnect from the server.
+%KEYWORDS close connect vas
+
+Returns the word Disconnected if no error occurs.
+%%
+
+%COMMAND dismount
+%USAGE <mountpoint> 
+%HELP Dismount the named mountpoint. 
+%KEYWORDS mount volume filesystem 
+
+Returns the null string unless an error occurs.
+%%
+
+%COMMAND patch
+%USAGE <mountpoint> | <volume-id>
+%HELP Does half a dismount either at
+the named mountpoint's end of a
+persistent link or at the volume-id's root
+directory end of a persistent link.
+Only for privileged users.
+%KEYWORDS mount volume filesystem 
+
+Returns the null string unless an error occurs.
+%%
+
+%COMMAND quota
+%USAGE <volume-id>
+%HELP Returns the number of kilobytes 
+allocated for the volume, and the number 
+of kilobytes used for the volume.
+%KEYWORDS mount volume filesystem 
+%%
+
+%COMMAND getdirentries
+%USAGE
+%HELP Prints directory entries in current working directory.
+%KEYWORDS ls list directory
+%%
+
+%COMMAND getmnt
+%USAGE <#bytes-for-buffer> [mnt | all | volid | root]
+%HELP Prints information in the mount table.
+\"mnt\" tells the mount points of the mounted volumes.
+\"volid\" prints the volume IDs of the mounted volumes.
+\"root\" prints the OID of the root of the mounted volumes.
+%KEYWORDS mount table root volid volume 
+%%
+
+%COMMAND ls
+%KEYWORDS ls list directory
+%USAGE [i[i[i]]gdaFluzs] [path]
+%HELP
+Akin to Unix ls, but not exactly.
+Option -i causes serial# to be printed (like inode#),
+-ii prints volid.serial#; -iii prints full logical host.volid.serial#.
+
+Do not  try -R!!!
+%%
+
+%COMMAND mkdir
+%USAGE <path> [mode]
+%KEYWORDS directory registered
+%HELP Create a directory with the given pathname.
+<Path> can be relative or absolute.
+
+Returns the OID of the created object.
+%%
+
+%COMMAND mv
+%USAGE <old_name> <new_name>
+%KEYWORDS registered rename move
+%HELP Rename the registered object with path
+<old_name> to <new_name>.
+
+If <new_name> exists, it is first removed.  
+If <new_name> refers to a directory, it must be an empty directory, 
+and must not include <old_name> in its path prefix.  
+Both <old_name> and <new_name> must be of the same type 
+(that is, both directories or both non- directories), and 
+must reside on the same file system (volume).
+
+Write access permission is required for both the directory
+containing <old_name> and the directory containing <new_name>.  
+If a mv request relocates a directory in the hierarchy, write
+permission in the directory to be moved is needed, since its
+entry for the parent directory (..)  must be updated.
+
+If the final component of <old_name> is a symbolic link, the symbolic 
+link is renamed, not the file or directory to which it points.
+
+Upon successful completion, this request marks for update the
+ctime and mtime fields of the parent directory of each file.
+
+Returns an error if the request fails, and a null string if it
+succeeds.
+%%
+
+%COMMAND mklink
+%USAGE <existing> <new>
+%KEYWORDS registered link hard create
+%HELP Create a hard link called <new>,
+which points to the existing object, <existing>.
+Hard links may not cross volumes (Shore filesystems).
+
+Returns the null string unless an error occurs.
+%%
+
+%COMMAND mksymlink
+%USAGE <contents> <new>
+%KEYWORDS registered symbolic symlink create
+%HELP Create a symbolic link called <new>,
+whose contents is <contents>.
+
+Returns the OID of the created object.
+%%
+
+%COMMAND mkunixfile
+%USAGE <path> <objsize> [mode]
+%HELP  Create an object with only
+one attribute: TEXT, which occupies
+the heap.  The object has no core.
+%KEYWORDS Unix object file text compatible compatibility
+
+Returns the OID of the created object.
+%%
+
+%COMMAND mkxref
+%USAGE <path|oid> <path> [mode]
+%HELP Create a cross-reference object called
+<path>; make it refer to the <oid>.
+%KEYWORDS xref cross-reference cross-ref reference create
+
+Returns the OID of the created object.
+%%
+
+%COMMAND rmfs
+%USAGE <lvid>
+%KEYWORDS volume filesystem 
+%HELP 
+Destroys the filesystem on the given volume,
+and destroys the volume.
+%%
+
+%COMMAND mkfs
+%USAGE <device> <kb> <lvid>
+%KEYWORDS volume filesystem 
+%HELP 
+Create a filesystem on the given Unix
+<device>.  The <device> is a Unix pathname.
+The <lvid> is optional. If not given, one is assigned by 
+the storage manager.
+<kb> is the quota in kilobytes.
+
+Returns the volume id of the volume thus created.
+%%
+
+%COMMAND volroot
+%USAGE <lvid>
+%KEYWORDS volume filesystem root directory
+%HELP
+Returns error message if error occurs, otherwise the OID of the root directory
+of the given volume.
+%%
+
+%COMMAND getroot
+%USAGE 
+%KEYWORDS volume filesystem root directory
+%HELP
+Returns error message if error occurs, otherwise the OID 
+of the root directory, if one has been mounted (set).
+%%
+
+%COMMAND newvid
+%USAGE 
+%KEYWORDS volume ID
+%HELP
+Allocate a new volume ID.
+
+Returns the new volume ID.
+%%
+
+%COMMAND volumes
+%USAGE <device> 
+%KEYWORDS volume device filesystem 
+%HELP
+Returns a 
+lists of the lvids of the volumes on the <device>. 
+The <device> must already be served.
+%%
+
+%COMMAND unserve
+%USAGE <device> 
+%KEYWORDS volume device filesystem root directory
+%HELP
+All the volumes on the <device> are made unavailable.
+%%
+
+%COMMAND format
+%USAGE <device> <kb> <force>
+%KEYWORDS volume device filesystem root directory
+%HELP
+The <device> is a Unix pathname.
+<kb> is the quota in kilobytes.
+If <force> is true, the device will be formatted
+even it it already exists.
+%%
+
+%COMMAND setroot
+%USAGE <volume-id> 
+%KEYWORDS volume device filesystem root directory
+%HELP
+Mounts the root directory in the given volume as your 
+root directory, \"/\".
+The volume must already have been formatted by \"format\".
+
+Returns the OID of the root directory of the volume. 
+%%
+
+%COMMAND pmount
+%USAGE <lvid> <mountpoint> 
+%KEYWORDS volume device filesystem voltab persistent mount 
+%HELP
+Make a link named <mountpoint> to the root directory of the
+volume <lvid>.  This is a persistent, cross-volume, unique link
+to the volume\'s root directory.
+(The volume\'s root directory cannot already be linked elsewhere.)
+
+Returns the volume's ID if a <mountpoint> is given.
+If no <mountpoint> is given, the result is a list
+of the persistent mounts present on the indicated volume.
+The volume must be on a device that is being served.
+%%
+
+%COMMAND serve
+%USAGE <device> 
+%KEYWORDS device serve 
+%HELP
+Tell the storage manager about this device.
+The device must already have been formatted and 
+may have one or more volumes created on it (with mkfs).
+
+If you are asking the SM to serve a device, you might
+need to put it in your configuration file also.
+
+If no <device> is given, the result is a list
+of the devices served.
+%%
+
+%COMMAND mount
+%USAGE [<device> <mountpoint> [true|writable|ro|readonly|false]]
+%KEYWORDS volume device filesystem voltab
+%HELP
+
+********mount with arguments is OBSOLETE : use setroot ******
+
+Mounts the Unix file <device> on the <mountpoint>
+(a Shore directory).
+If mounted read-only [false |  ro | readonly], updates are
+not allowed to anything on that filesystem.
+
+If no arguments are given, the mounted filesystems are listed
+(Server only).
+
+%%
+
+%COMMAND chown
+%USAGE <owner> path
+%HELP change the owner for the given registered object.
+Returns the new owner uid.
+%%
+
+%COMMAND chgrp
+%USAGE <group> path
+%HELP change the group ownership for the given registered object.
+Returns the new group gid.
+%%
+
+%COMMAND chmod
+%USAGE <mode> path
+%HELP change the mode bits for the given registered object.
+Returns the new mode.
+WARNING: Mode is interpreted as octal if it is preceded by
+a 0, as hexadecimal if preceded by 0x, and decimal otherwise.
+
+The Unix chmod(1) command syntax of g+w, u-x, etc is NOT understood.
+%%
+
+%COMMAND pwd
+%KEYWORDS print directory current working Shore
+%USAGE [<path|oid>]
+%HELP The Tcl command \"pwd\" 
+(for printing your current working Unix directory)
+has been renamed \"_pwd\".
+%%
+
+
+%COMMAND readref
+%USAGE <path|oid>
+%KEYWORDS xref cross-reference cross-ref reference read
+%HELP Read the contents of a cross-reference.
+Returns the OID of the
+object to which the cross-reference refers.
+%%
+
+%COMMAND resume
+%KEYWORDS tid transaction transactions
+%USAGE [tid]
+%HELP Resume the given tid,
+or the current transaction if
+no [tid] is given.
+%%
+
+%COMMAND unlink
+%USAGE <path>
+%ALIAS rm rmlink rmunixfile rmuserdef rmuserdefnodata
+%KEYWORDS registered remove destroy user-defined unixfile link
+%HELP Remove the object with the given pathname.
+<Path> can be relative or absolute.
+%%
+
+%COMMAND rmpool
+%USAGE <path>
+%KEYWORDS registered pool remove destroy
+%HELP Remove the pool with the given pathname.
+The pool must be empty.  <Path> can be relative or absolute.
+%%
+
+%COMMAND rmxref
+%USAGE <path>
+%KEYWORDS registered cross-reference xref reference remove destroy
+%HELP Remove the cross-reference named by <path>.
+The object to which the cross-reference refers is not
+touched.
+<Path> can be relative or absolute.
+%%
+
+%COMMAND rmsymlink
+%USAGE <path>
+%KEYWORDS registered symbolic link symlink remove destroy
+%HELP Remove the indicated symlink.
+<Path> can be relative or absolute.
+%%
+
+%COMMAND readlink
+%USAGE <path>
+%KEYWORDS registered symbolic link symlink read
+%HELP Read the indicated symlink.
+<Path> can be relative or absolute.
+%%
+
+%COMMAND rmdir
+%USAGE <path>
+%KEYWORDS registered directory remove destroy
+%HELP Remove the directory with the given pathname.
+The directory must be empty.  <Path> can be
+relative or absolute.
+%%
+
+%COMMAND shorefile
+%ALIAS sfile file
+%USAGE option <path|oid>
+%HELP
+Options are:
+    atime mtime ctime -- access, modification or status change time
+    oid,lvid,serial  -- oid, volumeid or serial# of object named by path 
+    exists -- true iff object named by path or oid exists
+    isdirectory isanonymous ispool isxref issymlink isfile, isother  -- 
+		true if named object exists and is the given type; error if it
+        does not exist; isfile means is UnixFile type; isother
+		means it has a user-defined type
+    isempty -- true iff object named is a pool or directory and is empty;
+        error if object is not a directory or pool
+    mode group owner  -- returns mode, group, or owner
+    owned -- true iff you are the owner
+    gowned  -- true if your group is the group
+    readable writable exec  -- as in access(2)
+    size -- core size + heap size of named object
+    type -- oid of type named object
+    fileid -- file id of index or pool for named objects that are
+        directories or pools; error if object is not a directory or pool
+
+Like the Tcl file command except it applies to Shore objects.
+The Tcl file command has been renamed to _file.
+%%
+
+%COMMAND stat
+%USAGE <path|oid>
+%KEYWORDS fstat lstat sysprops registered object directory ls
+%HELP Somewhat like Unix \"stat\".
+Pretty-prints the sysprops for a registered object.
+Equivalent to \"ls -dlai\".
+%%
+
+%COMMAND suspend
+%KEYWORDS tid transaction transactions
+%USAGE [tid]
+%HELP Suspend the given tid, or the current 
+transaction if no [tid] is given.
+%%
+
+%COMMAND umask
+%USAGE [mask]
+%KEYWORDS registered mask create object process
+%HELP Sets the umask on the server.
+<mask> can be in any radix.
+If no argument is given, the current mask is returned.
+%%
+
+%COMMAND utimes
+%USAGE <oid | path>
+%HELP Set the access, creation, and modification times
+of the object to the current time.
+Returns the time set.
+%%
+
+%COMMAND sutimes
+%USAGE <oid | path>
+%HELP Set the access, creation, and modification times
+of the object to the this time yesterday.
+(For testing purposes only.)
+Returns the time set.
+%%
+
+%COMMAND vas
+%ALIAS connect
+%USAGE [localhost|hostname|username [sm-obj-page-bytes [lg-obj-page-bytes]]]
+%HELP Create a client connection to the VAS.
+If no host name is given, localhost is used.
+(Server only: use username.)
+\"Sm-obj-page-bytes\" is the # bytes of share memory to be used
+for transferring small-object-pages between the server and the client.
+\"Lg-obj-page-bytes\" is the # bytes of share memory to be used
+for transferring large-objects between the server and the client.
+If either is 0, no shared memory is used, and everything is transferred
+over TCP.
+%KEYWORDS initialize start shared memory server connection
+%%
+
+%COMMAND du
+%USAGE [-s|-a|-o|-m|-b] [<path>]
+%HELP Lists the sizes of each file recursively starting from [path].
+option -s : summary for \".\" and its descendents
+option -a : print a line for each file as well a for each directories
+neither -a nor -s : print a line for each directory only
+option -o : print information about overhead 
+option -m : print information about SM overhead 
+option -b : be brief
+
+If no path is given, \".\" is assumed.
+%KEYWORDS disk usage list directory df 
+%%
+
+%COMMAND df
+%USAGE [-e|-p|-b|-a|-s] [<path|oid>]
+%HELP disk units
+option -e : information about extents
+option -p : information about pages
+option -b : information about bytes
+option -a : all of the above info
+option -s : summary only
+
+If no options are given, -a is assumed.
+
+If <path|oid> is specified, the volume in which the given object
+lives is the volume described.
+If no <path|oid> is given, all mounted volumes are described.
+%KEYWORDS disk filesystem usage volume
+%%
+
+%COMMAND suppress
+%USAGE [on|yes|off|no]
+%KEYWORDS quiet suppress print user errors
+%HELP 
+Controls printing of user errors.
+If no argument is given, \"on\" or \"off\" is returned.
+%%
+
+%COMMAND lock_timeout
+%USAGE <milliseconds>
+%HELP 
+Set lock timeout for this client.
+Positive integer values are treated as milliseconds.
+
+0 means return with an error if the lock
+cannot be acquired immediately.
+
+-1 means wait indefinitely for locks.
+%%
+
+%COMMAND abort
+%KEYWORDS tid transaction transactions
+%USAGE [tid]
+%HELP Abort the given tid,
+or the current transaction if
+no [tid] is given.
+%%
+
+%COMMAND begin
+%USAGE [2 | 3]
+%KEYWORDS tid transaction transactions
+%HELP Begin a new transaction.
+Returns the transaction id (tid).
+
+If a small integer is given as an argument,
+it is taken as the degree of consistency used
+for this transaction, where the Shore filesystem's
+directories are concerned.  If degree is 2, 
+only short-term share locks are acquired on directories.
+If degree is 3, you acquire long-term share locks on 
+directories, which limits the ability of other transactions
+to update directories during your transaction.
+%%
+
+%COMMAND chain
+%KEYWORDS tid transaction transactions
+%USAGE 
+%HELP Commit the given tid,
+and do not free locks, and leave
+a new transaction running. The new
+transaction inherits the locks of the
+one committed.
+Returns the null string unless an error occurs.
+%%
+
+%COMMAND commit
+%KEYWORDS tid transaction transactions
+%USAGE [tid]
+%HELP Commit the given tid,
+or the current transaction if
+no [tid] is given.
+
+Returns the null string unless an error occurs.
+%%
+
+%COMMAND tstate
+%USAGE 
+%KEYWORDS transaction state
+%HELP
+Returns the state of the current transaction, if there
+is a current transaction.
+%%
+
+%COMMAND tid
+%USAGE 
+%KEYWORDS transaction id
+%HELP
+Returns the identifier of the current transaction,
+or \"none\" if there is no current transaction.
+%%
+
+%COMMAND checkserver
+%USAGE 
+%HELP
+Returns 0 if server is still connected, 1 if not.
+%%

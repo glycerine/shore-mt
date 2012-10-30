@@ -1,0 +1,34 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ *      $RCSfile: Imakefile,v $
+ *      $Revision: 1.29 $
+ *      $Date: 1997/06/13 22:34:17 $
+ *      $Author: solomon $
+ */
+CPPFLAGS = -I../common -I../../common -I../../fc -I ../../rpc4.0 -I../../sm %
+	Include(TclInclude)
+
+HFILES = bzero.h process_options.h svas_client.h %
+	default_port.h reserved_oids.h %
+	externc.h shore_vas.h %
+	permissions.h svas_base.h vas_types.h clientstats.h
+#define Installed \
+	externc.h svas_error_def.h vas_types.h process_options.h reserved_oids.h
+INSTALLED = Installed
+
+tests_local:: app_test
+
+%GEN error_def(svas_error.dat, svas os)
+%GEN stats(svas_client.dat, clientstats)
+%GEN c_plus_program(app_test, app_test.o, ../client/libvas.a ../common/libcommon.a)
+
+%GEN install(include, Installed clientstats_def.i)
+
+%GEN tags(app_test.C $(HFILES) $(INSTALLED_FILES))
+%GEN depend_target(app_test.C)

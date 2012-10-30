@@ -1,0 +1,28 @@
+#!/bin/sh
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+# $Header: /p/shore/shore_cvs/src/examples/stree/swc,v 1.3 1995/04/26 11:03:06 solomon Exp $
+
+mountpoint=/shoremnt
+program=stree
+
+if test $1x = -ix
+then
+	program=doc_index
+	shift
+fi
+
+if test $# -ne 1
+then
+	echo "usage: $0 [-i] keyword"
+	exit 1
+fi
+
+prog_path=`pwd`/$program
+
+cd $mountpoint/$program
+wc `$prog_path -l $1 | sort -u`

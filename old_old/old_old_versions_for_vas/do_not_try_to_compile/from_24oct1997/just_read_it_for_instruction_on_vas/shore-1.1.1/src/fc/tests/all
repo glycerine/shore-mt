@@ -1,0 +1,31 @@
+#!/bin/ksh 
+
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+function execute  {
+    print -n "$1\t--> running --> "
+    print "running $1" >> $2
+    if ./$1 >> $2 2>&1; then
+	print "ok"
+    else
+	print "failed"
+    fi
+}
+
+rm -f /tmp/all*.out
+outf=/tmp/all$$.out
+execute list1 $outf
+execute list2 $outf
+execute list3 $outf
+execute hash1 $outf
+execute hash2 $outf
+execute cq1 $outf
+execute cq2 $outf
+execute bit $outf
+print
+print "result in $outf"

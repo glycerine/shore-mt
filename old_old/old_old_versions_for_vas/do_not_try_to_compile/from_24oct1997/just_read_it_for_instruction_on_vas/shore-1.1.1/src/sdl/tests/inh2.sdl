@@ -1,0 +1,10 @@
+module m1 {
+	interface one {
+		public:
+		lref<char> test();
+	};
+	interface two: public one {
+	};
+	interface three: public two {
+	};
+}

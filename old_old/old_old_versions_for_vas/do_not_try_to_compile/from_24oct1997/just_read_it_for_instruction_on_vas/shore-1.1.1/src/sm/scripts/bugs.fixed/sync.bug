@@ -1,0 +1,56 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test sync bug: trying to have two threads reading the
+#	same page at the same time
+#
+source $script_dir/vol.init
+
+if {$volid == 0} {
+    set volid 10
+    sm create_vol $volid force
+    set volid [sm init_vol_logical_id $volid 100]
+    sm mount
+}
+
+proc read_rec { r } {
+    sm begin_xct
+    sync
+    set read_result [sm read_rec $r 0 0]
+    echo read_result
+    sm commit_xct
+}
+
+sm begin_xct
+set f1 [sm create_file $volid]
+echo f1 = $f1
+
+set r1 [sm create_rec $f1 hdr1 11 mike]
+echo r1 = $r1
+sm commit_xct
+
+echo restart
+sm restart
+
+echo setting delay
+sm set_disk_delay 21
+
+# turn on debugging to see fix problem
+set prev_debug [sm set_debug "bf_m::fix"]
+
+echo forking 1
+set t1 [ fork_thread read_rec $r1 ]
+echo forking 2
+set t2 [ fork_thread read_rec $r1 ]
+
+sync_thread $t1
+sync_thread $t2
+join_thread $t1 $t2
+
+sm set_debug $prev_debug 
+

@@ -1,0 +1,21 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# This script tests creating a record on a page where there is
+# contention for free slots.
+#
+source $script_dir/vol.init
+
+set t1 t2
+
+# change body width
+set id_body_width %0100d
+
+source $script_dir/file.5a
+
+unset t1 t2

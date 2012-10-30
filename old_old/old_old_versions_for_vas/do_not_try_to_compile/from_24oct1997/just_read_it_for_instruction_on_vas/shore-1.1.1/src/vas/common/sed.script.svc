@@ -1,0 +1,39 @@
+
+1i\
+#define RPC_SVC\
+#ifdef SOLARIS2 \
+#define ARGUMENT_T (char *)\
+#else \
+#define ARGUMENT_T\
+#endif /* SOLARIS2 */
+/^#include "\/tmp\/msg.h"/s="\/tmp/\msg.h"="msg.h"=
+1,$s=^\([	 ]\)char \*(\*local)();$=\1char *(*local)(void *, void *);=
+1,$s=^\(static void vas_program_1\)();=\1(struct void *,SVCXPRT *);=
+1,$s=^\(static void client_program_1\)();=\1(struct void *,SVCXPRT *);=
+\=^#include <rpc/rpc\.h>=i\
+extern "C" {
+\=^#include <rpc/rpc\.h>=a\
+}\
+#include <errors.h>
+/^vas_program_1(/s=^vas_program_1(rqstp, transp)=vas_program_1(=
+/^vas_program_1(/,\/{/s=^\(	struct svc_req \*rqstp\);=\1,=
+/^vas_program_1(/,\/{/s=^\(	register SVCXPRT \*transp\);=\1 )=
+/^vas_program_1(/,\/{/s=^\(	SVCXPRT \*transp\);=\1 )=
+/^client_program_1(/s=^client_program_1(rqstp, transp)=client_program_1(=
+/^client_program_1(/,\/{/s=^\(	struct svc_req \*rqstp\);=\1,=
+/^client_program_1(/,\/{/s=^\(	register SVCXPRT \*transp\);=\1 )=
+/^client_program_1(/,\/{/s=^\(	SVCXPRT \*transp\);=\1 )=
+
+1,$s=bool_t\( (\*xdr_argument)\)(), \((\*xdr_result)\)();=int \1(XDR*,void*),\2(XDR*,void*);=
+1,$s=xdr_argument \= =xdr_argument \= (int (*)(XDR*, void *))=
+1,$s=xdr_result \= =xdr_result \= (int (*)(XDR*, void *))=
+1,$s=vas_program_1\,=(void (*)(void *))vas_program_1\,=
+1,$s=client_program_1\,=(void (*)(void *))client_program_1\,=
+1,$s/\(local = (char \*(\*)(\)/\1 void *,void */
+1,$s=xdr_argument\,=(xdrproc_t)xdr_argument\, ARGUMENT_T=
+1,$s=xdr_result\,=(xdrproc_t)xdr_result\,=
+/returned/d
+1,$s=svc_freeargs(transp, xdr_result=svc_freeargs(transp,(xdrproc_t)xdr_result=
+1,$s=svc_freeargs(transp, xdr_argument=svc_freeargs(transp,(xdrproc_t)xdr_argument=
+1,$s=fprintf(stderr,=catastrophic(=
+1,$s=exit(.);==

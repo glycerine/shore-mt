@@ -1,0 +1,31 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+//
+// part.sdl
+//
+
+module PScan
+{
+	// const long junksize = 23000;
+	const long junksize = 100;
+    interface Part
+    {
+     public:
+	void init(in long id);
+	long get_partid() const;
+	long get_name(in lref<char> buf, in long bufsize) const;
+	void check() const;
+	char csum(in char seed, in lref<char> buf, in long len) const;
+	char check_sum() const;
+
+	attribute long partid;
+	attribute string name;
+	attribute long junk[junksize];// to make the objects larger
+	attribute char checksum; // and to test the contents
+    };
+}

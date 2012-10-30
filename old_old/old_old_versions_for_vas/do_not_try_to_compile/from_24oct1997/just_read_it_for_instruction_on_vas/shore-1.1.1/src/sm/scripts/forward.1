@@ -1,0 +1,111 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# Test "Forwarding" of records.  This script test the
+# forwarding of records identified by logical ID when an append
+# operation causes the record to no longer fit on the page.
+#
+# check that logical id facility is on
+source $script_dir/vol.init
+
+if {$Use_logical_id == 0} {
+    echo WARNING: forward.1 cannot be run since logical IDs not turned on
+} else {
+    if {$logging == 0} {
+
+
+	set_config_info
+
+	set rec_size [expr 6+8]
+	set num_rec [expr $page_size/$rec_size]
+	#set num_rec 1
+	set id_width %06d
+
+	#
+	#   create num_rec records
+	#
+	sm begin_xct
+	set fid [sm create_file $volid]
+	set rid(0) $null_rid
+	verbose creating $num_rec 
+	for {set i 1} {$i <= $num_rec} {incr i} {
+	    set rid($i) [
+		sm create_rec $fid [format $id_width $i] 10 data.[format %08d $i]
+	    ]
+	}
+
+	sm commit_xct
+
+	#
+	# append to first few records to cause forwarding
+	#
+	sm begin_xct
+	verbose appending to $num_rec 
+	for {set i 1} {$i <= $num_rec} {incr i} {
+	    sm append_rec $rid($i) ".123456789.123456789.123456789.123456789.123456789"
+	}
+
+	# abort to make sure lid cache is properly cleared
+	verbose aborting
+	sm abort_xct
+
+	###############################################
+	#   read inserted records
+	#
+	verbose reading $num_rec 
+	sm begin_xct
+	for {set i 1} {$i <= $num_rec} {incr i} {
+	    set r [sm read_rec $rid($i) 0 0]
+	    set id [format $id_width $i]
+	    set iddata [format %08d $i]
+	    verbose $i $id $iddata $r
+	    set hdr [lindex $r 2]
+	    set body [lindex $r 4]
+	    assert {expr [string compare $hdr $id] == 0}
+	    verbose body=$body 
+	    verbose data.$iddata
+	    assert {expr [string compare $body data.$iddata] == 0}
+	}
+	sm commit_xct
+
+	#
+	# append to first few records to cause forwarding
+	#
+	sm begin_xct
+	verbose appending to $num_rec 
+	for {set i 1} {$i <= $num_rec} {incr i} {
+	    sm append_rec $rid($i) ".123456789.123456789.123456789.123456789.123456789"
+	}
+
+	# abort to make sure lid cache is properly cleared
+	sm commit_xct
+
+	###############################################
+	#   read inserted records
+	#
+	sm begin_xct
+	verbose reading $num_rec 
+	for {set i 1} {$i <= $num_rec} {incr i} {
+	    set r [sm read_rec $rid($i) 0 0]
+	    set id [format $id_width $i]
+	    set iddata [format %08d $i]
+	    verbose $i $id $iddata $r
+	    set hdr [lindex $r 2]
+	    set body [lindex $r 4]
+	    assert {expr [string compare $hdr $id] == 0}
+	    verbose body=$body 
+	    verbose data.$iddata
+	    # data should have changed after the append
+	    assert {expr [string compare $body data.$iddata] != 0}
+	}
+	sm commit_xct
+
+	unset rid
+	unset id fid hdr iddata num_rec i body r id_width rec_size
+    }
+}

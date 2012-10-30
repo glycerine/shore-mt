@@ -1,0 +1,40 @@
+// PR 277 (closed)
+// example from sdl manual
+module m1 {
+
+    typedef long vector[100];
+    const long MaxName = 40;
+    struct FullName {
+        string<MaxName> given_name, family_name;
+        char initial;
+    };
+    typedef struct FullName2 {
+        string<MaxName> given_name, family_name;
+        char initial;
+    } FullName3;
+    struct PersonalInfo {
+        FullName name;
+            struct Addr {
+            string number, name;
+            string city;
+            char state[2];
+            long zip;
+        } address;
+    };
+    enum WidgetType { Simple, Complex };
+	struct simple_case {
+		float cost;
+		string description;
+	};
+	struct complex_case {
+		short part_count;
+		sequence<Widget> components;
+	};
+    union Widget switch (WidgetType part_type) {
+        case Simple:
+			simple_case si;
+        case Complex:
+			complex_case cx;
+    };
+
+}

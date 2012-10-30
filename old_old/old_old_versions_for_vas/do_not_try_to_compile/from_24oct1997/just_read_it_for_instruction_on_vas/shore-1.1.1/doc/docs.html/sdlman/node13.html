@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Indexes</TITLE>
+<META NAME="description" CONTENT="Indexes">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node14.html">
+<LINK REL="previous" HREF="node12.html">
+<LINK REL="up" HREF="sdlman.html">
+<LINK REL="next" HREF="node14.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html211"
+ HREF="node14.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html208"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html202"
+ HREF="node12.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html210"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html212"
+ HREF="node14.html">References and Relationships</A>
+<B> Up:</B> <A NAME="tex2html209"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html203"
+ HREF="node12.html">Attributes</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="sdlman:index">&#160;</A><H1><A NAME="SECTION000130000000000000000000">
+Indexes</A>
+</H1>
+<P><PRE>
+    type_spec : 'index' '&lt;' simple_type_spec ',' simple_type_spec '&gt;'
+</PRE>
+<P>
+Attributes can be indexes; these are called &quot;manual indexes,&quot;
+meaning that they are explicitly intialized, loaded, and
+manipulated by an application program.
+<P><PRE>
+    typedef     long ssn;     // social security number
+    interface Person {
+    public:
+        attribute   string name;
+        attribute   ssn    social_security_number;
+    };
+
+    interface IndexObject {
+    public: 
+        attribute index&lt;string,Person&gt; name_to_person; 
+        attribute index&lt;ssn,string&gt;    ssn_to_name; 
+    };
+</PRE>
+<P>
+The <EM>index</EM> 
+declaration 
+<TT>index&lt;string,Person&gt;</TT>
+is equivalent to 
+<TT>index&lt;string,ref&lt;Person&gt; &gt;</TT>; the
+two declaration styles can be used interchangeably.
+<P>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

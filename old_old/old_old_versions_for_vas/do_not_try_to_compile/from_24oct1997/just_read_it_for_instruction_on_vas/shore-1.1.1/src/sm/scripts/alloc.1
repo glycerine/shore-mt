@@ -1,0 +1,145 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test allocation & deallocation of pages1
+#
+
+source $script_dir/vol.init
+
+# format for body size -- >= one page
+set form %0${page_size}d
+
+proc scanit { f } {
+    verbose scanit $f
+    set scan [sm scan_file_create $f t_cc_record]
+    verbose get first record from $scan
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+	set rec [sm pin_rid $pin]
+	verbose rec: $rec
+	# don't unpin! 
+	# sm pin_unpin $pin
+	set pin [sm scan_file_next $scan 0]
+	set i [expr {$i+1} ]
+    }
+    sm scan_file_destroy $scan
+
+    verbose scan found $i records
+}
+proc destroyfirst { f } {
+    set scan [sm scan_file_create $f t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    if {$pin != "NULL"} {
+	set rec [sm pin_rid $pin]
+	sm destroy_rec $rec
+	verbose destroyed $rec
+    }
+    sm scan_file_destroy $scan
+}
+proc destroyall { f } {
+    set scan [sm scan_file_create $f t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+	set rec [sm pin_rid $pin]
+	sm destroy_rec $rec
+	verbose destroyed $rec
+	set pin [sm scan_file_next $scan 0]
+	set i [expr {$i+1} ]
+    }
+    sm scan_file_destroy $scan
+    verbose destroyed $i recs file $f
+}
+
+
+proc t1 {} {
+    global volid  f0 r0 form
+    sm begin_xct
+    verbose xact [sm xct]
+sync
+sync
+    verbose creating...
+    set j [sm create_rec $f0 hdr 1000 [format $form 10] ]
+    verbose created $j
+sync
+    sm commit_xct
+}
+
+proc t2 {} {
+    global volid  f0 logging
+    sm begin_xct
+    verbose xact [sm xct]
+sync
+    verbose destroy 1...
+    destroyfirst $f0
+sync
+    if {$logging==0} {
+	verbose Logging off: substituting commit for abort
+	sm commit_xct
+    } else {
+	verbose aborting...
+	sm abort_xct
+    }
+sync
+}
+
+proc t3 {} {
+    global volid  f0
+    sm begin_xct
+    verbose xact [sm xct]
+sync
+sync
+    verbose destroy 1...
+    destroyfirst $f0
+    verbose committing...
+    sm commit_xct
+sync
+}
+
+
+set numrecs 3
+
+sm begin_xct
+set f0 [sm create_file $volid]]
+verbose created file $f0
+for { set i 1} { $i <= $numrecs} { incr i} {
+    set j [sm create_rec $f0 h$i 1000 [format $form $i] ]
+    verbose created rec $j
+}
+verbose created 3 recs file $f0
+scanit $f0
+sm commit_xct
+
+set y1 [fork_thread t1 {}]
+set y2 [fork_thread t2 {}]
+set y3 [fork_thread t3 {}]
+
+sync_thread $y1 $y2 $y3
+sync_thread $y1 $y2 $y3
+sync_thread $y1 $y2 $y3
+sync_thread $y1 $y2 $y3
+join_thread $y1 $y2 $y3
+
+sm begin_xct
+scanit $f0
+sm commit_xct
+
+sm begin_xct
+destroyall $f0
+sm commit_xct
+
+sm begin_xct
+dstats $volid
+sm commit_xct
+
+unset form f0 numrecs i j
+unset y1 y2 y3
+
+pstats

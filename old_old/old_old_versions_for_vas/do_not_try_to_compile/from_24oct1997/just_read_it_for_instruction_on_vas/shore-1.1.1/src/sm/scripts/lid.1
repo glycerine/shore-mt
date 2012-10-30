@@ -1,0 +1,53 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test logical ID related things
+#
+source $script_dir/vol.init
+
+# check that logical id facility is on
+if {$Use_logical_id == 0} {
+    echo WARNING: lid.1 cannot be run since logical IDs not turned on
+} else {
+
+    sm begin_xct
+    set f1 [sm create_file $volid]
+    verbose f1 = $f1
+
+    set r1 [sm create_rec $f1 hdr1 11 mike]
+    verbose read of $r1: [sm read_rec $r1 0 0]
+
+    set r2 [sm create_rec $f1 hdr12345 11 abcdefghijklmnopqrstuvwxyz]
+    verbose read of $r2: [sm read_rec $r2 0 0]
+
+    set alias2 [sm link_to_remote_id $volid $r2]
+    verbose read of alias2 $alias2: [sm read_rec $alias2 0 0]
+    set orig_id [sm convert_to_local_id $alias2]
+    assert {expr [string compare $r2 $orig_id]==0}
+
+    set alias3 [sm link_to_remote_id $volid $alias2]
+    verbose read of alias3 $alias3: [sm read_rec $alias3 0 0]
+    set orig_id [sm convert_to_local_id $alias3]
+    assert {expr [string compare $r2 $orig_id]==0}
+
+    set alias4 [sm link_to_remote_id $volid $r2]
+    verbose read of alias4 $alias4: [sm read_rec $alias4 0 0]
+    set orig_id [sm convert_to_local_id $alias4]
+    verbose converted $alias4 to $orig_id
+    assert {expr [string compare $r2 $orig_id]==0}
+    assert {expr [string compare $alias2 $alias4]==0}
+
+    set lfid [sm lfid_of_lrid $r1]
+    verbose $f1   $lfid
+    assert {expr [string compare $f1 $lfid]==0}
+
+    sm commit_xct
+
+    unset f1 r1 r2 lfid orig_id
+    unset alias2 alias3 alias4
+}

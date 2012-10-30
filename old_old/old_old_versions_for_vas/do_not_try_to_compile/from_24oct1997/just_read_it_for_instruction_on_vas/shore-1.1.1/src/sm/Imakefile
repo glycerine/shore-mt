@@ -1,0 +1,93 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ *  $Id: Imakefile,v 1.89 1997/06/16 21:35:59 solomon Exp $
+ */
+#define Tests ssh tests
+
+CPPFLAGS = -I../fc -I../common -I../sthread Include(TclInclude)
+
+%# General source files; the order is roughly from smlevel 0->4
+CFILES = %
+	 pmap.cc common_templates.cc %
+	 lexify.cc %
+	 bf.cc bf_core.cc chkpt_serial.cc device.cc io.cc page.cc xct.cc %
+	 xct_impl.cc smthread.cc %
+	 lock.cc lock_core.cc vol.cc  %
+	 log.cc unix_log.cc log_base.cc log_buf.cc srv_log.cc raw_log.cc %
+	 logrec.cc logstub.cc %
+	 btree_p.cc keyed.cc zkeyed.cc %
+ 	 btree.cc btcursor.cc btree_bl.cc btree_impl.cc%
+	 file.cc lgrec.cc  %
+	 rtree.cc  %
+	 restart.cc lid.cc  dir.cc chkpt.cc  %
+	 pin.cc  %
+	 bf_prefetch.cc scan.cc %
+	 sm.cc sm_s.cc smstats.cc sm_du_stats.cc smfile.cc smindex.cc %
+	 sort.cc %
+	 crash.cc deadlock_events.cc 
+
+#ifdef USE_COORD
+%# Source files for coordinator support
+CFILES += coord.cc subord.cc coord_log.cc coord_thread.cc participant.cc %
+	participant2.cc dtid_t.cc sm_global_deadlock.cc
+#endif
+
+%# General header files
+HFILES = bf_s.h bf.h bf_core.h bf_prefetch.h %
+	btree.h %
+	btree_impl.h btree_p.h btcursor.h %
+	chkpt.h chkpt_serial.h %
+	device.h dir.h %
+        io.h keyed.h lid.h lock.h lock_x.h lock_core.h %
+	log_buf.h srv_log.h log.h logrec.h page.h pmap.h%
+        restart.h scan.h sm.h smthread.h  %
+	sm_int_0.h sm_int_1.h sm_int_2.h sm_int_3.h sm_int_4.h  %
+	sysdefs.h %
+        file.h pin.h %
+        rtree.h smstats.h sdesc.h zkeyed.h sm_du_stats.h%
+	sort.h %
+	vol.h xct.h xct_impl.h xct_dependent.h %
+	global_deadlock.h deadlock_events.h
+
+#ifdef USE_COORD
+%# Header files for coordinator support
+HFILES += coord.h dtid_t.h coord_log.h mappings.h sm_global_deadlock.h 
+#endif
+
+#ifdef USE_RDTREE
+%# RD-tree support
+CFILES += rdtree.cc setarray.cc
+HFILES += rdtree.h setarray.h
+#endif
+
+#define Install \
+	bf.h bf_s.h deadlock_events.h e_error.h file_s.h io.h lexify.h lock.h \
+	lock_s.h log.h page.h page_s.h pin.h pmap.h scan.h sdesc.h setarray.h \
+	sm.h sm_base.h sm_du_stats.h sm_escalation.h sm_int_0.h sm_int_1.h \
+	sm_int_2.h sm_int_3.h sm_int_4.h sm_s.h sm_stats_info_t_def.i \
+	sm_stats_info_t_struct.i smstats.h smthread.h sort.h sort_s.h sysdefs.h \
+	xct_dependent.h
+
+LOGRECFILES = logfunc.i logtype.i logdef.i logstub.i redo.i undo.i logstr.i
+
+OBJ = $(CFILES:.cc=.o)
+
+all_local:: libsm.a
+
+%GEN stats(sm_stats_info.dat,sm_stats_info_t)
+%GEN error_enum(e_error.dat,e)
+%GEN generate_source($(LOGRECFILES),logdef.pl,logdef.dat,,)
+
+%GEN library(libsm.a, $(OBJ))
+
+%GEN install(include, Install)
+%GEN install(lib, libsm.a)
+
+%GEN depend_target($(CFILES))
+%GEN tags($(CFILES) $(HFILES))

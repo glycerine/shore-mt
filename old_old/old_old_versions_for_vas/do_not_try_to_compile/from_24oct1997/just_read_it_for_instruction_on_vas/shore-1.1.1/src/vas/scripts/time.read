@@ -1,0 +1,34 @@
+# source ../scripts/time.read
+source ../scripts/setup.all
+
+# set debugflags ""
+# export debugflags
+
+set quiet 1
+export quiet
+
+begin
+cd /small
+set obj [mkanon pool 10:10:NoText]
+read  $obj
+commit
+
+proc doit  { nb nt }  {
+	cout for object size $nb 
+	global obj
+	begin 
+	cout Object size : $nb  
+	set obj [mkanon pool $nb:0:NoText] 
+	time { fork { read $obj} } $nt 
+	time { fork { read $obj} } $nt
+	time { fork { read $obj} } $nt
+	commit 
+	cout END doit $nb $nt 
+}
+
+
+#  doit 1 10000
+doit 100 10000
+doit 1000 10000
+
+# rename doit ""

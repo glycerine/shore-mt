@@ -1,0 +1,134 @@
+// htmlignore
+
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+// htmlend
+
+// A repository of documents indexed by words appearing in them.
+// This version uses Shore's built-in indexes rather than binary search
+// trees as in stree.sdl.
+module doc_index {
+	// interfaces defined here
+	interface DocIndex;		// the top-level construct
+	interface Word;			// a word appearing on one or more documents
+	interface Document;		// a document stored in the repository
+	interface Cite;			// a reference to a line in a document
+
+	// htmllabel stree:docIndexIF
+	// An index mapping words to citations
+	interface DocIndex {
+	  private:
+		attribute index<string,Word> ind;	// the actual index
+
+		// Insert a new entry
+		void insert(in lref<char> word, in ref<Cite> cite);
+
+	  public:
+		// Constructor:  make an empty index
+		void initialize();
+
+		// Insert a new Document into the repository.  The argument is a
+		// pathname to be interpreted in the Unix name space as the name of a
+		// Unix file containing the raw data.  A new Document object with
+		// the same base name is created in the current Shore directory,
+		// filled with a copy of the file's context, and indexed by all of
+		// its words.
+		void insert_file(in lref<char> src);
+
+		// Retrieve the Word object matching the argument.
+		// Return NULL if not found.
+		ref<Word> find(in lref<char> word) const;
+
+		void delete_word(in string word);
+
+		// Debugging dump
+		void print() const;
+	};
+
+	// htmllabel stree:ixwordIF
+	// There is one Word object for each distinct word appearing in any
+	// document in the repository.
+	interface Word {
+	private:
+		attribute string value;
+	public:
+		relationship set<Cite> cited_by inverse cites;
+		// Constructor: empty occurrences list
+		void initialize(in lref<char> word);
+
+		// How many occurrences?
+		long count() const;
+
+		// Get ith occurrence (returns NULL if not that many)
+		ref<Cite> occurrence(in long i) const;
+
+		// Destructor
+		void finalize();
+
+		// Debugging dump
+		void print(in long verbose) const;
+
+		// The following method is meant to be used only by SearchTree.
+
+		// Add an occurence
+		void occurs_on(in ref<Cite> cite);
+	};
+
+	// htmllabel stree:ixciteIF
+	// A Cite object represents a citation.  There is one Cite object for each
+	// line of each document in the repository.  There is thus a many-many
+	// relationship from Cite to Word and a many-one relationship from Cite
+	// to Document.
+	interface Cite {
+	private:
+		attribute long offset;
+	public:
+		relationship ref<Document> doc inverse cited_by;
+		relationship set<Word> cites inverse cited_by;
+		// Constructor
+		void initialize(in ref<Document> d, in long o);
+
+		// Print the referenced line
+		void print(in long vflag) const;
+
+		// Destructor
+		void finalize();
+	};
+
+	// htmllabel stree:ixdocumentIF
+	// A Document is a chunk of text that looks like a Unix file.
+	// We also record the file name under which it was created.
+	// (The need to record the name may go away when Shore adds a way to find
+	// the pathname of a registered object given a Ref to it.)
+	interface Document {
+	private:
+		attribute text body;
+		attribute string name;
+		attribute long cur_len;
+	public:
+		relationship set<Cite> cited_by inverse doc;
+		// Constructor:  The body is empty.
+		void initialize(in lref<char> base_name, in long len);
+
+		// Add some text to the end of the body.
+		void append(in lref<char> str);
+
+		// Read-only access to the file name.
+		lref<char> get_name() const;
+
+		// Current length of text
+		long size() const;
+
+		// Print a line starting at OFFSET
+		void print_line(in long offset) const;
+
+		// Destructor
+		void finalize();
+	};
+
+}

@@ -1,0 +1,54 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ *      $RCSfile: Imakefile,v $
+ *      $Revision: 1.54 $
+ *      $Date: 1997/06/17 16:10:48 $
+ *      $Author: solomon $
+ */
+CPPFLAGS = -I../include -I../common -I../../common -I../../fc -I../../sm %
+	Include(TclInclude) -DCLIENT_ONLY
+
+all_local:: libvas.a sshutdown sizes
+
+SRC = %
+	vas.C sm_app.C in.C stubs.C newvas.C svas_layer.C %
+	batch.C batcher.C clientstats.C sizes.C sshutdown.C do_shutdown.c
+
+HFILES = vaserr.h svas_layer.h batch.h chng.h
+
+OBJ.clnt = vas.o sm_app.o in.o stubs.o newvas.o svas_layer.o %
+	batch.o batcher.o clientstats.o msg_clnt.o sm_du_stats.o
+LIBS = libvas.a ../common/libcommon.a
+#if defined(IS_SOLARIS2)
+/* Solaris does not require librpc.a, since it's in the default libraries */
+IMPORTS = ../common/libcommon.a ../../common/libcommon.a ../../fc/libfc.a
+#else
+IMPORTS = ../common/libcommon.a ../../common/libcommon.a ../../fc/libfc.a %
+	../../rpc4.0/rpc/librpclib.a
+#endif
+
+
+%GEN stats(batch.dat,batchstats shmbatchstats)
+
+%GEN c_plus_program(sshutdown, sshutdown.o do_shutdown.o, $(LIBS))
+%GEN c_plus_program(sizes, sizes.o, $(LIBS))
+
+%GEN merge_library(libvas.a, $(OBJ.clnt), $(IMPORTS))
+
+%GEN install(include, batchstats_def.i shmbatchstats_def.i)
+%GEN install(bin, sshutdown)
+
+msg_clnt.o:	../common/msg_clnt.c ../common/msg.h
+	$(COMPILE.c) -o $*.o -DSYSCALLCONST $<
+
+sm_du_stats.o:	../../sm/sm_du_stats.cc
+	$(COMPILE.cc) -o $*.o $<
+
+%GEN depend_target($(SRC))
+%GEN tags($(SRC) $(HFILES))

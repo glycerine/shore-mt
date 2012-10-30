@@ -1,0 +1,42 @@
+#source ../scripts/anon.test1
+source ../scripts/setup.all
+source ../scripts/anon.tests.setup
+
+cd /small
+
+# 
+# compares logging
+# statistics for a few
+# miscellaneous sizes
+#
+
+set p $pagesize
+set big [ list  [expr {1234 * $p }] [expr {1234 * $p - 1}] [expr {1234 * $p + 1}] ]
+set little [ list  976658 1 10 100 1000 10000 ]
+
+compensate
+foreach sz $big {
+	cstats
+	testz $sz abort
+	pstats
+}
+compensate
+
+foreach sz $little {
+	cstats
+	begin
+	cout mkanon pool $sz:0:0
+	mkanon pool $sz:0:0
+	abort
+	pstats
+
+	cstats
+	begin
+	cout mkzanon pool $sz:0:0
+	mkzanon pool $sz:0:0
+	abort
+	pstats
+}
+
+compensate
+return "anon.test1 done."

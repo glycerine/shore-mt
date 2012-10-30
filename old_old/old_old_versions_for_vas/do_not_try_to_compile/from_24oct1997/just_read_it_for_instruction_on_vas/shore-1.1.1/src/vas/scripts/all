@@ -1,0 +1,19 @@
+set dir ../scripts
+source $dir/setup.all
+foreach f {
+	1 2 3 4 5
+	appendAnon
+	batch.all
+	cache cd connect createAnon
+	dismount.all
+	index index.run
+	large largedir.all lock ls
+	mklgpool
+	permission.all
+	remove
+	small symlink
+	time.all truncateAnon truncateAnon.2
+	xref
+} { 
+	source $dir/$f 
+}

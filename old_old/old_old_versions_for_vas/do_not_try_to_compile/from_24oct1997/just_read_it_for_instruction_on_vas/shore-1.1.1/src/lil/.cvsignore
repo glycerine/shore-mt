@@ -1,0 +1,10 @@
+Makefile
+*.o
+tags
+.depend
+TAGS
+NO_G_FILES
+.B*
+.gdbinit
+.purify
+.pure

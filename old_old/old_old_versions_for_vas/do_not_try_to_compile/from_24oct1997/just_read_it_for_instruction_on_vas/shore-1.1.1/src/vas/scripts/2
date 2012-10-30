@@ -1,0 +1,59 @@
+# this: source ../scripts/2
+
+source ../scripts/setup.all
+
+set nobjs 10
+
+begin
+cd /small
+# compensating transaction:
+if [sfile exists pool]  {
+	scanpool pool remove
+	rmpool pool
+}
+if [sfile exists xref]  {
+	rmxref xref
+}
+if [sfile exists uf]  {
+	rmxref uf
+}
+commit
+
+begin
+cd /small
+
+if [not [sfile exists pool] ] {
+	mkpool pool
+	commit
+	begin
+}
+
+# create some number of anonymous objects
+# with the 1-step mkanon
+for {set i 0} {$i < $nobjs} {incr i} {
+	mkanon pool $i;
+}
+commit
+
+# scan the pool
+begin
+	cd /small
+	scanpool pool readdata
+commit
+
+begin
+cd /small
+# test 2-step anonymous object creation 
+for {set i 0} {$i < $nobjs} {incr i} {
+	set j [mkvolref 1]
+	mkanonwithref pool $j 50:40:NoText
+}
+commit
+
+# re-scan the pool
+begin
+	cd /small
+	scanpool pool readdata
+commit
+
+return "2 done."

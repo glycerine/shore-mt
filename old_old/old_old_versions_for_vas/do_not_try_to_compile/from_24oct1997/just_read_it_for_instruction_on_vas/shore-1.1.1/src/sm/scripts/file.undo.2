@@ -1,0 +1,63 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test Create, Destroy, Read of Records
+#
+
+source $script_dir/vol.init
+if {$logging == 0} {
+    echo "Logging off: script not run."
+} else {
+
+if {$volid == 0} {
+    set volid 10
+    sm create_vol $volid 222 1000
+
+    set volid [sm init_vol_logical_id $volid 100]
+    sm mount
+}
+
+set num_rec 24
+set id_hdr_width %06d
+set id_body_width %08d
+
+sm begin_xct
+    set fid [sm create_file $volid regular]
+    verbose commit create of file
+sm commit_xct
+
+sm begin_xct
+
+set rid(0) $null_rid
+verbose creating $num_rec records
+for {set i 1} {$i <= $num_rec} {incr i} {
+    verbose creating $i
+    set rid($i) [
+	sm create_rec $fid [format $id_hdr_width $i] 10 [format $id_body_width $i]
+    ]
+}
+
+verbose aborting create of $num_rec records
+sm abort_xct
+
+sm begin_xct
+
+set rid(0) $null_rid
+verbose creating $num_rec records
+for {set i 1} {$i <= $num_rec} {incr i} {
+    verbose creating $i
+    set rid($i) [
+	sm create_rec $fid [format $id_hdr_width $i] 10 data.[format $id_body_width $i]
+    ]
+}
+
+verbose committed create
+sm commit_xct
+
+unset rid i fid num_rec
+}

@@ -1,0 +1,47 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1995, 1996 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+udpsvc_stat RPC UDP service = 0x000d0000 udpstats {
+	int cache_finds; cache hits (cache_sets + cache_gets)
+	int cache_nofinds; cache misses (cache_sets and cache_gets)
+	int cache_hits;	cache hits (cache_get only)
+	int cache_misses; cache misses (cache_get only)
+	int cache_sets; calls to cache_set
+	int cache_presets; calls to cache_preset
+	int cache_gets; calls to cache_get
+	int drops; requests dropped
+	int done; requests serviced
+	int replies; replies
+	int rereplies; re-transmitted replies
+	int recvfroms; calls to recvfrom system call
+
+	//
+	// all these can be flaky because we could
+	// receive a retrans after the cache was
+	// flushed, if we have lots of activity
+	//
+	int retrans;  different calls having retransmissions 
+	int retrans_total; total # pkts that are retransmissions 
+	int retrans_max; max # retrans detected for any given request 
+
+	int replymax; largest reply sent
+	int reqmax; largest request received
+};
+tcpsvc_stat RPC TCP service = 0x000e0000 tcpstats {
+	int replymax; largest reply sent
+	int reqmax; largest request received
+};
+
+svc_stat RPC service = 0x000f0000 svcstats {
+	int replies_success;	replies - successful 
+	int replies_noproc;	replies - no such procedure
+	int replies_noprog;	replies - no such program
+	int replies_progmismatch;	replies - version mismatch
+	int replies_nodecode; replies - couldn't decode request
+	int replies_systemerr; replies - system error
+	int replies_denied; replies - authentication failures
+};

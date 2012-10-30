@@ -1,0 +1,31 @@
+#!/bin/sh -- # do not change this line, it mentions perl and prevents looping
+eval 'exec perl $0 ${1+"$@"}'
+	if 0;
+
+($#ARGV == 0) || die "Usage: $0 home\n";
+$home = shift @ARGV;
+$cfile = "Config.mk";
+
+(chdir $home) || die "cannot chdir to \"$home\": $!\n";
+$home = `pwd`;
+chop $home;
+(-e $cfile) || die "config file \"$cfile\" does not exist\n";
+
+$_ = $ENV{'HOSTTYPE'};
+$mach = Snake, $arch = SNAKE if (/hp/);
+$mach = Decstation, $arch = MIPS if (/dec/);
+$mach = Sparc, $arch = SPARC if (/sun/ || /sparc/);
+chmod u+w, $cfile;
+
+#
+# substitute MACH, and HOME 
+#
+$s1 = "s#^MACH = .*\$#MACH = $mach#";
+$s2 = "s#^ARCH = .*\$#ARCH = $arch#";
+$s3 = "s#^HOME = .*\$#HOME = $home#";
+
+$sub = $s1 . ";" . $s2 . ";" . $s3;
+
+exec("perl", "-pi.bak", "-e", $sub, $cfile);
+
+

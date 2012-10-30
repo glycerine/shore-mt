@@ -1,0 +1,67 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+source $script_dir/vol.init
+set old_short_form $short_form
+set short_form %010d
+
+set nrec 10
+
+proc scan_up_destroy {ndx nrec dodestroy}  {
+    #
+    # verify ascending
+    #
+    verbose "scan up:"
+    set destroy 0
+    set scan [sm create_scan $ndx >= neg_inf <= pos_inf]
+    for {set i 1} {$i <= $nrec} {incr i}  {
+        set r [sm scan_next $scan]
+	if {[string compare $r eof] == 0} then { break }
+        set key [lindex $r 0]
+        set el [lindex $r 1]
+        verbose "scanned ($key, $el)"
+        assert {expr [string trimleft $key 0] == $el}
+        assert {expr $i == [string trimleft $key 0]}
+
+	if { $destroy } {
+	    # remove the item from the index
+	    verbose destroying all $ndx $destroy
+	    sm destroy_all_assoc $ndx $destroy 
+	    verbose destroy done $destroy
+	}
+	if { $dodestroy } {
+	    set destroy $key
+	}
+    }
+    assert {expr $i > $nrec}
+    assert {expr [string compare [sm scan_next $scan] eof] == 0}
+    sm destroy_scan $scan
+    verbose "---- successful"
+}
+#
+# create index and load it up 
+#
+sm begin_xct
+set ndx [sm create_index $volid btree]
+verbose created index $ndx
+sm commit_xct
+
+sm begin_xct
+for {set i 1} {$i <= $nrec} {incr i} {
+    verbose inserting $i
+    sm create_assoc $ndx [format $short_form $i] $i
+}
+sm commit_xct
+
+sm begin_xct
+scan_up_destroy $ndx $nrec 0
+scan_up_destroy $ndx $nrec 1
+scan_up_destroy $ndx $nrec 0
+sm commit_xct
+
+set short_form $old_short_form
+unset old_short_form

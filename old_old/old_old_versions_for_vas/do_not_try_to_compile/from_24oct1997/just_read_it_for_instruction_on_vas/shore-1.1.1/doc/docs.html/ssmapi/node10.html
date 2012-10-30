@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Miscellaneous Facilities</TITLE>
+<META NAME="description" CONTENT="Miscellaneous Facilities">
+<META NAME="keywords" CONTENT="ssmapi">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmapi.css">
+<LINK REL="next" HREF="node11.html">
+<LINK REL="previous" HREF="node9.html">
+<LINK REL="up" HREF="ssmapi.html">
+<LINK REL="next" HREF="node11.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html240"
+ HREF="node11.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html237"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html231"
+ HREF="node9.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html239"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html241"
+ HREF="node11.html">Writing and Compiling a</A>
+<B> Up:</B> <A NAME="tex2html238"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html232"
+ HREF="node9.html">Communication and RPC Facilities</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html242"
+ HREF="node10.html#SECTION000101000000000000000000">
+Statistics</A>
+<LI><A NAME="tex2html243"
+ HREF="node10.html#SECTION000102000000000000000000">
+Sorting</A>
+<LI><A NAME="tex2html244"
+ HREF="node10.html#SECTION000103000000000000000000">
+Data Vectors</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="ssmapi:util">&#160;</A><H1><A NAME="SECTION000100000000000000000000">
+Miscellaneous Facilities</A>
+</H1>
+<P><A NAME="ssmapi:statistics">&#160;</A><H2><A NAME="SECTION000101000000000000000000">
+Statistics</A>
+</H2>
+<P>
+The SSM keeps many statistics on its operation such as
+lock request and page I/O counts.  Details are available in
+<A NAME="tex2html40"
+ HREF="../man/statistics.ssm.html">statistics(ssm)</A>.
+A utility for
+formatted printing of these statistics is described in
+<A NAME="tex2html41"
+ HREF="../man/statistics.fc.html">statistics(fc)</A>.
+<P><A NAME="ssmapi:Sorting">&#160;</A><H2><A NAME="SECTION000102000000000000000000">
+Sorting</A>
+</H2>
+<P>
+The SSM has sorting facilities, but they are still
+under development, so the interface may change.  Descriptions
+of the sorting facilities can be found in
+<A NAME="tex2html42"
+ HREF="../man/sort_stream_i.ssm.html">sort_stream_i(ssm)</A>
+and
+<A NAME="tex2html43"
+ HREF="../man/sort.ssm.html">sort(ssm)</A>.
+<P><A NAME="ssmapi:vector">&#160;</A><H2><A NAME="SECTION000103000000000000000000">
+Data Vectors</A>
+</H2>
+<P>
+A data vector is an array of (pointer,length) indicating blocks of data
+in memory.
+The array can be arbitrarily long, and methods are provided
+to comparing and copying data.
+They are further described in
+<A NAME="tex2html44"
+ HREF="../man/vec_t.common.html">vec_t(common)</A>.
+<P>
+Data vectors reduce the number of parameters in
+many SSM methods by combining pointer and length information and
+allow the code to avoid re-copying data by allowing a sequence of chunks
+to be treated like one contiguous buffer.
+For example, <TT>ss_m::create_rec</TT> accepts a <TT>vec_t</TT> parameter
+to indicate the source of the data, allowing a single record to be created
+by gathering data from multiple locations in memory.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html240"
+ HREF="node11.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html237"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html231"
+ HREF="node9.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html239"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html241"
+ HREF="node11.html">Writing and Compiling a</A>
+<B> Up:</B> <A NAME="tex2html238"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html232"
+ HREF="node9.html">Communication and RPC Facilities</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,23 @@
+#$Header: /p/shore/shore_cvs/src/util/mount/generic/Makefile.tmpl,v 1.10 1997/06/13 22:33:53 solomon Exp $
+
+CFLAGS = -g -O -Wall -Wtraditional -Wshadow -Wpointer-arith -Wstrict-prototypes
+CC = gcc
+LIB = @LIB@
+
+.PHONY: make all
+
+all: smount sumount
+
+clean:
+	$(RM) *.o a.out core sumount smount
+
+sumount: sumount.o mount_tab.o
+	$(CC) $(CFLAGS) -o $@ $@.o mount_tab.o $(LDFLAGS) $(LIB)
+
+smount: smount.o mount_tab.o
+	$(CC) $(CFLAGS) -o $@ $@.o mount_tab.o $(LDFLAGS) $(LIB)
+
+make:
+	./configure
+
+mount_tab.o smount.o sumount.o: platform.h globals.h

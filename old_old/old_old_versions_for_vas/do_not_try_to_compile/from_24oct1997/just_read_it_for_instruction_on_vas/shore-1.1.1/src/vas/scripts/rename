@@ -1,0 +1,147 @@
+# source ../scripts/rename
+
+cd /small
+
+set parent1 dira
+set parent2 dirb
+set file1 $parent1/file1
+set file2 $parent2/file2
+set dir1 $parent1/dir1
+set dir2 $parent2/dir2
+set sym1 $parent2/sym1
+
+begin
+# compensating transaction
+foreach f { $dir1 $dir2 $file1 $file2 $sym1 $parent1 $parent2 } {
+	cout [unlink $f]
+}
+commit
+cout cleaned up for script rename.
+
+set me	  	  [getuid]
+set mygrp	  [getgid]
+
+#this test has parent's set-gid bit clear
+
+set oldumask [umask]
+umask 022
+
+#set up some context
+begin
+	mkdir $parent1
+	mkdir $parent2
+	mkuserdef $file1 0:10:0
+	mksymlink "abc" $sym1
+
+	set oldmtime1 [sfile mtime $parent1]
+	set oldctime1 [sfile ctime $parent1]
+
+	set oldmtime2 [sfile mtime $parent2]
+	set oldctime2 [sfile ctime $parent2]
+	sleep 1
+commit
+
+begin
+
+# case 0: path2 does not exist (ok) (both files)
+	mv $file1 $file2
+
+# check that mtimes and ctimes of both parents are changed
+	set newmtime1 [sfile mtime $parent1]
+	set newctime1 [sfile ctime $parent1]
+
+	set newmtime2 [sfile mtime $parent2]
+	set newctime2 [sfile ctime $parent2]
+
+	assert [ expr { $newmtime1 != $oldmtime1 } ]
+	assert [ expr { $newctime1 != $oldctime1 } ]
+
+	assert [ expr { $newmtime2 != $oldmtime2 } ]
+	assert [ expr { $newctime2 != $oldctime2 } ]
+abort
+
+begin
+# case 1: path2 does not exist (ok) (both directories)
+	mv $dir1 $dir2
+
+# check that mtimes and ctimes of both parents are changed
+	set newmtime1 [sfile mtime $parent1]
+	set newctime1 [sfile ctime $parent1]
+
+	set newmtime2 [sfile mtime $parent2]
+	set newctime2 [sfile ctime $parent2]
+
+	assert [ expr { $newmtime1 != $oldmtime1 } ]
+	assert [ expr { $newctime1 != $oldctime1 } ]
+
+	assert [ expr { $newmtime2 != $oldmtime2 } ]
+	assert [ expr { $newctime2 != $oldctime2 } ]
+abort
+
+begin
+# case 2: path2 does exist (ok-- removes the object)
+	set oid [mkuserdef $file2 0:10:0]
+	mv $file1 $file2
+	# append should work
+	append $file2 10
+	expect SVAS_NotFound from { append $oid 10 } 
+	expect SVAS_NotFound from { append $file1 10 } 
+abort
+
+begin
+# case 3: path1 does not exist (error case)
+	expect SVAS_NotFound from { mv $dir1/xxxx $dir2/xxxx }
+abort
+
+begin
+# case 4: path2 exists but is non-empty dir (error)
+	set oid [mkuserdef $dir2/xxx 0:10:0]
+	expect OS_NotEmpty from { mv $dir1 $dir2/xxx }
+abort
+
+begin
+# case 5: path2 exists but is not same type object as path1 (err)
+	expect OS_NotADirectory from { mv $dir1 $file1}
+	expect OS_NotADirectory from { mv $file1 $dir1}
+abort
+
+begin
+# case 6: path2 exists but path1 is in the prefix of path2 (err)
+	expect OS_InvalidArgument from { mv $dir1 $dir1/a}
+abort
+
+begin
+# TODO
+# case 7: both exist but are on different volumes  (err)
+# TODO expect OS_CrossDeviceRef from { mv $dir1 $vol2 }
+abort
+
+begin
+# case 8: no write access for path1 parent (error)
+	chmod 0444 $parent1
+	expect OS_PermissionDenied from { mv $file1 $file2 }
+abort
+
+begin
+# case 9: no write access for path2 parent (error)
+	chmod 0444 $parent2
+	expect OS_PermissionDenied from { mv $file1 $file2 }
+abort
+
+begin
+# case 10: no write access for path1 (error -- .. has to be changed)
+	chmod 0444 $file1
+	expect OS_PermissionDenied from { mv $file1 $file2 }
+abort
+
+begin
+# case 12: path1 is a symbolic link so check that the link is renamed
+	set contents [readlink $sym1]
+	mv $sym1 $file2
+	set contents1 [readlink $file2]
+	assert {$content == $contents1}
+abort
+
+umask $oldumask 
+
+return "rename done."

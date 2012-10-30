@@ -1,0 +1,13 @@
+source ../scripts/setup.all
+
+begin
+cd /
+ls
+ls -i
+ls -F
+ls -g
+ls -l
+ls -igF
+
+commit
+return "ls done."

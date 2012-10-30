@@ -1,0 +1,68 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+The Ssh program is a shell for testing the Shore Storage Manager.
+
+Ssh has two "configuration" files.
+The first .shoreconfig (same name as the one for the shore server)
+where all options are set (previously they were set in .sshrc).
+All option lines now have the form:
+        ssh.server.executablename.optionname
+Ssh first looks for a .shoreconfig file in your home directory
+and then in the local directory.  An example file is in
+.shoreconfig.example.
+
+Ssh has a new option called ssh_sshrc which points to an rc file
+to be read.  Normally this is set to ~/.sshrc.  The .sshrc file
+is interpreted by Tcl.  It's primary purpose is to describe
+devices and volumes used by the scripts.  An example is in 
+.sshrc.example.  
+
+
+*********************************************************************
+
+You can run ssh on a single script at at time thus:
+
+with physical oids:
+	ssh -f ../scripts/btree.1 
+
+with logical oids:
+	ssh -lf ../scripts/lid.1
+
+to run a test that still reproduces a bug:
+	ssh -lf ../scripts/bugs/xxxx
+
+*********************************************************************
+
+You can run ssh on groups of scripts thus:
+
+   --normal "regression" testing:
+	ssh -lf ../scripts/all
+
+   --some performance tests
+	ssh -lf ../scripts/all.perf
+
+   --some to find out which tests need to unset tcl variables:
+	ssh -lf ../scripts/cleanup.all
+	then look at the file called "garbage_variables" ...
+
+   --to run (presumably) forever in pseudo-random order...
+	ssh -lf ../scripts/random.all
+
+*********************************************************************
+
+To get a better testing of crash recovery, use the shell scripts
+runssh.  It forks off an ssh that runs random.all, and it also
+kills (with a signal) the ssh at pseudo-random times. 
+
+*********************************************************************
+
+To test crash recovery where the time/place of the crash is 
+predetermined, use runtests.pl.
+
+*********************************************************************
+

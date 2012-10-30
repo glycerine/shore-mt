@@ -1,0 +1,24 @@
+begin
+cd /
+if [sfile exists pool] {
+	dunlink pool
+}
+set maxsize 100000
+set p [mkpool pool]
+set c [random $maxsize]
+
+set j 100
+while {$j > 0} {
+
+	set l [random 30]
+	set r [mkanon pool $c:0:0]
+	while {$l > 0} {
+		set w [random $c]
+		write $r 0 $w
+		set l [expr $l-1]
+	}
+	rmanon pool $r
+
+	set j [expr $j-1]
+}
+abort

@@ -1,0 +1,30 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+SYSPROPS System properties cache (per-client) = 0x00070000 SyspCache {
+	int cache_size; Cache size in cells
+	int	entries; Entries in cache
+
+	// stats associated with this sysprops cache
+	int 	inspects;	Cells inspected
+	int 	caches1;	Times sysprops cached
+	int 	caches2;	Times file id added to cached sysprops
+	int 	invalidates;	Times cache invalidated
+	int		total;  Total lookups for retrieving and uncaching
+	float   ratio1; Cells inspected/lookup (close to size-in-cells is bad)
+	float   ratio2; Hits/lookup  (low is bad)
+
+	int 	uncaches_found;	Cached sysprops invalidated
+	int 	uncaches_notfound;	Sysprops being invalidated wasn't cached
+	int     uncaches;  Total invalidates (uncaches)
+	int 	hits;		Retrieved from cache (cache hits)
+	int 	misses;	Lookup missed (cache misses)
+	int     retrieves; Total retrieves (hits + misses)
+	int 	replaced_other;  Caching forced out another valid lrid
+	int		replaced_same; Caching replaced same lrid
+	int		retr_swapped; Retrieved from swapped
+}

@@ -1,0 +1,181 @@
+#!/bin/sh 
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+# $Header: /p/shore/shore_cvs/src/sdl/tests/testscript,v 1.34 1996/07/25 14:25:20 kupsch Exp $
+#
+
+set -h 
+unset verbose
+
+expect_sdlerr=`echo consts lists pr213 err1 err2` 
+expect_sdlwarn=`echo eg2`
+expect_compile=`echo array eg1 eg2 eg3 eg4 eg5 eg6 eg7 eg8 enums external forward manualindex example struct t1 inh1 inh3 poolref seq_of_struct `
+expect_run=`echo appends array sets union union2 manualindex2 sequences strings inheritance index_vars pool_destroy pool_destroy1 inh2 volid isa`
+
+
+cleanup_before() { /bin/rm -f $1.h $1.o $1.log $1.diffs; }
+cleanup_after() { /bin/rm -f $1.o $1.diffs; }
+
+make_h() {
+	echo -n "run at " > $1.log; date >> $1.log
+	echo make -f Makefile.template $1.h >> $1.log 
+	make -f Makefile.template $1.h 1>> $1.log 2>&1
+}
+
+make_ho() {
+	make_h $1;
+	echo make -f Makefile.template $1.o 1>> $1.log 2>&1
+	make -f Makefile.template $1.o 1>> $1.log 2>&1
+}
+
+make_exec() {
+	make_ho $1
+	make -f Makefile.template $1 1>> $1.log 2>&1
+	echo running $1 1>> $1.log 2>&1
+	$1 1>> $1.log 2>& 1
+# rm the exec, else we run out of space...
+	/bin/rm -f $1
+
+}
+
+diffit() { 
+	cat $1.log | sed -e '/^run at/,/^running/d' > $1.newe
+	diff -w $1.newe $1.expected > /dev/null; 
+	if (test $? -ne 0)  then 
+		echo "*****"
+		echo "***** FAILURE IN RUN $1 -- see $1.log, $1.expected";
+		echo "*****" 
+	fi
+	rm $1.newe
+}
+
+tstart() { 
+	echo ">>>>> testing $i ... "
+	cleanup_before $i;
+}
+tend() { 
+	cleanup_after $i;
+	echo "<<<<< done with $i"
+	echo
+}
+
+sdlerr() {
+	tstart $1
+	make_h $1 
+	if (test $? -eq 0) then
+		echo "*****"
+		echo "*****FAILURE: expected sdl error in " $1
+		echo "*****" 
+	fi
+	tend $1 
+}
+
+# for each entry in expect_sdlwarn, add an entry to the case statement since the sh 
+# shell doesn't have arrays where a list of corresponding warning could be stored.
+# the perl script for 'eg2' just checks that the output contains the 2 line warning.
+
+sdlwarn() {
+	tstart $1
+	make_h $1 
+	case $1 in
+		eg2) perl -e '$*=1; @f = <>; $f = join("", @f); ($f =~ /multiple use of name C, source lines 21 and 13\n2nd declaration is suppressed/) ? exit(0) : exit(1)' < $1.log ;;
+		*) echo "unknown file " $1 " in sdlwarn"; exit 1;;
+	esac
+	if (test $? -ne 0) then
+		echo "*****"
+		echo "*****FAILURE: expected sdl warning in " $1
+		echo "*****" 
+	fi
+	tend $1 
+}
+
+sdlcompile() {
+	tstart $1 
+	make_ho $1 
+	if (test $? -ne 0) then
+		echo "*****"
+		echo "***** FAILURE: expected sdl to compile " $1
+		echo "***** see " $1.log 
+		echo "*****" 
+	fi
+	tend $1 
+}
+
+sdlrun() {
+	tstart $1 
+	make_exec $1 
+	diffit $1 
+	tend $1 
+}
+
+# # # *****************************************************************
+
+echo -n "Sdl compiler should detect errors in these: "
+echo $expect_sdlerr
+echo
+echo -n "Sdl compiler should detect warnings in these: "
+echo $expect_sdlwarn
+echo
+echo -n "These should compile but not run: "
+echo $expect_compile
+echo
+echo -n "These should compile and run: "
+echo $expect_run
+echo
+
+if(test $# -gt 0) then
+	echo "testing indiv"
+	for j in  $expect_sdlerr; do
+		for i in  $*; do
+			if(test $j = $i) then
+				sdlerr $i
+			fi
+		done
+	done
+	for j in  $expect_sdlwarn; do
+		for i in  $*; do
+			if(test $j = $i) then
+				sdlwarn $i
+			fi
+		done
+	done
+	for j in  $expect_compile; do
+		for i in  $*; do
+			if(test $j = $i) then
+				sdlcompile $i
+			fi
+		done
+	done
+	for j in  $expect_run; do
+		for i in  $*; do
+			if(test $j = $i) then
+				sdlrun $i
+			fi
+		done
+	done
+	exit 
+fi
+
+# else ... do them all
+
+for i in  $expect_sdlerr; do
+	sdlerr $i
+done
+
+for i in  $expect_sdlwarn; do
+	sdlwarn $i
+done
+
+for i in  $expect_compile; do
+	sdlcompile $i
+done
+
+for i in  $expect_run; do
+	sdlrun $i
+done
+
+

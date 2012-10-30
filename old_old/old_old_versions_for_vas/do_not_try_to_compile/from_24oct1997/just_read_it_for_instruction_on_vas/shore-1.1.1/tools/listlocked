@@ -1,0 +1,21 @@
+#!/bin/sh -- # do not change this line, it mentions perl and prevents looping
+eval 'exec perl $0 ${1+"$@"}'
+	if 0;
+
+($#ARGV == 0) || die "Usage: $0 baseline \n";
+$baseline = shift @ARGV;
+
+print "bad directory name : $baseline\n" if (! -e $baseline) ;
+
+require "find.pl";
+&find('.');
+
+sub wanted {
+	if (-T) {
+	    if (-e "RCS/$_,v")  {
+		print "$name\n" if (`rlog -L -l$user -R $_`) ;
+	    }
+	}
+}
+
+

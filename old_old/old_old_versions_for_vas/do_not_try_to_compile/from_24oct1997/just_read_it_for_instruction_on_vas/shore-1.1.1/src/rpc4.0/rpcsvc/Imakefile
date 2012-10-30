@@ -1,0 +1,26 @@
+%#
+%# $RCSfile: Imakefile,v $
+%# $Revision: 1.13 $
+%# $Date: 1997/06/16 21:35:58 $
+%# $Author: solomon $
+%#
+%#
+
+%# Note:  Only mount_xdr.o and mount.h are used by Shore
+
+CPPFLAGS = -I.. -I../rpc/include
+
+all_local:: librpcsvc.a mount.h
+
+mount.h: mount.x ../rpcgen/rpcgen
+	../rpcgen/rpcgen -h -o mount.h mount.x
+%GEN generated_headers(mount.h)
+
+mount_xdr.c: mount.x ../rpcgen/rpcgen
+	../rpcgen/rpcgen -c -o mount_xdr.c mount.x
+%GEN generated_srcs(mount_xdr.c)
+
+../rpcgen/rpcgen:
+	$(MAKE) -C ../rpcgen rpcgen
+
+%GEN library(librpcsvc.a, mount_xdr.o)

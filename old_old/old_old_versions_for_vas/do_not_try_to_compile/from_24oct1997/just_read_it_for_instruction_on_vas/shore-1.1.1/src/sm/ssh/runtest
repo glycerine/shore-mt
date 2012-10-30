@@ -1,0 +1,25 @@
+#!/bin/csh -f 
+if ($#argv != 5) then
+   echo usage: $0 TEST ITER KIND FLAGS script
+   exit 1
+endif
+
+if ($1 == "") then
+    setenv SSMTEST "none"
+else 
+    setenv SSMTEST $1
+endif
+setenv SSMTEST_ITER $2
+setenv SSMTEST_KIND $3
+setenv DEBUG_FLAGS "$4"
+
+set script=$5
+
+# echo SSMTEST=$SSMTEST SSMTEST_ITER=$SSMTEST_ITER SSMTEST_KIND=$SSMTEST_KIND DEBUG_FLAGS=$DEBUG_FLAGS 
+echo $SSMTEST $SSMTEST_ITER $SSMTEST_KIND $DEBUG_FLAGS > runtests.out
+
+./ssh -f ../scripts/$script 1 >>& runtests.out 
+
+set  s=$status
+echo exiting $s
+exit $s

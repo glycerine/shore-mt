@@ -1,0 +1,271 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+# *****************************************************************
+# This is all Tcl. 
+# *****************************************************************
+
+# VARIABLES to control the rest of this script:
+
+set verbose 1
+
+# 	see also very bottom
+set printusererrors 1
+
+#
+# 	set to 1 if you want this script
+# 	to prepare the volume for oo7
+set prepoo7 0
+
+# 	you must leave this alone:
+set ok 1
+
+#
+# VOLUME TABLE:
+#
+#	format of a volume table entry:
+#
+#		{ dev  mnt  wrt  vid  size }
+#
+#		where
+#
+#		 dev = Unix path name for the device
+#		 mnt = Shore path name for the mountpoint
+#		 wrt = should read "writable"
+#		 vid = volume id of the form: "int.int" or just "int".
+#		 size = the size that you want the volume to be, in KB,
+#				so 17000 means 17 megabytes.
+#				
+#
+#	The server gets the name of the root volume and the root device
+#	from the option "svas_root",
+#	which, if set in the .shoreconfig file, MUST match the information
+#	given here for "rootvolumename" and "rootvolumeid".
+#
+	set rootvolumename ./volumes/miniroot
+	set rootvolumeid 10
+	set rootvolumesize 5000
+	set rootvolumeinfo  [list $rootvolumename / writable $rootvolumeid $rootvolumesize ]
+
+#	Information for non-root volumes:
+
+	set volumeinfo  { }
+#	set volumeinfo  {
+#	{./volumes/vol8k /small writable 8000 3000 }
+#	{./volumes/vol9k /large writable 9000 10000 }
+#	}
+
+#
+#	
+# STEP 0
+#	Compare this root volume info with that from the svas_root option.
+#	
+
+	set rootinfo  [getoption svas_root]
+	if { [llength $rootinfo] != 0 } {
+		set dev [lindex $rootinfo 0]
+		set vid [lindex $rootinfo 1]
+		set rootvolumeinfoA  [list $dev / writable $vid $rootvolumesize ]
+
+		if { $rootvolumeinfo != $rootvolumeinfoA } {
+			cerr
+			cerr { ********************************************** }
+			cerr { *******************WARNING******************** }
+			cerr { ********************************************** }
+			cerr
+			cerr {    Root volume info from configuration file }
+			cerr {    does not match that in startup file. }
+			cerr
+			cerr { ********************************************** }
+			cerr { ********************************************** }
+			cerr { ********************************************** }
+			cerr
+			return -1
+		}
+	}
+
+
+
+# *****************************************************************
+
+# Step 1 : FORMAT
+# 	See if these volumes have been formatted yet.
+# 	If they don't exist in our UNIX space, we'll format them. 
+#
+# 	NB: THIS WILL NOT WORK RIGHT WITH RAW DEVICES since they
+# 	always exist.
+#
+#	
+	foreach m [lappend volumeinfo $rootvolumeinfo] {
+		set dev [lindex $m 0]
+		set mnt [lindex $m 1]
+		set wrt [lindex $m 2]
+		set vid [lindex $m 3]
+		set sz [lindex $m 4]
+		if [not [_file exists $dev]]  {
+			if {$verbose==1} {
+				cout format --$dev-- $sz true
+			}
+			format $dev $sz true
+
+			if {$verbose==1} {
+				cout mkfs $dev $sz $vid
+			}
+			mkfs $dev $sz $vid 
+		} else {
+			if {$verbose==1} {
+				cout serve $dev
+			}
+			serve $dev
+		}
+	}
+	if {$verbose==1} {
+		cout "Done serving devices and making filesystems.\n"
+	}
+
+# *****************************************************************
+#
+#	Step 2: ROOT DIRECTORY
+#	See if we have a root directory.
+
+if {$ok == 1} {
+	suppress on
+	begin
+	if [file exists /]  {
+		set root [getroot]
+	} else {
+		set root  0
+	}
+	commit
+	if {$verbose==1} {
+		cout "root =" $root
+	}
+	suppress off
+}
+#
+# *****************************************************************
+
+#
+# 	Step 3 : Make sure root is mounted.
+# 	the device should already have been served
+#
+if {$ok == 1} {
+	if {$root==0} {
+		set m $rootvolumeinfo
+		set dev [lindex $m 0]
+		set mnt [lindex $m 1]
+		set wrt [lindex $m 2]
+		set vol [lindex $m 3]
+		set sz [lindex $m 4]
+
+		if {$mnt != "/"} {
+			cout  { Error in startup file: rootvolume is not /. }
+			set ok 0
+		} else {
+			if {$verbose==1} {
+				cout "setroot " $vol
+			}
+			set root [setroot $vol]
+
+			begin
+			cout "/" is now [getroot]
+			commit
+		}
+	}
+}
+#
+# *****************************************************************
+# Step 4 : Make sure the rest of the volumes are served
+#
+# 	Tell the SM to serve these volumes.
+#	If we have a root directory, we don't need to serve that volume.
+#
+if {$ok == 1} {
+	foreach m $volumeinfo {
+		set dev [lindex $m 0]
+		set mnt [lindex $m 1]
+		set wrt [lindex $m 2]
+		set vol [lindex $m 3]
+
+		if {$verbose==1} {
+			cout "See if " $mnt " exists in the Shore namespace."
+		}
+#		Begin a transaction so that we can 
+#		execute [file exists ...]
+		begin
+		set nofile [not [file exists $mnt]] 
+		commit
+
+#		the file might exist, or it might never have been linked.
+#		into the namespace.
+		if {$nofile} {
+			if {$verbose==1} {
+				cout  $mnt " does not exist "
+				cout pmount $vol $mnt
+			}
+			pmount $vol $mnt
+		} else {
+			if {$verbose==1} {
+				cout  $mnt " does exist"
+			}
+		}
+	}
+	if {$verbose==1} {
+		cout "Done putting together the namespace.\n"
+	}
+}
+# *****************************************************************
+#
+# 	Step 5: set up stuff for oo7 and rooms examples 
+#
+
+if {$ok==1}  {
+	if {$prepoo7==1} {
+		set printusererrors 0
+
+#   example of how to create a directory 
+		begin
+		cd /
+		foreach d { oo7 oo7/tiny oo7/little oo7/small } {
+			if {$verbose==1} {
+				cout $d 
+			}
+			if [not [file exists $d]] { 
+				if {$verbose==1} {
+					cout mkdir $d 
+				}	
+				mkdir $d 
+			} 
+			if [not [file exists $d/pool]] { 
+				if {$verbose==1} {
+					cout mkpool $d/pool
+				}
+				mkpool $d/pool 
+			} 
+		}
+		commit
+		cd /
+	}
+} else {
+	cerr "*******************************************"
+	cerr "*                                         *"
+	cerr "*  Server started without a root volume.  *" 
+	cerr "*  Either log off and restart the server, *"
+	cerr "*    or do `setroot <volid>' for your     *"
+	cerr "*       formatted root volume.            *"
+	cerr "*                                         *"
+	cerr "*       Log off and restart the server    *"
+	cerr "*       to create the 007 directories.    *"
+	cerr "*******************************************"
+}
+
+# 
+# *****************************************************************
+# Whew. Done.
+# *****************************************************************
+
+set printusererrors 0

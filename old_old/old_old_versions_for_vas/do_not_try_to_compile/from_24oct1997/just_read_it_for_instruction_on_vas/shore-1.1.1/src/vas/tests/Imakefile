@@ -1,0 +1,22 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+/*
+ *      $RCSfile: Imakefile,v $
+ *      $Revision: 1.29 $
+ *      $Date: 1997/06/16 21:36:12 $
+ *      $Author: solomon $
+ */
+CPPFLAGS = -I../include -I../common -I../../common -I../../fc -I../../sm %
+	Include(TclInclude)
+
+all_local:: client purtest
+
+%GEN c_plus_program(client, client.o, $(LIB))
+%GEN c_plus_program(purtest, purtest.o, $(LIB))
+
+%GEN depend_target(client.C purtest.C)
+%GEN tags(client.C puretest.C)

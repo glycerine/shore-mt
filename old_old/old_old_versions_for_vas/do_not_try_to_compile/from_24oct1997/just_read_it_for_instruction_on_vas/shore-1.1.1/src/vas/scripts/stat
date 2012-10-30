@@ -1,0 +1,23 @@
+# source ../scripts/stat
+
+source ../scripts/chmod.compensate
+set true "1"
+set false "0"
+
+begin
+	set subject tfile
+	set oid [mkuserdef $subject 0:1:0]
+commit
+
+begin
+#   show that you can stat a file w/o having
+#   any access to it
+	set oldmode [sfile mode $subject]
+	chmod 0000 $subject
+	stat $subject 
+	chmod $oldmode $subject
+
+#	TODO: need a file owned by someone else
+# 	to show that ownership has nothing to do with it
+
+commit

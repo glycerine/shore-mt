@@ -1,0 +1,31 @@
+
+
+
+module m1 {
+	export attri;
+	import opi_example;
+	interface opi; // necessary
+	interface attri {
+	public:
+		attribute long 		an_array[3];
+        attribute ref<opi>  opi_array[3];
+        attribute int  		int_array[3];
+	};
+
+}
+
+module opi_example {
+	export all;
+	import m1;
+
+	interface opi {
+	private:
+		// all combinations
+	public:
+		// some non-const operation
+		void init();
+
+	};
+
+}
+

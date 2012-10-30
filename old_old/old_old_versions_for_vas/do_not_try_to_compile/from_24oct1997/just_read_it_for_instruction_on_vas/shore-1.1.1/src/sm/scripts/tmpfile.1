@@ -1,0 +1,135 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test Temp files
+#
+if {$Use_logical_id == 1} {
+	echo WARNING: tmpfile.1 cannot be run (since logical IDs are turned on)
+	verbose WARNING: until we destroy tmp files properly on dismount for logical ids
+} else {
+	source $script_dir/vol.init
+
+	# set num_rec 2000
+	set num_rec 2000
+	set id_width %06d
+
+	if [is_set rid] {
+	   unset rid
+	}
+
+	# First, see if you can abort the creation
+	# of a temp file
+	sm begin_xct
+	verbose tid [sm xct_to_tid [sm xct]]
+	set tfid [sm create_file $volid tmp]
+	verbose TEMP fid $tfid
+	set trid(0) $null_rid
+	verbose timing the create of $num_rec NO LOG
+	verbose [time {
+		for {set i 1} {$i <= $num_rec} {incr i} {
+		set trid($i) [
+		    sm create_rec $tfid [format $id_width $i] 10 data.[format %01000d $i]
+		]
+		}
+	} 1]
+	for {set i 1} {$i <= $num_rec} {incr i} {
+	    verbose TMP rid $trid($i)
+	}
+
+	verbose ABORTING the creation of a temp file
+	sm abort_xct
+
+
+	sm begin_xct
+	verbose tid [sm xct_to_tid [sm xct]]
+	set tfid [sm create_file $volid tmp]
+	verbose TEMP fid $tfid
+
+	set trid(0) $null_rid
+	verbose timing the create of $num_rec NO LOG
+	verbose [time {
+		for {set i 1} {$i <= $num_rec} {incr i} {
+		set trid($i) [
+			sm create_rec $tfid [format $id_width $i] 10 data.[format %01000d $i]
+		]
+		}
+	} 1]
+	for {set i 1} {$i <= $num_rec} {incr i} {
+	    verbose TMP rid $trid($i)
+	}
+
+	sm commit_xct
+
+	sm begin_xct
+	verbose tid [sm xct_to_tid [sm xct]]
+
+	set fid [sm create_file $volid regular]
+	echo REGULAR fid $fid
+
+	set rid(0) $null_rid
+	verbose timing the create of $num_rec WITH LOG
+	verbose [time {
+		for {set i 1} {$i <= $num_rec} {incr i} {
+		set rid($i) [
+			sm create_rec $fid [format $id_width $i] 10 data.[format %01000d $i]
+		]
+		}
+	} 1]
+
+	sm commit_xct
+
+	proc t_timeit { num_rec op finish } {
+		global trid
+
+		sm begin_xct
+		verbose tid [sm xct_to_tid [sm xct]]
+		verbose timing the $op of $num_rec NO LOG
+		verbose [time {
+		for {set i 1} {$i <= $num_rec} {incr i} {
+			verbose sm $op $trid($i) 
+			sm $op $trid($i) 0 "ABCDEFGHIJKLMNOPQRST" 
+		}
+		} 1]
+
+		verbose $finish
+		if {$finish == "restart"} {
+		  restart
+		} else {
+		  catch [sm $finish] err
+		  verbose result of restart is $err
+		}
+		return 0
+	}
+
+	proc timeit { num_rec op finish } {
+		global rid
+
+		sm begin_xct
+		verbose tid [sm xct_to_tid [sm xct]]
+		verbose timing the $op of $num_rec WITH LOG
+		verbose [time {
+		for {set i 1} {$i <= $num_rec} {incr i} {
+			verbose sm $op $rid($i) 
+			sm $op $rid($i) 0 "ABCDEFGHIJKLMNOPQRST" 
+		}
+		} 1]
+
+		verbose $finish
+		sm $finish
+	}
+
+	t_timeit $num_rec update_rec commit_xct
+	timeit $num_rec update_rec commit_xct
+
+	t_timeit $num_rec update_rec abort_xct
+	t_timeit $num_rec update_rec restart
+
+
+	unset rid
+	unset tfid trid fid num_rec i id_width
+}

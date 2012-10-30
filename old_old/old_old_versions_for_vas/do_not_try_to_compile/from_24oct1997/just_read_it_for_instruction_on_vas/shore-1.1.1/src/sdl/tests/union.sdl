@@ -1,0 +1,57 @@
+/////////////////
+// PR 219
+// PR 259
+////////////////
+module m1 {
+	interface a;
+
+	typedef sequence<int, 3>                seq1_t;
+
+	enum enumx { zero,one,two,three,four,five,six };
+
+	// very simple unions
+	// note: for ease of use, move the decls out of the interface and
+	// into the module.  There is still a bug if they are local to
+	// the interface, but putting them in the module makes the type
+	// names accessible without a qualifier.
+	union simple_union_t switch (enumx tag) {
+		case one: 		int 	  u_one;
+		case two:		boolean   u_two;
+	};
+
+	// not-so-simple unions
+	union union_t switch (enumx tag) {
+		case one: 		int 	  u_integer;
+		case two:		boolean   u_boolean;
+		case three:		set<a>  u_set; 
+		case four:		ref<a>  u_ref;
+		case five:  	string    u_string;
+	};
+
+	typedef sequence<int, 3> 		seq1_t;
+	union union_seq_t switch (enumx tag) {
+		case one: 	ref<a> u_ref;
+		case two:	set<a>  u_set; //PR 259:  probably(?) should be an error
+		case three:	bag<a>  u_bag; //PR 259:  probably(?) should be an error
+		case four:	seq1_t	  u_seq; //PR 259 probably(?) should be an error
+		};
+
+	interface union_example_t {
+	public:
+
+		attribute simple_union_t simple; 
+		attribute union_t u; // PR 259: doesn't sdl-link if I add this
+			// UPDATE: now doesn't link (ld) because the
+			// copy constructor for union_t isn't defined
+
+		// PR 219 - BUG: either of these causes the problem 
+		// typedef sequence<union_t, 3> seq2_t;
+		// typedef sequence<union_seq_t> seq3_t;
+	};
+
+	interface a {
+	public:	
+		attribute boolean junk;
+	};
+
+}

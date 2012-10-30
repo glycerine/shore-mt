@@ -1,0 +1,49 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Time loading of objects.
+#
+source $script_dir/vol.init
+
+set config [sm config_info]
+echo config $config
+
+set num_rec 1000
+set hdr "" 
+set chunk_width 8100
+set chunk_pattern %0$chunk_width\d
+set num_chunks 1
+
+set rec_size [expr $chunk_width *  $num_chunks]
+set chunk [format $chunk_pattern 1]
+echo $chunk_pattern [string length $chunk]
+
+echo creating $num_rec, size= $rec_size
+
+sm begin_xct
+    set fid [sm create_file $volid ]
+    set rid(0) $null_rid
+sm commit_xct
+
+echo CREATE STARTING: [sm gather_stats reset]
+set create_time [ time {
+
+sm begin_xct
+    sm create_many_rec $num_rec $fid $hdr $rec_size $chunk $num_chunks
+
+echo CREATES BEFORE COMMIT $num_rec RECS: [sm gather_stats]
+    sm commit_xct
+} 1 ]
+echo
+echo CREATES AFTER COMMIT $num_rec RECS: [sm gather_stats reset]
+echo volume_quota [sm get_volume_quota $volid]
+
+echo 
+echo total create time = $create_time
+
+unset rid

@@ -1,0 +1,42 @@
+
+// SEE PR 236
+// demonstrates use of external declarations
+//
+// pr 236 has to do with the LB for op1 and op2, below:
+// it generates 
+// class a, enum b, c , struct d, struct e
+// when it should generate
+// class a, enum b, c , union d, struct e
+//
+
+module m1 {
+	export all;
+	import m2;
+	external class a;
+	external enum b;
+    enum enum4 { one,two,three,four };
+
+	interface opi; // necessary
+
+	external typedef c;
+	external union d;
+
+	interface my_obj {
+	private:
+		attribute long an_array[3];
+	public:
+		external struct e;
+
+		b op1(in a p_a, in b p_b, in c p_c, in d p_d, in e p_d);
+		c op2(out a p_a, out b p_b, out c p_c, out d p_d, out e p_d);
+		// long op3(out ma p_a, out mb p_b, out mc p_c, out md p_d, out me p_d);
+	};
+}
+
+module m2 {
+	external class ma;
+	external enum mb;
+	external typedef mc;
+	external union md;
+	external struct me;
+}

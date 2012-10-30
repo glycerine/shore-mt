@@ -1,0 +1,135 @@
+# source ../scripts/utimes
+
+source ../scripts/chmod.compensate
+set true "1"
+set false "0"
+set subject tfile
+
+begin
+	set oid [mkuserdef $subject 0:1:0]
+commit
+
+begin
+	set oldmtime [sfile mtime $subject]
+	set oldctime [sfile ctime $subject]
+	set oldatime [sfile atime $subject]
+
+	set r [random 3]
+#	avoid random turning out 0
+	set r [expr {$r + 2}]
+	cout sleeping $r
+	sleep $r
+	utimes $subject
+
+#  see that ctime,mtime are changed by this op
+
+	set newmtime [sfile mtime $subject]
+	set newctime [sfile ctime $subject]
+	set newatime [sfile atime $subject]
+
+	assert [ expr { $newmtime != $oldmtime } ]
+	assert [ expr { $newctime != $oldctime } ]
+	assert [ expr { $newatime != $oldatime } ]
+
+#
+# TODO: test that times are set right
+#	test: process must be owner of the file OR have
+#  write perm to change times to NOW (no args)
+#	TODO: need mechanism to test non-owner case
+
+#	see that mtime IS NOT changed by chown, chgrp, chmod, link
+#   see that ctime IS changed by chown
+
+	set mygid [getgid]
+	set othergid [getgid exodus]
+	assert [expr { $othergid != $mygid } ]
+	set oldmtime [sfile mtime $subject]
+	set oldctime [sfile ctime $subject]
+	cout $oldctime
+	sleep 2
+
+	# change it at least twice just to be sure it's changed
+	chgrp $mygid $subject
+	chgrp $othergid $subject
+	chgrp $mygid $subject
+	assert [expr { [sfile mtime $subject] == $oldmtime } ]
+	assert [expr { [sfile ctime $subject] != $oldctime } ]
+	set oldctime [sfile ctime $subject]
+	cout $oldctime
+	sleep 2
+
+	chmod  0755 $subject
+	chmod  0744 $subject
+	chmod  0755 $subject
+#	cout [sfile mtime $subject]
+#	cout $oldmtime
+	assert [expr { [sfile mtime $subject] == $oldmtime } ]
+	assert [expr { [sfile ctime $subject] != $oldctime } ]
+	set oldctime [sfile ctime $subject]
+	cout $oldctime
+	sleep 2
+
+	mklink $subject newlink1
+	mklink $subject newlink2
+	assert [expr { [sfile mtime $subject] == $oldmtime } ]
+	assert [expr { [sfile ctime $subject] != $oldctime } ]
+	set oldctime [sfile ctime $subject]
+	cout $oldctime
+	sleep 2
+
+	unlink newlink1
+	unlink newlink2
+	assert [expr { [sfile mtime $subject] == $oldmtime } ]
+	assert [expr { [sfile ctime $subject] != $oldctime } ]
+	set oldctime [sfile ctime $subject]
+	cout $oldctime
+	sleep 2
+
+#   see that mtime and ctimes are changed by append
+	append $subject 10
+	assert [expr { [sfile mtime $subject] != $oldmtime } ]
+	assert [expr { [sfile ctime $subject] != $oldctime } ]
+	set oldmtime [sfile mtime $subject]
+	set oldctime [sfile ctime $subject]
+	cout $oldctime
+	sleep 2
+
+#   see that mtime and ctimes are changed by write
+	write $subject 0 10
+	assert [expr { [sfile mtime $subject] != $oldmtime } ]
+	assert [expr { [sfile ctime $subject] != $oldctime } ]
+	set oldmtime [sfile mtime $subject]
+	set oldctime [sfile ctime $subject]
+	cout $oldctime
+	sleep 2
+
+#   see that mtime and ctimes are changed by trunc
+	trunc $subject 10
+	assert [expr { [sfile mtime $subject] != $oldmtime } ]
+	assert [expr { [sfile ctime $subject] != $oldctime } ]
+	set oldmtime [sfile mtime $subject]
+	set oldctime [sfile ctime $subject]
+	cout $oldctime
+	sleep 2
+
+#   see that no times are changed by read
+	read $subject 0 10
+	assert [expr { [sfile mtime $subject] == $oldmtime } ]
+	assert [expr { [sfile ctime $subject] == $oldctime } ]
+	set oldmtime [sfile mtime $subject]
+	set oldctime [sfile ctime $subject]
+	cout $oldctime
+	sleep 2
+
+# TODO: need some other capability to test the chown part
+
+#  TODO: test: setting times to a given time: only
+#  owner or SU can do this.  Test that it works,
+#  see that ctime is changed by this op 
+#	Need another mechnism to test non-owner case and SU case
+#	Need extended utimes command
+#
+
+commit
+
+return "utimes done."

@@ -1,0 +1,22 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+# oc options are found thus:
+# bounty(nhall): fgrep add_option *.C
+# Shore.C:    W_DO(_options->add_option("oc_mlimit", "integer",
+# Shore.C:    W_DO(_options->add_option("oc_objlimit", "integer",
+# Shore.C:    W_DO(_options->add_option("oc_batch", "integer",
+# Shore.C:    W_DO(_options->add_option("oc_nobatch", "yes/no",
+# Shore.C:    W_DO(_options->add_option("oc_prefetch", "yes/no",
+# Shore.C:    W_DO(_options->add_option("oc_pstats", "yes/no",
+
+# here's how they are used in oo7:
+shore.oo7.*.oc_pstats: yes
+shore.oo7.*.oc_mlimit: 4000000
+
+# alternatively, for example, with bench:
+# bench -v -oc_prefetch no  -oc_mlimit 5000000 oo7.config.tiny 1 t1 one

@@ -1,0 +1,61 @@
+# source ../scripts/time
+
+set debugflags ""
+export debugflags
+
+source ../tests/scripts/setup.all
+
+set quiet 1
+export quiet
+
+begin
+cd /small
+
+time { nullcmd 1 } 1000
+abort
+
+proc doit {nb} {
+	cout BEGIN doit $nb 
+	begin
+	set $nb 1
+	cout Object size : $nb
+	set obj [mkanon pool $nb:0:NoText]
+	time { read $obj } 1000
+	time { read $obj } 1000
+	time { read $obj } 1000
+	time { write $obj 0 $nb } 1000
+	time { write $obj 0 $nb } 1000
+	time { write $obj 0 $nb } 1000
+	abort
+	cout END doit $nb 
+}
+
+#  doit {1}
+doit {100}
+doit {1000}
+
+rename doit ""
+
+begin
+cd /large
+if [not [sfile exists pool] ] {
+	mkpool pool
+}
+set  pool [sfile oid pool]
+commit
+
+begin
+time {mkanon $pool 1:0:NoText} 1000
+abort
+
+begin
+time {mkanon $pool 100:0:NoText} 100
+abort 
+
+begin
+time {mkanon $pool 1000:0:NoText} 100
+abort
+
+begin
+time {mkanon $pool 3000:0:NoText} 100
+abort

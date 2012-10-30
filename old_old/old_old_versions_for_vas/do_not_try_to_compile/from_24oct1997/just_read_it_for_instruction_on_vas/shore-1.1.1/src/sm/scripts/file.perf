@@ -1,0 +1,48 @@
+# set fileType to tmp or regular or no_log
+# set logging to yes or no here AND in .shoreconfig
+
+set fileType regular
+set logging yes
+set numTests 10
+set id_width %08d
+
+proc test {fileType}  {
+	global id_width volid buffer
+
+	sm begin_xct
+    set fid [sm create_file $volid $fileType]
+	for {set i 0} {$i < 32} {incr i}  {
+		sm create_rec $fid [format $id_width $i] 30000 $buffer
+	}
+	sm commit_xct
+}
+
+# make a 64K buffer
+set buffer ""
+for {set i 48} {$i < 112} {incr i}  {
+	set c [format "%c" $i]
+	set buffer "$buffer$c"
+}
+for {set i 0} {$i < 10} {incr i}  {
+	set buffer "$buffer$buffer"
+}
+
+
+source ../scripts/vol.init
+clearstats
+
+echo "********************************"
+echo "** fileType: $fileType, logging: $logging, numTest: $numTests"
+echo "********************************"
+
+set testTime [time {test $fileType} $numTests]
+
+echo
+echo testTime=$testTime
+echo ********************************
+echo STAT NUMBERS ARE FOR $numTests RUNS.
+echo ********************************
+echo [sm gather_stats]
+echo
+echo
+

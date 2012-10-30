@@ -1,0 +1,571 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Implementing a Multi-Threaded Server</TITLE>
+<META NAME="description" CONTENT="Implementing a Multi-Threaded Server">
+<META NAME="keywords" CONTENT="ssmvas">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmvas.css">
+<LINK REL="next" HREF="node6.html">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="ssmvas.html">
+<LINK REL="next" HREF="node6.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html203"
+ HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html200"
+ HREF="ssmvas.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html194"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html202"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html204"
+ HREF="node6.html">Implementing Clients</A>
+<B> Up:</B> <A NAME="tex2html201"
+ HREF="ssmvas.html">Writing Value-Added Servers with Manager</A>
+<B> Previous:</B> <A NAME="tex2html195"
+ HREF="node4.html">Operations on Storage Structures</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html205"
+ HREF="node5.html#SECTION00051000000000000000000">
+Error Codes</A>
+<LI><A NAME="tex2html206"
+ HREF="node5.html#SECTION00052000000000000000000">
+Startup</A>
+<UL>
+<LI><A NAME="tex2html207"
+ HREF="node5.html#SECTION00052100000000000000000">
+Configuration Options</A>
+<LI><A NAME="tex2html208"
+ HREF="node5.html#SECTION00052200000000000000000">
+SSM Initialization</A>
+</UL>
+<LI><A NAME="tex2html209"
+ HREF="node5.html#SECTION00053000000000000000000">
+Thread Management</A>
+<UL>
+<LI><A NAME="tex2html210"
+ HREF="node5.html#SECTION00053100000000000000000">
+Listener Thread</A>
+<LI><A NAME="tex2html211"
+ HREF="node5.html#SECTION00053200000000000000000">
+Client Threads</A>
+<LI><A NAME="tex2html212"
+ HREF="node5.html#SECTION00053300000000000000000">
+Cleaner Thread</A>
+<LI><A NAME="tex2html213"
+ HREF="node5.html#SECTION00053400000000000000000">
+Terminal Input Thread</A>
+</UL>
+<LI><A NAME="tex2html214"
+ HREF="node5.html#SECTION00054000000000000000000">
+Transaction and Lock Management</A>
+<LI><A NAME="tex2html215"
+ HREF="node5.html#SECTION00055000000000000000000">
+RPC Implementation</A>
+<UL>
+<LI><A NAME="tex2html216"
+ HREF="node5.html#SECTION00055100000000000000000">
+Declarations</A>
+<LI><A NAME="tex2html217"
+ HREF="node5.html#SECTION00055200000000000000000">
+C++ Wrappers</A>
+<LI><A NAME="tex2html218"
+ HREF="node5.html#SECTION00055300000000000000000">
+RPC Startup</A>
+<LI><A NAME="tex2html219"
+ HREF="node5.html#SECTION00055400000000000000000">
+Multi-threading Issues</A>
+<LI><A NAME="tex2html220"
+ HREF="node5.html#SECTION00055500000000000000000">
+Steps to add a New RPC</A>
+</UL>
+<LI><A NAME="tex2html221"
+ HREF="node5.html#SECTION00056000000000000000000">
+Shutdown</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="ssmvas:multithread">&#160;</A><H1><A NAME="SECTION00050000000000000000000">
+Implementing a Multi-Threaded Server</A>
+</H1>
+<P>
+The capability to implement a multi-threaded
+server that manages multiple transactions is one of the
+distinguishing features of the SSM.  Other persistent storage
+systems such as <A NAME="tex2html1"
+ HREF="http://www.cs.wisc.edu/exodus/">the Exodus Storage Manager
+(http://www.cs.wisc.edu/exodus/)</A>
+)
+only allow writing clients that run only one transaction at a time
+and are usually single-threaded.
+The grid example server is a multi-threaded threaded program that
+manages requests from multiple clients, and interactive
+commands through its terminal interface.
+<P><A NAME="ssmvas:errors">&#160;</A><H2><A NAME="SECTION00051000000000000000000">
+Error Codes</A>
+</H2>
+<P>
+Most SSM methods return an error code object of
+type <TT>w_rc_t</TT> (usually typedef'ed as <TT>rc_t</TT>.
+It is important always to check the return values of these
+methods.  To help find places where return codes
+are not checked, the
+<TT>w_rc_t</TT> destructor
+has extra code (when compiled with <TT>DEBUG</TT> defined)
+to verify that the error code was checked.  An <TT>w_rc_t</TT>
+is considered checked when any of its methods that read/examine
+the error code are
+called, including the assignment operator.
+Therefore, simply returning an <TT>w_rc_t</TT> (which involves
+an assignment) is considered checking it.  Of course, the newly
+assigned <TT>w_rc_t</TT> is considered unchecked.
+<A HREF="../ssmapi/node8.html#ssmapi:errorhandling">More details on error checking</A>
+are available in the SSM interface document.
+<P>
+The macros <TT>W_DO</TT> and <TT>W_COERCE</TT>, declared in <TT>w_rc.h</TT>,
+are helpful in checking return values and keeping the code concise.
+The <TT>W_DO</TT> macro takes a function to call, calls it and checks
+the return code.  If an error code is returned, the macro executes
+a <TT>return</TT> statement returning the error.  The <TT>W_COERCE</TT>
+does the same thing except it exits the program if an error code is
+returned by the called function.
+<P>
+Many of the grid methods return <TT>w_rc_t</TT> codes as well.
+However, the RPC-related methods of command_server_t return
+error message strings.  The conversion from <TT>w_rc_t</TT> to string
+is done by <TT>SSMDO</TT> macro found at the top of command_server.C.
+<P><A NAME="ssmvas:startup">&#160;</A><H2><A NAME="SECTION00052000000000000000000">
+Startup</A>
+</H2>
+<P><A NAME="ssmvas:config">&#160;</A><H3><A NAME="SECTION00052100000000000000000">
+Configuration Options</A>
+</H3>
+<P>
+Several SSM configuration options must be set before
+the SSM is started with the <TT>ss_m</TT> constructor.  In addition, most
+servers, including the grid server, will have options of their own
+that need to be set.  The SSM provides an option facility
+<A NAME="tex2html6"
+ HREF="../man/options.common.html">options(common)</A>
+for this purpose.  Included with the option facility are functions to
+find options on the program command line and from files of configuration
+information.
+<P>
+In <TT>server.C</TT>, <TT>main</TT> creates a 3-level option group
+(levels will be discussed shortly), and adds the server's options to
+the group with a call to <TT>ss_m::setup_options</TT>.  Once the option
+group is complete we call <TT>init_config_options</TT> in <TT>options.C</TT> to initialized the options' values.
+<P>
+The <TT>init_config_options</TT> function is used by both the client and
+server programs to initialize option values.  The first thing it does
+is add classification level names for the option group.   The option
+group used for the example has 3 levels.  First level is the
+system the program belongs two, in this case <TT>grid</TT>.  The second
+is the type of program, in this case <TT>server</TT>.  The third is
+the filename of the program executable, which is also <TT>server</TT>.
+The classification levels allow options to be set for
+multiple programs with a single configuration file.  For
+example, both the client and server programs have a <TT>connect_port</TT>
+option for specifying the port clients use to connect to the server.
+The following line in a configuration file sets the connection
+port so that client and server always agree:
+<P><TT>grid.*.connect_port: 1234</TT>
+<P>
+The following line would be ignored by the grid programs as
+it is for the Shore VAS system:
+<P><TT>shore.*.connect_port: 1234</TT>
+<P>
+After setting the level names, <TT>init_config_options</TT> reads
+the configuration file <TT>./exampleconfig</TT> scanning for options.
+Then the command line is searched for any option settings so that
+command line settings override those in the configuration file.
+Any option settings on the command line are removed by changing
+<TT>argc</TT> and <TT>argv</TT>.
+<P><A NAME="ssmvas:startingssm">&#160;</A><H3><A NAME="SECTION00052200000000000000000">
+SSM Initialization</A>
+</H3>
+<P>
+Once all of the configuration options have been set, the
+SSM can be started.  The
+<A HREF="../ssmapi/node3.html#ssmapi:initshut">SSM is started by constructing</A>
+an instance of the <TT>ss_m</TT> class (as is done in
+<TT>main</TT> in <TT>server.C</TT>).
+<P>
+One of the things the <TT>ss_m</TT> constructor does is perform recovery,
+if necessary.  Recovery will be necessary if a previous server process
+crashed before successfully completing the <TT>ss_m</TT> destructor.
+<P>
+Once the SSM is constructed, <TT>main</TT> calls
+<TT>setup_device_and_volume</TT> to initialize the device and volume
+as described
+htmlrefabovessmvas:initializing.  With the SSM constructed, we
+can now start the threads that do the real work.
+<P><A NAME="ssmvas:threadmgmt">&#160;</A><H2><A NAME="SECTION00053000000000000000000">
+Thread Management</A>
+</H2>
+<P>
+The grid server manages multiple activities.  It responds to input
+from the terminal, listens for new connections from clients, and
+processes RPCs from clients.  Any one of these activities can become
+blocked while acquiring a lock or performing I/O, for example.
+By assigning activities to threads, the entire server
+process no longer blocks, only threads do.
+<P>
+The subsections below explain the three types of threads
+used by the grid server.  The thread classes are declared in
+declared in <TT>rpc_thread.h</TT> and implemented in <TT>rpc_thread.C</TT>.
+Notice that each thread class is derived from <TT>smthread_t</TT>.
+All threads that use SSM facilities must derived from <TT>smthread_t</TT>
+rather than the base class, <TT>sthread_t</TT>.
+<P>
+The first code to be executed by any newly forked thread
+is its <TT>run</TT> method.  The <TT>run</TT> method is virtual
+so that it can be specialized for each type of thread.
+<P><A NAME="ssmvas:listener">&#160;</A><H3><A NAME="SECTION00053100000000000000000">
+Listener Thread</A>
+</H3>
+<P>
+Once the RPC facility has been initialized,
+<TT>main</TT> creates a new thread, type <TT>listener_t</TT>,
+that listens for client connections.
+The listener thread does two jobs:
+<UL>
+<LI> Wait for client connection requests and fork a thread to
+handle the connection
+<LI> Manage an orderly shutdown of clients when the <TT>shutdown</TT>
+method is called
+</UL>
+<P>
+The work of the listener thread is all done in its <TT>run</TT> method
+(as is true for all most threads).  The first thing
+<TT>run</TT> does is create a file handler (<TT>sfile_read_hdl_t</TT>)
+for reading from the connection socket.  The code then loops waiting
+for input to the socket.  When a connection request arrives, the RPC
+function <TT>svc_getreqset</TT> is called allowing the RPC package to
+process the connection request.  Then, a <TT>client_t</TT> thread
+(discussed in the next section) is created to handle the connection.
+The new client thread is added to the listener's list of clients.
+Notice that since the client list may be accessed by
+multiple threads, it is protected by a
+<A NAME="tex2html7"
+ HREF="../man/smutex_t.sthread.html">mutex</A>.
+<P>
+When the server is ready to shutdown, <TT>main</TT> calls
+<TT>listener_t::shutdown</TT>, which in turn calls shutdown
+on the file handler for the connection socket.  This causes the
+listener thread to wakeup and break out of the
+while loop in the <TT>run</TT> method.
+The listener then notifies the cleaner thread (see below)
+to destroy defunct threads.
+<P><A NAME="ssmvas:clientthreads">&#160;</A><H3><A NAME="SECTION00053200000000000000000">
+Client Threads</A>
+</H3>
+<P>
+When the listener thread detects a new connection
+it forks a new thread, type <TT>client_t</TT>,
+to process RPC requests on the connection.
+The <TT>client_t</TT> constructor is given a socket on which to wait
+for requests and a pointer to the listener thread to notify when
+it is finished.  Notice that the client thread has
+a buffer area for generating RPC replies, called <TT>reply_buf</TT>.
+<P>
+The <TT>client_t::run</TT> method
+begins by creating a a file handler (<TT>sfile_read_hdl_t</TT>)
+for reading from the socket where requests will arrive.
+Next, a <TT>command_server_t</TT> object is created to process
+the requests.
+<P>
+The code then loops waiting for input on the socket.  When an RPC
+request arrives the RPC function <TT>svc_getreqset</TT> is called which
+in turn dispatches the RPC to the proper RPC stub function (implemented
+in <TT>command_server.C</TT>).  When the connection is broken, the loop
+is exited and the file handler and <TT>command_server</TT> are destroyed.
+Then <TT>listener_t::child_is_done</TT> is called to notify the listener
+that the client thread is finally finished.
+<P><A NAME="ssmvas:cleaner">&#160;</A><H3><A NAME="SECTION00053300000000000000000">
+Cleaner Thread</A>
+</H3>
+<P>
+The cleaner thread waits on a condition variable and when
+awoken, checks for defunct threads in the
+list of client threads.  Any defunct threads found are removed
+and destroyed.
+<P>
+Normally it wakes up when a client thread finishes its
+<TT>client_t::run</TT> method, checks the list, and the waits
+again on the condition variable <TT>cleanup</TT>.
+When the listener thread ends, it causes the cleaner thread
+to destroy itself.
+<P><A NAME="ssmvas:terminal">&#160;</A><H3><A NAME="SECTION00053400000000000000000">
+Terminal Input Thread</A>
+</H3>
+<P>
+The main program simply starts a main thread after processing
+options.
+The <TT>main</TT> thread then takes over the work of the server.
+After starting the listener thread,
+<TT>main</TT> creates another thread, of type <TT>stdin_thread_t</TT>,
+which processes commands from standard input.
+<P>
+The work of the standard input thread is all done in its <TT>run</TT>
+method (as is true for all most threads).  The first thing <TT>run</TT> does is create a file handler (<TT>sfile_read_hdl_t</TT>)
+for reading from the file descriptor for standard input.  Next, a
+<TT>command_server_t</TT> object is created to process the commands.
+The code then loops waiting for input.  When input is ready, a line
+is read and fed to <TT>command_server_t::parse_command</TT> for
+processing.  If <TT>parse_command</TT> indicates that the quit command
+has been entered or if EOF is reached on standard input, the input
+loop is exited and the thread ends.
+<P><A NAME="ssmvas:xct">&#160;</A><H2><A NAME="SECTION00054000000000000000000">
+Transaction and Lock Management</A>
+</H2>
+<P>
+The grid server uses a simple transaction management scheme.
+All operations on data managed by the SSM must be done within the scope
+of a transaction.  Each client thread starts a transaction for the
+client it manages.  Clients decide when to end (either commit or abort)
+the transaction.  When this occurs a new one is automatically started by
+the grid server.  If a client disconnects from the server, its current
+transaction is automatically aborted.
+<P>
+The SSM automatically acquires locks when data is accessed, providing
+serializable transactions.  The grid server relies on
+the automatic locking done by the SSM.  One example of where the server
+explicitly acquires locks is in the <TT>grid_t::clear</TT> method, which
+removes every item from the database.  Here we acquire an EX lock on
+the item file and indices to avoid the overhead of acquiring finer
+granularity locks.
+<P>
+More sophisticated transaction and locking schemes are possible.
+For example, the <TT>grid_t::generate_display</TT> method (used by
+the print command) locks the entire file containing items,
+thus preventing changes to the grid.  For greater concurrency, it is
+possible to have <TT>generate_display</TT> start a separate transaction
+before scanning the item file.  Afterward, it can commit the
+transaction, releasing the locks on the file.  To do this the client
+uses the <TT>smthread_t::attach</TT> method to attach
+to the original client transaction.
+<P>
+Another way to get a similar effect is to use the <TT>t_cc_none</TT> flag to the concurrency control (<TT>cc</TT>) parameter of
+the <TT>scan_file_i</TT> constructor.
+<P><A NAME="ssmvas:rpc">&#160;</A><H2><A NAME="SECTION00055000000000000000000">
+RPC Implementation</A>
+</H2>
+<P>
+At the heart of the grid system are the RPCs called by the client and
+serviced at the server.  We use the publicly available Sun RPC package
+to implement the RPCs.
+<P><A NAME="ssmvas:decl">&#160;</A><H3><A NAME="SECTION00055100000000000000000">
+Declarations</A>
+</H3>
+<P>
+The RPCs are declared in <TT>msg.x</TT>.  This includes <TT>grid_basics.h</TT> which contains some additional declarations used throughout
+the grid code.  The first part of <TT>msg.x</TT> contains declarations
+for structures use to hold RPC arguments and return values, followed
+by a listing of the RPCs.  The final part of the file contains ANSI-C
+style function prototypes for the server and client side RPC stubs
+since the RPC package does not generate them.
+<P>
+The <TT>msg.x</TT> file is processed by the <TT>rpcgen</TT> (see rpcgen(1)
+manual page) utility to create the following files:
+<UL>
+<LI> <TT>msg_clnt.c</TT>: client-side stubs for the RPCs
+<LI> <TT>msg_svc.c</TT>: server-side dispatch routine
+<LI> <TT>msg.h</TT>: declarations used by both the client and server
+<LI> <TT>msg_xdr.c</TT>: xdr functions
+</UL><A NAME="ssmvas:cxxwrap">&#160;</A><H3><A NAME="SECTION00055200000000000000000">
+C++ Wrappers</A>
+</H3>
+<P>
+The output of <TT>rpcgen</TT> is inconvenient for two reasons: it
+is is C not C++ and the client stubs take
+different parameters than those of the server.  Therefore, we
+encapsulate the RPCs in the abstract base class <TT>command_base_t</TT>
+declared in <TT>command.h</TT>.  The pure virtual functions in this
+class represent RPCs.
+Class <TT>command_client_t</TT> (in <TT>command_client.h</TT>)
+is derived from <TT>command_base_t</TT>
+and implements the client side of the
+RPCs by calling the C routines in <TT>msg_clnt.c</TT>.  Also derived
+from <TT>command_base_t</TT> is <TT>command_server_t</TT> (in
+<TT>command_server.h</TT>) that implements the server side of the RPCs.
+<P>
+The server-side C stubs for the RPCs, implemented in
+<TT>server_stubs.C</TT>, call corresponding
+<TT>command_server_t</TT> methods.
+<P>
+The only function that makes RPC requests is
+<TT>command_base_t::parse_command</TT>.  It parses a command line
+and calls the appropriate <TT>command_base_t</TT> method implementing
+the RPC.
+<P>
+To process RPC requests on the server, an instance of <TT>command_server_t</TT> is created for each client thread.  When an RPC
+arrives, the thread managing the client is awakened and the RPC dispatch
+function in <TT>msg_svc.c</TT> is called.  This calls the server-side C
+stub which in turn calls the corresponding <TT>command_server_t</TT>
+method.  The methods in <TT>command_server_t</TT> call <TT>grid_t</TT>
+methods (in <TT>grid.C</TT>) to access and update the grid database.
+<P>
+To execute commands on the server,
+an instance of <TT>command_server_t</TT> is created for the
+thread managing standard input.  This thread calls
+<TT>command_base_t::parse_command</TT> for each line of
+input.  The parse <TT>parse_command</TT> method
+calls the <TT>command_server_t</TT> methods, short-circuiting
+the RPC facility.
+<P><A NAME="ssmvas:rcpstart">&#160;</A><H3><A NAME="SECTION00055300000000000000000">
+RPC Startup</A>
+</H3>
+<P>
+Once the SSM and volumes are initialized, the grid server is ready to
+start the RPC service and begin listening for connections from clients.
+RPC start-up is done by the function <TT>start_tcp_rpc</TT> in <TT>server.C</TT>.  This function creates the socket used to listen
+for connection requests, binds a port to the socket, and then
+calls RPC facility's initialization functions.
+<P><A NAME="ssmvas:multithread2">&#160;</A><H3><A NAME="SECTION00055400000000000000000">
+Multi-threading Issues</A>
+</H3>
+<P>
+The multi-threaded environment of the server requires changes
+to a couple common practices in Sun RPC.
+<P>
+Replies are usually placed in a statically allocated structure.
+With multiple threads, each threads needs its own space for
+replies, so a reply area is created for each thread as
+described
+<A HREF="node5.html#ssmvas:clientthreads">above</A>.
+<P>
+The RPC package allocates (<TT>malloc</TT>s) space for pointer
+arguments in RPCs.  The convention is that the function
+processing a request frees the space from the previous request of the
+same type.  Because the convention requires that the reply be saved
+in static storage,
+this does not work in a multi-threaded environment.
+The Sun RPC package shipped with the Shore release has modified
+<TT>rpcgen</TT> to generate a dispatch routine that
+automatically
+frees the space after the reply is sent, relieving the function
+of the burden of freeing the space.
+Because of this change, the library
+does not lend itself
+to saving replies for the purpose of retransmitting them
+in response to duplicate requests (for the UDP service).
+<P><A NAME="ssmvas:newrpc">&#160;</A><H3><A NAME="SECTION00055500000000000000000">
+Steps to add a New RPC</A>
+</H3>
+<P>
+As an example.  of how to add an RPC we explain how the <TT>locate</TT>
+command was added to the grid example.
+<P><UL>
+<LI> Add argument and reply types to <TT>msg.x</TT>.
+<P>
+The argument type for the locate command is <TT>location_arg</TT>
+and the reply type is <TT>location_reply</TT>.  The constant,
+<TT>thread_reply_buf_size</TT> must also be changed to reflect
+the size of the <TT>location_reply</TT> structure.
+<LI> Add RPC and stub declarations to <TT>msg.x</TT>.
+<P>
+The RPC is called <TT>location_of_rpc</TT> and is listed in the <TT>program</TT> section of <TT>msg.x</TT>.   Below this are declarations
+for the client and server-side stubs.
+<LI> Add declaration to <TT>command.h</TT>, <TT>command_server.h</TT> and
+<TT>command_client.h</TT>.
+<P>
+Recall that there are C++ wrapper methods for the RPCs in
+the abstract base class <TT>command_base.h</TT> and its derived classes.
+So, declarations for the RPC wrapper method must be added to them.
+We used the method name <TT>location_of</TT>.
+<LI> Implement wrapper method in <TT>command_client.C</TT>.
+<P>
+The client side of <TT>location_of</TT> must call the
+RPC stub, <TT>location_of_rpc_1</TT>.
+<LI> Implement server stub to call the wrapper method in <TT>server_stubs.C</TT>.
+<P>
+The server-side stub for the RPC, <TT>location_of_rpc_1</TT>, must call
+the wrapper method, <TT>command_server_t::location_of</TT>.
+<LI> Implement wrapper method in <TT>command_server.C</TT>.
+<P>
+The wrapper method implements the RPC by called a corresponding method
+of the <TT>grid_t</TT> class.  It converts any error into a string
+to be sent in the reply.
+<LI> Implement the <TT>location_of</TT> method in <TT>grid.C</TT>.
+<P>
+All access to the grid database is done by methods of <TT>grid_t</TT>.
+Therefore there is a <TT>location_of</TT> method that does the actual
+index lookup to find the location of an item.  Of course, a declaration
+for <TT>location_of</TT> must be added to <TT>grid.h</TT>.
+<LI> Add locate command to parser in <TT>command.C</TT>.
+<P>
+Implemented in <TT>command.C</TT> is <TT>command_base_t::parse_command</TT>, which parses a command line and calls
+the the RPC's C++ wrapper.  To add the command, edit the <TT>enum</TT>
+for command tokens and the array of command descriptions.  Then add
+the command to the <TT>switch</TT> statement in <TT>parse_command</TT>.
+<P></UL><A NAME="ssmvas:shutdown">&#160;</A><H2><A NAME="SECTION00056000000000000000000">
+Shutdown</A>
+</H2>
+<P>
+Shutting down the SSM involves ending all threads, except the
+one running <TT>main</TT> and then destroying the <TT>ss_m</TT> object.
+After <TT>main</TT> starts the thread for commands on the terminal,
+main calls <TT>wait</TT> on the thread.  When the <TT>quit</TT> command
+is entered, the terminal thread ends causing <TT>wait</TT> to return,
+thus waking up the main thread.  <TT>Main</TT> then tells the listener
+listener thread to shutdown and does a <TT>wait</TT> for it.  The shutdown
+process for the listener thread is described <A HREF="node5.html#ssmvas:listener">above</A>.  The main thread wakes up when the listener
+thread is done.  The final shutdown step is to <TT>delete</TT> the instance
+of the class <TT>ss_m</TT> created at the beginning of <TT>main</TT>.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html203"
+ HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html200"
+ HREF="ssmvas.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html194"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html202"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html204"
+ HREF="node6.html">Implementing Clients</A>
+<B> Up:</B> <A NAME="tex2html201"
+ HREF="ssmvas.html">Writing Value-Added Servers with Manager</A>
+<B> Previous:</B> <A NAME="tex2html195"
+ HREF="node4.html">Operations on Storage Structures</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

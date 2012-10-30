@@ -1,0 +1,134 @@
+source ../scripts/setup.all
+#
+#
+#  nops determines the total # operations (creates + destroys + clears)
+#  done by this script
+#  NB: log size will be a determining factor
+#
+#  nobjs is the current number of objects
+#
+#  maxsize is an upper bound on the size of an object this script
+# 	will make
+#
+set nops 1000
+set nobjs 0
+set maxsize 10000
+set verbose 0
+
+cd /small
+
+begin
+# compensating transaction
+scanpool pool remove
+commit
+set oldverbose $verbose
+proc clear { p } {
+	cout "CLEAR (destroy all recs)"
+	scanpool $p remove
+	set nleft [scanpool $p count]
+	assert [expr { $nleft == 0 } ]
+	popall
+}
+
+proc do { p maxsize } {
+	set c [random $maxsize]
+	set h [random [expr { $maxsize - $c } ] ]
+	set totalsize [expr {$c + $h} ]
+	set t [random $totalsize]
+	cout mkanon $p $c:$h:$t 
+	set z [permit OS_NoSpaceLeft from { mkanon $p $c:$h:$t }]
+	if { $z == "OS_NoSpaceLeft" } {
+		clear $p
+		return 0;
+	} else {
+		cout MADE $z
+		push $z
+		return 1;
+	}
+}
+
+proc doz { p maxsize } {
+	set c [random $maxsize]
+	set h [random [expr { $maxsize - $c } ] ]
+	set totalsize [expr {$c + $h} ]
+	set t [random $totalsize]
+	cout mkzanon $p $c:$h:$t 
+	set z [permit OS_NoSpaceLeft from { mkanon $p $c:$h:$t }]
+	if { $z == "OS_NoSpaceLeft" } {
+		clear $p
+		return 0;
+	} else {
+		cout MADE $z
+		push $z
+		return 1;
+	}
+}
+
+proc undo { p n } {
+	set save 0
+	if { $n > 0 } {
+		set m [random $n]
+		set save $m
+#   	remove m objects from list
+		while { $m > 0 }  {
+			set obj [pop]
+			cout rmanon $obj
+			rmanon $p $obj
+			set m [expr { $m - 1 }]
+		}
+	}
+	return $save
+}
+
+
+
+begin
+	cd /small
+	set n $nops
+	set m 0
+	while { $n > 0 }  {
+		set op [random 20]
+		case $op in {
+		{ 7 } 
+				{
+					commit; begin
+				}
+		{ 2 5 12 16 }
+				{ 
+					set nobjs [expr {$nobjs + [doz pool $pagesize]}]
+				}
+		{ 0 3 6 8 10 }
+				{ 
+					set nobjs [expr {$nobjs + [do pool $pagesize]}]
+				}
+		{ 14 }
+				{ 
+					set nobjs [expr {$nobjs + [doz pool $maxsize]}]
+				}
+		{ 15 }
+				{ 
+					set nobjs [expr {$nobjs + [do pool $maxsize]}]
+				}
+		{ 4 11 17 } 		
+				{ 
+					clear pool 
+					set nobjs 0
+				}
+		{ 1 9 13 18 19 } 
+				{ 
+					set nobjs [expr {$nobjs - [undo pool $nobjs]}]
+				}
+		}
+
+		set n [expr { $n - 1 }]
+		set m [expr { $m + 1 }]
+		if { [expr {$m == 1000}] } {
+			commit 
+			begin
+			set m 0
+		}
+	}
+commit
+
+set verbose $oldverbose
+return "anon.random done."

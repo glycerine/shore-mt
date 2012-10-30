@@ -1,0 +1,140 @@
+#
+# this is the guts of bt.insert.[1234]
+# it assumes that the calling script has defined keylist
+# 
+
+# set maxnum 2022
+set maxnum 4044
+
+# 1 key/value per page:
+set elemlength 4044
+
+
+
+#
+# create index and load it up 
+#
+# make it start out a 1-page index and expand to a regular 
+# index.
+#
+#
+sm begin_xct
+set ndx [sm create_index $volid $unique regular b*1000 t_cc_kvl small]
+verbose created index $ndx
+sm commit_xct
+
+
+# 
+# insert values in list
+#
+set nrec [llength $keylist]
+
+verbose $nrec records: $keylist
+
+proc random_restart { a } {
+    set j [random 3]
+    for { set i 0 } { $i <= $j } { incr i } {
+	_restart $a
+    }
+}
+proc runtest { term } {
+    global unique
+    global keylist
+    global ndx
+    global nrec 
+    global logging
+
+    verbose runtest $term logging=$logging nrec $nrec
+	
+    set key 1
+    set value 1
+    sm begin_xct
+    for {set i 0} {$i < $nrec} {incr i} {
+	verbose inserting $i
+	set key [lindex $keylist $i] 
+	verbose key $key
+
+	set value [mkval $i $key]
+	verbose value $value
+
+	verbose sm create_assoc $ndx $key <elem $key length>
+	sm create_assoc $ndx $key $value
+
+	# verbose sm find_assoc $ndx $key
+	# set res [sm find_assoc $ndx $key]
+	# assert {[expr [string compare $value $res] == 0]}
+	# verbose FOUND
+    }
+    switch $term {
+       abort { 
+	    if {$logging==0} {
+		verbose "Logging off: sm abort_xct not done.  Committing instead."
+		sm commit_xct 
+	    } else {
+		verbose sm abort_xct 
+		sm abort_xct 
+	    }
+	}
+       commit { 
+	    verbose sm commit_xct 
+	    sm commit_xct 
+	}
+       restart { 
+	    if {$logging==0} {
+		verbose "Logging off: restart not done.  Committing instead."
+		sm commit_xct 
+	    } else {
+		verbose random_restart
+		random_restart false
+	    }
+	}
+    }
+}
+
+runtest abort
+
+# sm begin_xct
+# test_scan $ndx 0
+# sm commit_xct
+
+runtest restart
+
+# sm begin_xct
+# test_scan $ndx 0
+# sm commit_xct
+
+clearstats
+runtest commit
+pstats 
+
+#
+# scan the index and check for the expected values
+# in the expected order
+#
+sm begin_xct
+set sorted [lsort $keylist]
+set len [llength $keylist]
+set res [test_scan $ndx $len]
+
+for {set i 0} {$i < $len} {incr i} {
+   set resi [lindex $res $i]
+   set sorti [lindex $sorted $i]
+
+   # use string comparison rather than expr so that
+   # it works with entries that are not integers
+   if { [string compare $resi [lindex $sorted $i]] != 0 } {
+      verbose index $i: test_scan returns $resi expected $sorti
+   }
+}
+
+unset res resi sorti sorted len i
+sm commit_xct
+
+sm begin_xct
+verbose sm destroy_index $ndx
+sm destroy_index $ndx
+verbose destroyed index
+sm commit_xct
+
+unset maxnum elemlength ndx nrec 
+

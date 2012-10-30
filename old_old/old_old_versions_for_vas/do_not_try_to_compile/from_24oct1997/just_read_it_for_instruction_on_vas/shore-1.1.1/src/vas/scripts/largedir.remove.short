@@ -1,0 +1,20 @@
+# source ../scripts/largedir.remove.short
+
+cd /small
+
+global verbose
+set nent  [expr {$pagesize / 100}]
+set nent  [expr {$nent * 2}]
+set nent  [expr {$nent + 2}]
+
+begin
+	for {set i 0} {$i < $nent} {incr i} {
+		if ($verbose) {
+			cout "rmdir f" $i 
+		}
+		rmdir f$i
+		ls -ldi .
+	}
+	ls -ldi .
+	ls
+commit

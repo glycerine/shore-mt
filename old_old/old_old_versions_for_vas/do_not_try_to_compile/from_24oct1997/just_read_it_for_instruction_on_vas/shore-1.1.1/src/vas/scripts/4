@@ -1,0 +1,42 @@
+# this: source ../scripts/4
+
+# create object w/ uninitialized data
+
+source ../scripts/setup.all
+
+begin
+cd /small
+# compensating transaction:
+if [sfile exists ud1]  {
+	unlink ud1
+}
+if [sfile exists xref]  {
+	unlink xref
+}
+if [sfile exists uf]  {
+	unlink uf
+}
+commit
+
+begin
+cd /small
+if [not [sfile exists ud1] ] {
+	set ud1 [mkuserdefnodata uf 100:3:NoText]
+	set a [sfile size $ud1]
+	assert [ expr {$a == 103} ]
+	stat $ud1
+	read $ud1
+	set xd1 [mkxref $ud1 xref]
+	set a [sfile size [readref xref]]
+	assert [ expr {$a == 103} ]
+# it's an error to try to read the xref by its oid
+# because you can read(readref(by oid)) or read(by path)
+	read xref
+	# overwrite most of core and all of heap
+	write xref 10 93
+	write xref 0 [sfile size $ud1]
+}
+
+commit
+
+return "4 done."

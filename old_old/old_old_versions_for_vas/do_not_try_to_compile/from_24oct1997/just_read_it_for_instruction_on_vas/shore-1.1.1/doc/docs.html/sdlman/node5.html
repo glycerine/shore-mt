@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Objects and Values</TITLE>
+<META NAME="description" CONTENT="Objects and Values">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node6.html">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="sdlman.html">
+<LINK REL="next" HREF="node6.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html115"
+ HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html112"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html106"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html114"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html116"
+ HREF="node6.html">Modules</A>
+<B> Up:</B> <A NAME="tex2html113"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html107"
+ HREF="node4.html">Grammatical Conventions</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="sdlman:object">&#160;</A><H1><A NAME="SECTION00050000000000000000000">
+Objects and Values</A>
+</H1>
+<P>
+All persistent state in Shore is encapsulated in
+<EM>objects</EM>.
+An object has
+<EM>attributes</EM>,
+which define its persistent state,
+<EM>operations</EM>,
+which may change its state and/or return information about its current
+state,
+and
+<EM>relationships</EM>,
+which determine how it is related to other objects.
+An object also has a unique
+<EM>identity</EM>;
+that is, modifying the state of an object is different from creating a new
+object with the new state.
+Objects do not nest.
+Although a particular application may define a
+&quot;part-subpart&quot;
+relationship between two objects,
+each object has an independent identity and lifetime.
+A
+<EM>value</EM>
+is a unit of stored state.
+In contrast with objects, values may be nested but do not have independent
+identities.
+The state of an object is a value, as is the state of each attribute
+of the object and each component of a structured value.
+<P>
+Each object has a fixed-size
+<EM>core</EM>
+and an optional variable-size
+<EM>extension</EM>.
+The structure of the core is defined by an
+<EM>interface definition</EM>
+in SDL.
+The extension supports variable-sized strings and sequences.
+<em>The user can also use the extension as a storage pool to allocate values
+dynamically and link them to the core and to each other with
+<EM>local references</EM>
+(lrefs) which are converted to pointers (memory addresses) when they
+are brought into memory.
+</em><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html115"
+ HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html112"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html106"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html114"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html116"
+ HREF="node6.html">Modules</A>
+<B> Up:</B> <A NAME="tex2html113"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html107"
+ HREF="node4.html">Grammatical Conventions</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

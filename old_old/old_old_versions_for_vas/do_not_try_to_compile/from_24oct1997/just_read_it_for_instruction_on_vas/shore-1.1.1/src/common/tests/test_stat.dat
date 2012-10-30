@@ -1,0 +1,17 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+test example statistics module = 0x00020000  test_stat {
+		// this is a c++-style comment
+	int		i	sample int
+	uint	j	sample unsigned int
+	float	k	sample float
+	long	l	sample long
+	u_long  v	sample unsigned long
+	# double	l	sample double
+	float	sum sample sum of i, j, and k
+};

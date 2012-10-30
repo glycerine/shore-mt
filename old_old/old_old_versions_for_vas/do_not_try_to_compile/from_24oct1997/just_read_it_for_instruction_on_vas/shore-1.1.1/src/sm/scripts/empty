@@ -1,0 +1,3 @@
+
+# just a script to run for recovery only (for use with ../ssh/runtests)
+echo exiting

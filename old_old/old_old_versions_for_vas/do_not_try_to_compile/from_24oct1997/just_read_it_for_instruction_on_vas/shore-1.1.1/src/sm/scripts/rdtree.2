@@ -1,0 +1,77 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# start up
+#
+source $script_dir/vol.init
+
+set nrec 150
+set numvals 10
+set bound 50
+set seed 100
+
+#
+# create rdtree 
+#
+sm begin_xct
+set ndx [sm create_set_index $volid 4 rdtree]
+verbose created rdtree $ndx
+sm commit_xct
+
+#
+# load and abort
+#
+sm begin_xct
+for {set i 1} {$i <= $nrec} {incr i} {
+    set sets($i) [sm next_set $numvals $bound $seed]
+#    verbose inserting $sets($i) $i
+    sm create_set_assoc $ndx $sets($i) $i
+}
+verbose inserted $nrec entries
+#sm draw_rtree $ndx
+#sm print_set_index $ndx
+verbose aborting...
+sm abort_xct
+
+# 
+# reload
+#
+sm begin_xct
+for {set i 1} {$i <= $nrec} {incr i} {
+    set sets($i) [sm next_set $numvals $bound $seed]
+#    verbose inserting $sets($i) $i
+    sm create_set_assoc $ndx $sets($i) $i
+}
+verbose inserted $nrec entries
+#sm draw_rtree $ndx
+#sm print_set_index $ndx
+sm commit_xct
+
+sm begin_xct
+verbose probe:
+for {set i 1} {$i <= $nrec} {incr i} {
+#    verbose $i $sets($i)
+    set r [sm find_set_assoc $ndx $sets($i)]
+    set el [lindex $r 0]
+#    verbose r = $r, i = $i, el = $el
+    assert {[ expr {$el != " "} ]}
+}
+verbose "---- successful"
+
+sm commit_xct
+
+sm begin_xct
+
+set q "{17,26,27,28,40}"
+#set q "2.-1500.-1500.1500.1500"
+
+sm rdtree_query $ndx / $q
+sm rdtree_query $ndx || $q
+sm rdtree_query $ndx << $q
+
+sm commit_xct

@@ -1,0 +1,34 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  test btree key type conversions
+#  These are key types that ssh cannot cope with except for
+#  doing the key type conversions.
+#
+source $script_dir/vol.init
+
+set typelist { i1i2i4 u2u4i2i4b*1000 u2u2u2u2u2u1i4 f4f8u1i1 }
+
+set len [llength $typelist]
+
+set kt 1
+for {set k 0} {$k < $len} {incr k} {
+    set ktype [lindex $typelist $k] 
+    verbose "---- testing -- $ktype"
+    sm begin_xct
+    if [catch {sm create_index $volid btree regular $ktype} ndx] {
+	verbose $ndx
+	assert {error_is $ndx E_WRONGKEYTYPE}
+	sm abort_xct
+    } else {
+	catch {get_key_type $ndx} kt
+	assert {expr {[string compare $kt $ktype] == 0} }
+	sm commit_xct
+    }
+}
+unset ndx typelist len ktype kt k 

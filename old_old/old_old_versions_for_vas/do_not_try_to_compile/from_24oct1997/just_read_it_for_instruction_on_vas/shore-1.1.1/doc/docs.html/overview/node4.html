@@ -1,0 +1,429 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>The Shore Architecture</TITLE>
+<META NAME="description" CONTENT="The Shore Architecture">
+<META NAME="keywords" CONTENT="overview">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="overview.css">
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="overview.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html141"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html138"
+ HREF="overview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html132"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html140"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html142"
+ HREF="node5.html">Status of Release</A>
+<B> Up:</B> <A NAME="tex2html139"
+ HREF="overview.html">An Overview of Shore</A>
+<B> Previous:</B> <A NAME="tex2html133"
+ HREF="node3.html">Basic Shore System Concepts</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html143"
+ HREF="node4.html#SECTION00041000000000000000000">
+Peer-to-Peer Server Communication</A>
+<LI><A NAME="tex2html144"
+ HREF="node4.html#SECTION00042000000000000000000">
+Shore Software Components</A>
+<UL>
+<LI><A NAME="tex2html145"
+ HREF="node4.html#SECTION00042100000000000000000">
+The Language-Independent Library</A>
+<LI><A NAME="tex2html146"
+ HREF="node4.html#SECTION00042200000000000000000">
+The Shore Server</A>
+</UL>
+<LI><A NAME="tex2html147"
+ HREF="node4.html#SECTION00043000000000000000000">
+Some Implementation Details</A>
+<UL>
+<LI><A NAME="tex2html148"
+ HREF="node4.html#SECTION00043100000000000000000">
+Cache Consistency</A>
+<LI><A NAME="tex2html149"
+ HREF="node4.html#SECTION00043200000000000000000">
+Transaction Management</A>
+<LI><A NAME="tex2html150"
+ HREF="node4.html#SECTION00043300000000000000000">
+OID Implementation</A>
+</UL></UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="overview:architecture">&#160;</A><H1><A NAME="SECTION00040000000000000000000">
+The Shore Architecture</A>
+</H1>
+<P><A NAME="overview:peer">&#160;</A><H2><A NAME="SECTION00041000000000000000000">
+Peer-to-Peer Server Communication</A>
+</H2>
+<P>
+Figure <A HREF="node2.html#fig:shorearch">2</A>
+in 
+Section&nbsp;<A HREF="node2.html#overview:differences">1.2</A>
+illustrates the process structure of Shore.
+Shore executes as a group of communicating processes called <EM>SHORE
+servers</EM>.  Shore servers consist exclusively of <EM>trusted</EM> code,
+including those parts of the system that are provided as
+part of the standard Shore release, as well as code for 
+value-added servers.
+that can be added by sophisticated users to implement
+specialized facilities (e.g., a query-shipping SQL server) without
+introducing the ``client-level server'' problem described earlier.
+Application processes (labelled ``App'' in 
+Figure <A HREF="node2.html#fig:shorearch">2</A>
+manipulate <EM>objects</EM>, while servers deal primarily with fixed-length
+<EM>pages</EM> allocated from disk <EM>volumes</EM>, each of which is
+managed by a single server.<A NAME="tex2html22"
+ HREF="footnode.html#237"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+Applications are not trusted, in the sense that a buggy or malicious
+application can only modify objects that it is authorized to access; in
+particular,
+it cannot corrupt metadata such as slot tables, indexes, or the directory
+structure.
+<P>
+Each Shore server plays several roles.
+First, it is a page-cache manager.  The cache may contain pages from
+local volumes as well as pages from remote servers containing objects
+that were requested by local client applications.<A NAME="tex2html23"
+ HREF="footnode.html#238"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+Second, the server acts as an agent for local application processes.
+When an application needs an object, it sends an RPC request to
+the local server, which fetches the necessary page(s) and returns the object.
+(More details are provided in the following section.)
+Finally, the Shore server is responsible for concurrency control and recovery.
+A server obtains and caches locks on behalf of its local clients.
+The <EM>owner</EM> of each page (the server that manages its volume) is
+responsible for arbitrating lock requests for its objects, as well as
+logging and committing changes to it.
+Transaction management is described in more detail below.
+<P>
+This process structure provides a great deal of
+flexibility. When acting as an owner of a page,
+the Shore server performs the role of the server in a
+traditional data-shipping, client-server DBMS;  when acting as the agent for
+an application, it plays the role of client.
+Letting the Shore server assume both roles allows data placement
+to be optimized according to workload.
+For example, data that is largely private to a single
+user could be owned by the Shore server on that user's workstation.
+The location-transparency (from the application's viewpoint) provided
+by the caching-based architecture allows an application on such a
+workstation to access both local and remote persistent data in an
+identical manner.  Furthermore, the ability to cache pages at the
+local server can greatly reduce any observed performance penalty
+for accessing remote data.  In 
+Figure <A HREF="node2.html#fig:shorearch">2</A>,
+applications running on Workstation 2 can access data that is largely
+private through the local Shore server, while obtaining other shared
+data from the other Shore servers.  With a query-shipping architecture
+implemented by a ``higher level'' value-added server
+(such as an SQL server), applications would communicate directly with
+remote servers.
+<P><A NAME="overview:software">&#160;</A><H2><A NAME="SECTION00042000000000000000000">
+Shore Software Components</A>
+</H2>
+<P><A NAME="overview:lil">&#160;</A><H3><A NAME="SECTION00042100000000000000000">
+The Language-Independent Library</A>
+</H3>
+<P>
+Figure <A HREF="node4.html#fig:app">7</A>
+depicts the components of the Shore software
+linked with each application.
+When the application attempts to dereference an ``unswizzled'' pointer,
+the language binding generates a call to the 
+object-cache manager (OC)
+in the
+<EM>language-independent library</EM> (LIL).
+<BR>
+<DIV ALIGN="CENTER"><A NAME="fig:app">&#160;</A><A NAME="249">&#160;</A>
+<TABLE>
+<CAPTION><STRONG>Figure 7:</STRONG>
+Application-Server Interface</CAPTION>
+<TR><TD><IMG WIDTH="378" HEIGHT="355"
+ SRC="img8.gif"
+ ALT="\begin{figure}
+ {\centerline{\epsfxsize=3.3in\epsfbox{fig/app.psfig}}}\end{figure}"></TD></TR>
+</TABLE>
+</DIV>
+<BR>
+If the desired object is not present, the OC sends an RPC request to
+the local server, which fetches the necessary page(s) if necessary by reading
+from a local
+disk or sending a request to another server.<A NAME="tex2html25"
+ HREF="footnode.html#252"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+If the local operating system supports shared memory, the server uses
+it to deliver a page of objects to the LIL more quickly.
+<P>
+To avoid paging, the object cache manager locks the cache in memory 
+and uses LRU replacement if it grows too large
+All OIDs in the cache are swizzled to point to entries in an
+<EM>object table</EM>.  This level of indirection allows objects to be removed
+from memory before the transaction commits, without the need to track down
+and unswizzle all pointers to them.
+<P>
+The LIL also contains the Unix compatibility library, with procedures that
+emulate common file system calls such as <TT>open</TT>, <TT>read</TT>, and <TT>seek</TT>.
+Finally, the LIL is responsible for
+authenticating the application to the server using
+the Kerberos authentication system [<A
+ HREF="node7.html#mnss:sec">MNSS87</A>]<A NAME="tex2html26"
+ HREF="footnode.html#258"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>.
+<P><A NAME="overview:server">&#160;</A><H3><A NAME="SECTION00042200000000000000000">
+The Shore Server</A>
+</H3>
+<P>
+Figure <A HREF="node4.html#fig:server">8</A>
+shows the internal structure of the Shore server in
+more detail.  
+It is divided into several components, including
+the Shore Value-Added Server,
+which communicates with applications, and the 
+<EM>Shore Storage Manager</EM> (SSM), 
+which manages the persistent object store.
+<P>
+<BR>
+<DIV ALIGN="CENTER"><A NAME="fig:server">&#160;</A><A NAME="265">&#160;</A>
+<TABLE>
+<CAPTION><STRONG>Figure 8:</STRONG>
+Shore Server Components</CAPTION>
+<TR><TD><IMG WIDTH="376" HEIGHT="283"
+ SRC="img9.gif"
+ ALT="\begin{figure}
+ {\centerline{\epsfxsize=3.3in\epsfbox{fig/servernew.psfig}}}\end{figure}"></TD></TR>
+</TABLE>
+</DIV>
+<BR>
+<P>
+The 
+Shore Value-Added Server (SVAS)
+is responsible for providing access to Shore
+objects stored in the  SSM.
+It manages the Unix-like name space and other structures described in
+Section&nbsp;<A HREF="node3.html#overview:filesystem">2.3</A>.
+When an application connects with the server, the server associates
+Unix-like process state (such as a user ID and current directory name)
+with the connection.  User ID information is checked against registered
+objects when they are first accessed to protect against unauthorized access.
+As in Unix, the current directory name information provides a context for
+converting file (path) names into absolute locations in the name space.
+<P>
+The SVAS
+is one example of a value-added server.
+Another value-added server is the NFS server described in 
+Section&nbsp;<A HREF="node3.html#overview:legacy">2.3.2</A>.
+Each value-added server provides an alternative interface to the storage manager.
+They all interact with the storage manager through a common interface
+that is similar to the RPC interface between application processes and
+the server.  
+A goal of Shore is to make it possible
+to debug a new value-added server as a client process
+and then migrate it into the server for added efficiency when it is
+completely debugged.
+<P>
+Another example of a value-added server could be an SQL 
+server that provides a query-shipping
+interface to a relational database.<A NAME="tex2html28"
+ HREF="footnode.html#270"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+<P>
+Below the server interface lies the Storage Manager.  As shown in
+Figure <A HREF="node4.html#fig:server">8</A>,
+the SSM can be viewed as having three sub-layers.
+The highest is the value-added server-to-SSM interface, which
+consists primarily of functions to control
+transactions and to access objects and indexes.  The middle level
+comprises the core of the SSM.  It implements records,
+indexes, transactions, concurrency control, and recovery.  At the lowest
+level are extensions to the core that implement the distributed server
+capabilities described in 
+Section&nbsp;<A HREF="node4.html#overview:peer">3.1</A>.
+In addition to
+these three layers, the SSM contains an operating system interface that
+packages together multi-threading, asynchronous I/O, and inter-process
+communication.
+<P><A NAME="overview:implementation">&#160;</A><H2><A NAME="SECTION00043000000000000000000">
+Some Implementation Details</A>
+</H2>
+<P>
+A detailed description of the storage manager is beyond the scope of
+this document.  However, in this subsection we highlight three of the
+important technical issues that arise in its implementation:
+cache consistency, transaction management, and  object identifier
+implementation.
+<P><A NAME="overview:cache">&#160;</A><H3><A NAME="SECTION00043100000000000000000">
+Cache Consistency</A>
+</H3>
+<P>
+In Shore, there are two types of caches--the object caches used by
+applications and the page caches maintained by Shore servers.  These
+two types of caches are managed very differently.  The Shore servers'
+page caches are allowed to retain their contents across transaction
+boundaries (called <EM>inter-transaction caching</EM>).  Cache
+consistency is maintained through the use of a <EM>callback locking</EM>
+protocol&nbsp;[<A
+ HREF="node7.html#hkmnssw:sca">HMN+88</A>,<A
+ HREF="node7.html#llow:the">LLOW91</A>,<A
+ HREF="node7.html#wr:cac">WR91</A>,<A
+ HREF="node7.html#fc:cli">FC92</A>]<A NAME="tex2html29"
+ HREF="footnode.html#280"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>.
+The application/server interface, however does not support ``upcalls.''
+Requiring application processes to respond to remote procedure calls
+would interfere with other synchronization mechanisms used by many
+application programs such as threads packages, graphics (X11 or InterViews),
+and networking interfaces.  Therefore, the object cache is invalidated
+(and locks are released) at the end of a transaction.
+We plan to explore techniques to extend the use of
+the object cache across transaction boundaries later in the Shore project.
+<P>
+To balance efficiency against the need for fine-grain concurrency,
+Shore uses an <EM>adaptive</EM> version of callback locking that
+can dynamically adjust the granularity (e.g., page vs. object)
+at which locking is performed depending on the presence of data
+conflicts&nbsp;[<A
+ HREF="node7.html#cfz:fin">CFZ93</A>].  This adaptive algorithm is based on the
+notion of <EM>lock de-escalation</EM>&nbsp;[<A
+ HREF="node7.html#lc:aco">LC89</A>,<A
+ HREF="node7.html#j:ada">Jos91</A>].<A NAME="tex2html30"
+ HREF="footnode.html#285"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+<P><A NAME="overview:xact">&#160;</A><H3><A NAME="SECTION00043200000000000000000">
+Transaction Management</A>
+</H3>
+<P>
+When an application wishes to commit a transaction, a commit request is sent
+to its local server.  If the transaction has modified data that is owned
+by multiple servers, then a two-phase commit protocol is used among the
+relevant servers.  If the local server has a log, it will coordinate the
+distributed commit protocol; otherwise, it will delegate the coordinator
+role to another server.  Transactions that only access
+data that is owned by the local server can commit locally.  Thus, the
+peer-to-peer architecture incurs the additional overhead of distributed
+commit only when it is necessary.
+<P>
+The transaction rollback and recovery facilities of Shore are based on
+the ARIES recovery algorithm
+[<A
+ HREF="node7.html#mhlps:ari">MHL+92</A>] extended for the
+client-server environment of Shore.  The client-server distinction
+reflects the roles played by the server with respect to an object.  A
+server that owns an object is the one that stores the log for that
+object and that performs all recovery operations on the object.
+Servers caching the object behave as clients and generate log records
+that are shipped to the owner of the object.  The initial server-to-server
+implementation of Shore relies on a simple extension of ARIES that we
+call <EM>redo-at-server</EM>.  In this extension, a client never ships
+dirty pages back to the server, only log records; when the server receives
+log records from a client, it redoes the operations indicated by the log
+records.  This is easy to implement, and it has the advantage of eliminating
+the need to send dirty pages back to the server.<A NAME="tex2html31"
+ HREF="footnode.html#290"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+The primary disadvantage is that the server may need to reread pages if
+it has flushed them from its cache.
+In the future, we plan to implement the
+client-server extension to ARIES that was developed and implemented
+for the EXODUS Storage Manager&nbsp;[<A
+ HREF="node7.html#fztcd:cra">FZT+92</A>] and compare its
+performance to our simpler redo-at-server implementation.
+<P><A NAME="overview:oid">&#160;</A><H3><A NAME="SECTION00043300000000000000000">
+OID Implementation</A>
+</H3>
+<P>
+The implementation of object identifiers (OIDs) has a considerable
+impact on how the rest of an object manager is implemented and on its
+performance.  The Shore Storage Manager uses two types of OIDs.
+A <EM>physical OID</EM> records the actual location of an object on disk, while
+a <EM>logical OID</EM> is position independent, allowing transparent
+reorganization such as reclustering.  The higher levels of Shore
+(including the object cache manager) use
+logical OIDs to represent object references.
+<P>
+A logical OID consists of an 8-byte volume identifier and an 8-byte
+serial number.
+The former is designed to be long enough to allow it be
+globally unique, allowing independently developed databases to be combined.
+The latter is large enough to avoid reuse of values under any conceivable
+operating conditions.  When an OID is stored on disk, only the serial
+number is recorded.  The volume identifier is assumed to be the same as
+the volume containing the OID.  For cross-volume references, the serial
+number identifies a special forwarding entry that contains the full OID
+of the object (the identifier of the volume that contains it and its
+serial number relative to that volume).
+<P>
+To map serial numbers to physical OIDs or remote logical OIDs, each volume
+contains a B+ tree index called its <EM>LID index</EM>.  An in-memory
+hash table is used to cache recently translated entries.
+The server also eagerly adds translations to this per-transaction translation
+cache.  For example, whenever a server receives a request for an object
+whose logical OID is not currently in the
+cache, it requests the page containing that object from the
+object's server.  When that page arrives, the server enters mappings for
+<EM>all</EM> of the objects on that page into the translation cache.  This
+technique effectively reduces the number of LID index accesses from
+one lookup per object to one lookup per page of objects.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html141"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html138"
+ HREF="overview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html132"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html140"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html142"
+ HREF="node5.html">Status of Release</A>
+<B> Up:</B> <A NAME="tex2html139"
+ HREF="overview.html">An Overview of Shore</A>
+<B> Previous:</B> <A NAME="tex2html133"
+ HREF="node3.html">Basic Shore System Concepts</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

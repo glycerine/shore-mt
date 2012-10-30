@@ -1,0 +1,47 @@
+#!/bin/csh -f
+#
+# NB: you must replace the definition of $file below!
+#
+
+set bsz=8192
+set nbk=5000
+set list="1 2 3 4 5 6 7 8 9 10"
+# set file=/tmp/dev1
+set file=/dev/rsd2d
+
+echo dd if=/dev/zero of=$file bs=$bsz count=$nbk
+dd if=/dev/zero of=$file bs=$bsz count=$nbk
+
+foreach test (r w) 
+    if ($test =~ "r") then
+	set bigtest=R
+    else
+	set bigtest=W
+    endif
+
+    echo "/************************************************************/"
+    echo "/***  VOLUME: " $file
+    echo "/************************************************************/"
+    echo "---  direct " $test
+    echo ioperf $bigtest $file $bsz $nbk
+    foreach a ($list)
+	ioperf $bigtest $file $bsz $nbk
+    end
+
+    echo "---  use diskrw " $test
+    setenv NO_FASTPATH
+    unsetenv FASTPATH
+    echo ioperf $test $file $bsz $nbk
+    foreach a ($list)
+	ioperf $test $file $bsz $nbk
+    end
+
+    echo "---  bypass diskrw " $test
+    unsetenv NO_FASTPATH
+    setenv FASTPATH
+    echo ioperf $test $file $bsz $nbk
+    foreach a ($list)
+	ioperf $test $file $bsz $nbk
+    end
+end
+

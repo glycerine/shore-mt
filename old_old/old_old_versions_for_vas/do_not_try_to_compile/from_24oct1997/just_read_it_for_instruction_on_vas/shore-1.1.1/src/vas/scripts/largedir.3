@@ -1,0 +1,44 @@
+# source ../scripts/largedir.3
+global verbose
+
+begin
+cd /small
+set f aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+if [not [sfile exists $f]] { mkdir $f }
+set f bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+if [not [sfile exists $f]] { mkdir $f }
+set f ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+if [not [sfile exists $f]] { mkdir $f }
+set f ddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+if [not [sfile exists $f]] { mkdir $f }
+set f eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+if [not [sfile exists $f]] { mkdir $f }
+set f fffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+if [not [sfile exists $f]] { mkdir $f }
+set f ggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+if [not [sfile exists $f]] { mkdir $f }
+set f hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+if [not [sfile exists $f]] { mkdir $f }
+set f iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+if [not [sfile exists $f]] { mkdir $f }
+set f jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
+if [not [sfile exists $f]] { mkdir $f }
+set f kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+if [not [sfile exists $f]] { mkdir $f }
+set f lllllllllllllllllllllllllllllllllllllllllllllllllllllllll
+if [not [sfile exists $f]] { mkdir $f }
+set f mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
+if [not [sfile exists $f]] { mkdir $f }
+set f nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+if [not [sfile exists $f]] { mkdir $f }
+set f ooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+if [not [sfile exists $f]] { mkdir $f }
+set f ppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
+if [not [sfile exists $f]] { mkdir $f }
+set f qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+if [not [sfile exists $f]] { mkdir $f }
+commit
+
+ls
+ls -ld .
+

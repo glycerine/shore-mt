@@ -1,0 +1,30 @@
+
+
+module m1 {
+	interface a; // necessary forward decl
+
+	typedef sequence<long, 3>                seq1_t;
+	struct s {
+		ref<a> aref;
+		int b;
+	};
+
+	interface my_obj {
+	public:
+		// compiles if this first attr is removed:
+		// fails if this first attr is included
+        //attribute sequence<a> a_seq;
+
+		attribute sequence<ref<a> > a_seq;
+		attribute sequence<long> vseq;
+		attribute sequence<long, 3> bounded_vseq;
+		attribute sequence<s> struct_seq;
+
+	};
+
+	interface a {
+	public:
+        attribute long longattr;
+	};
+
+}

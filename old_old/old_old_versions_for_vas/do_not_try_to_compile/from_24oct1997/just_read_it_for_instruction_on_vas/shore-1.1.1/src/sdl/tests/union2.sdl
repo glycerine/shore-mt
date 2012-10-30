@@ -1,0 +1,14 @@
+module m1 {
+	export all;
+	enum representation_enum_t { REP_INT, REP_STRING };
+	union tagged_value_t
+		switch (representation_enum_t tag) 
+	{
+			case REP_INT:		long			int_val;
+			case REP_STRING:	string			string_val;
+	}; // end union
+	interface I {
+		public:
+			attribute tagged_value_t tv;
+	};
+}

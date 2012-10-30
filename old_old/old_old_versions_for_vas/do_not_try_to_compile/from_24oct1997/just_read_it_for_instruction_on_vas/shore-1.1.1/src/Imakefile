@@ -1,0 +1,14 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * $Header: /p/shore/shore_cvs/src/Imakefile,v 1.41 1997/09/06 22:33:46 solomon Exp $
+ */
+#define Subdirs fc sthread common sm rpc4.0 vas lil sdl util
+#define Tests examples oo7
+
+%GEN install(,COPYRIGHT)

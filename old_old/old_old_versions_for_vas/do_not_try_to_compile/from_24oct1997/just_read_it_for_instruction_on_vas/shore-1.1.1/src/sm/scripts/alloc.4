@@ -1,0 +1,188 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  Like alloc.2 but instead of scanning to destroy recs,
+#  it remembers the rids and destroys the recs w/o a scan.
+#
+#
+#	Test allocation & deallocation of pages
+#   the statistics-gathering checks assertions on the files 
+#   and in current form, fails
+#
+
+source $script_dir/vol.init
+
+# format for body size -- >= one page
+set form %0${lg_rec_page_space}d
+
+
+proc t1 {} {
+    global volid  f0 r0 form logging
+verbose t1 dstats-1 
+dstats $volid
+verbose t1 finished dstats-1 
+    sm begin_xct
+    verbose t1 xact [sm xct]
+# sync
+    verbose t1 creating 10 more recs ...
+    for { set i 1} { $i <= 10} { incr i} {
+	verbose creating t1 rec ...
+	catch {sm create_rec $f0 h$i 1000 [format $form $i]} j 
+	if [error_is $j E_DEADLOCK] {
+	   verbose Caught(a) : $j
+	    if {$logging==0} {
+		verbose t1 Logging off: substituting commit for abort
+		sm commit_xct
+	    } else {
+		verbose t1 aborting...
+		sm abort_xct
+	    }
+	   return
+	}
+	verbose t1 created rec $j
+	# catch {dstatsnoaudit $volid} err
+	# if [error_is $err E_DEADLOCK] {
+	#    echo Caught(b): $err
+	 #   verbose aborting...
+	 #   sm abort_xct
+	 #   return
+# 	}
+    }
+    verbose t1 created 10 recs file $f0
+    # verbose t1 dstatsnoaudit t1 xxx
+    # catch {dstatsnoaudit $volid} err
+   # might get deadlock if we continue 
+   #  if [error_is $err E_DEADLOCK] {
+    #    echo Caught(c): $err
+     #   verbose aborting...
+      #  sm abort_xct
+       # return
+    # }
+# sync
+    # verbose t1 dstatsnoaudit t1 yyy
+    # catch {dstatsnoaudit $volid } err
+    # if [error_is $err E_DEADLOCK] {
+      #  echo Caught(d): $err
+       # verbose aborting...
+       # sm abort_xct
+      #  return
+    # }
+
+    verbose t1 committing ...
+    sm commit_xct
+# sync
+    verbose t1 dstatsno t1 zzz
+    dstats $volid
+    verbose t1 finished dstats zzz t1
+}
+proc scanit { f } {
+    set scan [sm scan_file_create $f t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+	verbose $pin
+	set pin [sm scan_file_next $scan 0]
+	set i [expr {$i+1} ]
+    }
+    # (could get a deadlock)
+    catch { sm scan_file_destroy $scan } error
+    verbose $error
+    verbose scan found $i records
+}
+proc t2 {} {
+    global volid  f0 rid logging
+    sm begin_xct
+    verbose t2 xact [sm xct]
+    verbose t2 destroying all records (explicity, not by a scan) ...
+    for { set i 1} { $i <= 10} { incr i} {
+	verbose t2 sm destroy_rec $rid($i) ...
+	catch { sm destroy_rec $rid($i) } error
+	verbose error = $error
+	verbose t2 destroyed $rid($i)
+    }
+    set i [expr {$i -1}]
+    verbose t2 destroyed $i recs file $f0
+   #  verbose t2 dstatsnoaudit t2 xxx
+    # might get deadlock if we continue 
+   #  catch {dstatsnoaudit $volid} err
+   #  verbose result of dstats is $err
+    # if [error_is $err E_DEADLOCK] {
+     #   echo Caught(e): $err
+      #  verbose aborting...
+       # return
+    # }
+# sync
+    # verbose t2 dstatsnoaudit t2 yyy
+    # catch {dstatsnoaudit $volid} err
+    # if [error_is $err E_DEADLOCK] {
+      #  echo Caught(f): $err
+       # verbose aborting...
+      #  return
+   #  }
+    # verbose t2 dstatsnoaudit t2 zzz
+    # catch {dstatsnoaudit $volid} err
+    # if [error_is $err E_DEADLOCK] {
+      #  echo Caught(g): $err
+       # verbose aborting...
+      # return
+    # }
+# sync
+    if {$logging==0} {
+	verbose t2 Logging off: substituting commit for abort
+	sm commit_xct
+    } else {
+	verbose t2 aborting...
+	sm abort_xct
+    }
+    verbose t2 dstatsnoaudit t2 qqq
+    dstatsnoaudit $volid
+# sync
+}
+
+
+sm begin_xct
+set f0 [sm create_file $volid]]
+verbose created file $f0
+for { set i 1} { $i <= 10} { incr i} {
+    set j [sm create_rec $f0 h$i 1000 [format $form $i] ]
+    set rid($i) $j
+    verbose created rec $rid($i)
+}
+verbose created 10 recs file $f0
+sm commit_xct
+
+dstats $volid
+
+set y1 [fork_thread t1 {}]
+set y2 [fork_thread t2 {}]
+
+
+verbose sync_thread $y1 $y2
+# sync_thread $y1 $y2
+
+verbose sync_thread $y1 $y2
+# sync_thread $y1 $y2
+
+verbose sync_thread $y1 $y2
+# sync_thread $y1 $y2
+
+verbose join_thread $y1 $y2
+join_thread $y1 $y2
+
+verbose after join
+dstats $volid
+
+sm begin_xct
+scanit $f0
+sm commit_xct
+
+dstats $volid
+
+pstats
+
+unset i j f0 rid y1 y2 form

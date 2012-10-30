@@ -1,0 +1,80 @@
+# source ../scripts/mkdir
+
+source ../scripts/mkdir.compensate
+
+cd /small
+
+set me	  	  [getuid]
+set mygrp	  [getgid]
+
+set parent dira
+set child  dirb
+
+set oldumask [umask]
+umask 022
+
+#this test has parent's set-gid bit set
+begin
+	mkdir $parent
+	chmod 02755 $parent
+	set pmode [sfile mode $parent]
+
+	set oldpmtime [sfile mtime $parent]
+	set oldpctime [sfile ctime $parent]
+	set oldpatime [sfile atime $parent]
+	set pgrp	  [sfile group $parent]
+
+	cd $parent
+
+	sleep 2
+	umask 0777
+	mkdir $child
+
+	set newpmtime [sfile mtime ../$parent]
+	set newpctime [sfile ctime ../$parent]
+	set newpatime [sfile atime ../$parent]
+
+	set cmode		[sfile mode $child]
+	set cgrp		[sfile group $child]
+	set cown		[sfile owner $child]
+	set cmtime 		[sfile mtime $child]
+	set cctime 		[sfile ctime $child]
+	set catime 		[sfile atime $child]
+
+#	test that child's owner is me
+	assert [expr {$cown == $me}]
+
+#	NB:
+# 	we're assuming that the orig parent's set-uid bit is set
+#	we're also assuming that the user running this script
+#	is in the group that is given as his default group
+#
+#	test that setgid bit of child is inherited from parent
+#	test that mode is otherwise determined by umask
+
+	assert [expr {$pmode == 042755}]
+	assert [expr {$cmode == 042000}]
+
+#	test that parent's mtime and ctime are updated
+	assert [expr {$oldpctime != $newpctime}]
+	assert [expr {$oldpmtime != $newpmtime}]
+	assert [expr {$oldpatime != $newpatime}]
+
+#	test that child's atime, mtime and ctime are recent
+	assert [expr {$oldpctime != $cmtime}]
+	assert [expr {$oldpmtime != $cctime}]
+
+#	test that group of child is inherited from
+#	parent (parent's set gid bit is set)
+	assert [expr {$cgrp == $pgrp}]
+
+	expect OS_PermissionDenied from { rmdir $child }
+	chmod 0755 $child
+	rmdir $child
+	cd ..
+	rmdir $parent
+commit
+
+umask $oldumask 
+
+return "mkdir.2 done."

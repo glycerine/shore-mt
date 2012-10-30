@@ -1,0 +1,61 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# This script tests creating a record on a page where there is
+# contention for free slots.
+# TO BE source-d by file.5, file.7
+#
+
+sm begin_xct
+
+verbose creating file
+set f1 [sm create_file $volid ]
+
+verbose [format $id_body_width 1]
+
+verbose creating r1 and r2
+set r1 [ sm create_rec $f1 "" 11 [format $id_body_width 1] ]
+set r2 [ sm create_rec $f1 "" 11 [format $id_body_width 2] ]
+verbose $r1 $r2
+
+sm commit_xct
+
+proc thr1 { dummy } {
+	global r1 r2
+	sm begin_xct
+	sm destroy_rec $r1
+	sync
+	sm commit_xct
+}
+
+proc thr2 { dummy } {
+	global r1 r2 f1
+	sm begin_xct
+	set r3 [sm create_rec $f1 "hdr" 0 "body"]
+	verbose thread2 created $r3
+	sync
+	sm commit_xct
+}
+
+verbose forking 1
+set t1 [ fork_thread thr1 "dummy"]
+verbose forking 2
+set t2 [ fork_thread thr2 "dummy"]
+
+sync_thread $t1
+sync_thread $t2
+join_thread $t1 $t2
+
+sm begin_xct
+verbose destroying file
+sm destroy_file $f1
+sm commit_xct
+
+unset r1
+unset r2
+unset f1

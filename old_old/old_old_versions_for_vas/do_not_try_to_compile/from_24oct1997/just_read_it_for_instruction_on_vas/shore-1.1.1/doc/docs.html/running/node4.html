@@ -1,0 +1,329 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Running a Shore Server</TITLE>
+<META NAME="description" CONTENT="Running a Shore Server">
+<META NAME="keywords" CONTENT="running">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="running.css">
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="running.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html76"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html73"
+ HREF="running.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html67"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html75"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html77"
+ HREF="node5.html">NFS-Mounting Your File System</A>
+<B> Up:</B> <A NAME="tex2html74"
+ HREF="running.html">Configuring and Running the Server</A>
+<B> Previous:</B> <A NAME="tex2html68"
+ HREF="node3.html">Configuring a Shore Server</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html78"
+ HREF="node4.html#SECTION00041000000000000000000">
+A Bootstrapping Problem</A>
+<LI><A NAME="tex2html79"
+ HREF="node4.html#SECTION00042000000000000000000">
+TCL command file (option <TT>svas_shellrc</TT>)</A>
+<LI><A NAME="tex2html80"
+ HREF="node4.html#SECTION00043000000000000000000">
+Running the Shore Server</A>
+<LI><A NAME="tex2html81"
+ HREF="node4.html#SECTION00044000000000000000000">
+Shutting the Server Down</A>
+<LI><A NAME="tex2html82"
+ HREF="node4.html#SECTION00045000000000000000000">
+Changing Your Environment</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="running:running">&#160;</A><H1><A NAME="SECTION00040000000000000000000">
+Running a Shore Server</A>
+</H1>
+<P><A NAME="running:bootstrap">&#160;</A><H2><A NAME="SECTION00041000000000000000000">
+A Bootstrapping Problem</A>
+</H2>
+<P>
+When the server starts, it locates its configuration
+file and reads it.
+The configuration option
+<TT>svas_root</TT> gives a pathname in the Unix file system of a device or
+file that is to serve as the root volume for Shore.
+The default is <TT>./volumes/miniroot 10</TT>, which means that Shore will
+use the Unix file <TT>./volumes/miniroot</TT>
+to simulate a disk device.
+(The &quot;<TT>10</TT>&quot; is an internal volume id to be assigned to this
+volume by Shore).
+Using Unix files to simulate disks is convenient for debugging, but
+for better performance, you should replace this name with the pathname
+of a real &quot;raw&quot; disk device (<TT>/dev/...</TT>).
+One or more options <TT>svas_serve</TT> may also be present, indicating
+other devices containing volumes to be served.
+When you start from scratch, you have no root directory,
+and you have to create one.
+The server is able to run without a root directory,
+but you can't do much with a server that has no
+file system, other than use it to format devices
+and make file systems (which correspond to volumes)
+on those devices.
+<P>
+After reading the configuration file, the server normally starts a TCL
+shell.
+TCL (Tool Command Language) is a package originally written by John Ousterhout
+at the University of California at Berkeley.
+It consists of an interpreted language and an extensive support library,
+including facilities for calling C function from TCL.
+The main use of TCL in Shore is to provide an interactive command-line
+interface to its components.
+The TCL shell started by the SVAS reads a script of start-up commands and
+then prompts for interactive input.
+<P><A NAME="running:tcl">&#160;</A><H2><A NAME="SECTION00042000000000000000000">
+TCL command file (option <TT>svas_shellrc</TT>)</A>
+</H2>
+<P>
+One of the configuration options,
+<TT>svas_tclshell</TT>, determines whether the server
+will start a TCL shell.
+If the value of <TT>svas_tclshell</TT> is <TT>yes</TT> or <TT>true</TT>,
+a shell is started, and the option <TT>svas_shellrc</TT> is inspected.
+(If the <TT>svas_tclshell</TT> option is not set by the configuration
+file or a command-line option, its default value is <TT>true</TT>.)
+If <TT>svas_shellrc</TT> is set, it names a file of <EM>TCL commands</EM>,
+which are interpreted when the shell starts.
+The default configuration file included with Shore sets this option to
+<TT>&nbsp;/shore.rc</TT>.
+If you followed the
+<A HREF="../installation/node7.html#installation:running">installation instructions</A>,
+you copied <TT>shore.rc</TT> from the installation directory
+<TT>$SHORE/lib</TT> to your home directory.
+This file of TCL commands is a convenience, not a requirement.
+You may modify it or even remove it once you understand what it does.
+<P>
+The first time you run the SVAS, you are doing the Shore counterpart
+of re-installing Unix.
+The analogous activity in Unix is to
+reformat your disks and install Unix from
+scratch, making file systems with <TT>mkfs(8)</TT> or
+<TT>newfs(8)</TT>).
+There are enough steps to this process that you don't want
+to have to do it by hand each time.
+The script <TT>shore.rc</TT> automates this task.
+It determines if the root file system was
+mounted when the server started running.
+If not, the TCL commands format the root volume and
+create a Shore file system on it.
+The commands also create several directories that are required by
+the example applications.
+<P>
+Once your system is configured and running,
+and you are in &quot;production mode&quot;,
+you can dispense with this script.
+As long as you don't intend to reformat your disks,
+you can start a server without an TCL commands; all
+you have to do in this case is to set the SVAS options
+<TT>svas_root</TT> and
+<TT>svas_serve</TT> so that the SVAS can mount the root
+directory and other volumes.
+On the other hand, it does not hurt anything to run the
+server with a TCL shell and to have it read the TCL command
+file each time it starts.
+If you want to replace the file of TCL commands with your
+own version, or if you want to avoid reading such a file
+altogether, edit your options file <TT>.shoreconfig</TT>
+and change or remove the command that sets the option
+<TT>svas_shellrc</TT>.
+<P><A NAME="running:server">&#160;</A><H2><A NAME="SECTION00043000000000000000000">
+Running the Shore Server</A>
+</H2>
+<P>
+If you followed the instruction for running the SVAS in
+<A HREF="../installation/node7.html#installation:running">Running the Shore Server</A>,
+you saw several messages looking like this:
+<P><SMALL><PRE>
+Warning: no database administrator -- running under userid 1417, groupid 1417
+Looking for run command file &quot;~/shore.rc&quot; \ldots
+format --./volumes/miniroot-- 20000 true
+mkfs ./volumes/miniroot 20000 10
+Done serving devices and making filesystems.
+
+root = 0
+setroot  10
+/ is now 0.0.0.0:10.20007
+See if  /  exists in the Shore namespace.
+/  does exist
+Done putting together the namespace.
+
+Done reading ~/shore.rc.
+Shore Server
+</PRE>
+<TT>Version ($Revision: 1.36 $ $Date: 1997/01/24 16:48:16 $)</TT>
+<PRE>
+(0)%
+</PRE>
+</SMALL>
+<P>
+You can ignore most of these messages.
+<DL>
+<DT><STRONG><TT>Warning: no database administrator ...</TT></STRONG>
+<DD>announces that the server is not being run by the super-user, or
+by the user
+<TT>shoreadm</TT>.
+<DT><STRONG><TT>Looking for run command file &quot;~/shore.rc&quot; ...</TT></STRONG>
+<DD>If the server is configured to run a TCL shell (which it was),
+and if it is given a file to read when the shell starts (<TT>shore.rc</TT>
+in this case), it reads that file and interprets the commands therein.
+Among the commands in <TT>shore.rc</TT> were commands to
+format the device and volume for the root directory,
+mount the root directory, and print the full object identifier
+of the root directory.
+<DT><STRONG><TT>format -./volumes/miniroot ...</TT></STRONG>
+<DD><DT><STRONG><TT>mkfs ./volumes/miniroot ...</TT></STRONG>
+<DD>The script checks whether the &quot;device&quot; <TT>./volumes/miniroot</TT>
+exists.  If not it assumes that the device is really a Unix file,
+which it creates and initializes to look like an empty file system by
+issuing the commands
+<PRE>
+format ./volumes/miniroot 20000 true
+mkfs ./volumes/miniroot 20000 10
+</PRE>
+The number 20000 is the size of the file created, in kilobytes.
+If you want to use a raw device, you must change both the configuration option
+<TT>svas_root</TT> in the configuration file <TT>.shoreconfig</TT>
+and the variable <TT>rootvolumename</TT> in the startup file <TT>shore.rc</TT>.
+Also the check to see whether the device exists will always succeed, so
+you will have to run the <TT>format</TT> and <TT>mkfs</TT> commands
+&quot;by hand&quot; the first time to format the device.
+The second and subsequent times you run SVAS, these lines of output will be
+replaced by
+<PRE>
+serve ./volumes/miniroot
+</PRE>
+meaning that the server has added this volume to the list of volumes for which
+it will act as a server.
+<P><DT><STRONG><TT>Shore Server ...</TT></STRONG>
+<DD>After reading the file of TCL commands, the server's TCL shell
+prints a welcome message and a prompt for TCL commands.
+</DL>
+<P>
+The SVAS is now running a TCL shell in the window in which you
+started the server. As you run clients, you can also run
+TCL shell commands to the SVAS.
+Unfortunately, this shell has no user guide, but is has some
+on-line help. Type &quot;commands&quot; or &quot;help&quot;.
+<P><A NAME="running:shutting">&#160;</A><H2><A NAME="SECTION00044000000000000000000">
+Shutting the Server Down</A>
+</H2>
+<P>
+The server shuts down when you type the command
+<TT>bye</TT>, which is
+synonymous with
+<TT>quit, q, exit,</TT> and <TT>x</TT>.
+You can also run the program
+<TT>sshutdown</TT> directly from a Unix shell window.
+This program contacts the server and causes it to shut down.
+(This is the only way of cleanly shutting down the server if you ran it
+without a TCL shell).
+<P><A NAME="running:environment">&#160;</A><H2><A NAME="SECTION00045000000000000000000">
+Changing Your Environment</A>
+</H2>
+<P>
+If you want to change the location of your logs or
+the location of your data volumes, you will need to edit
+<TT>shore.rc</TT> (or whatever file you have
+chosen as your file of TCL commands).
+<EM>Warning: If your volumes or log are on a network file system (such as NFS
+or AFS) rather than a local disk,
+the server will be sluggish, and you must take care that
+the volumes and logs have the necessary permissions so that
+the user who runs the server can create and update the volumes and
+log files.</EM>
+<P>
+The file of TCL commands does several things:
+<DL COMPACT>
+<DT>1.
+<DD>It defines a table of volumes on which to create file systems
+<DT>2.
+<DD>It formats the volumes if necessary.
+<B>Warning:
+If your volumes are on a Unix raw device, you must do this step by hand.</B>
+<DT>3.
+<DD>It determines if the root directory was already mounted
+when the configuration file was processed, and if not,
+<DT>4.
+<DD>It creates a file system (with the release, this
+corresponds to a volume)
+for the root of the Shore name space (&quot;/&quot;) ,
+and mounts it,
+<DT>5.
+<DD>It mounts any non-root volumes
+<DT>6.
+<DD>It creates some directories and pools used by the example
+applications, if they don't already exist.
+</DL>
+<P>
+If you want to change the location or size
+of your file system, look at the volume table
+at the beginning of the file.
+The comments there should be self-explanatory.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html76"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html73"
+ HREF="running.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html67"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html75"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html77"
+ HREF="node5.html">NFS-Mounting Your File System</A>
+<B> Up:</B> <A NAME="tex2html74"
+ HREF="running.html">Configuring and Running the Server</A>
+<B> Previous:</B> <A NAME="tex2html68"
+ HREF="node3.html">Configuring a Shore Server</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

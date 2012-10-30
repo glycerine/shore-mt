@@ -1,0 +1,27 @@
+// m1 is an example from sdl manual
+
+module m1 {
+	export all;
+    typedef     long ssn;    
+    interface Person {
+    public:
+        attribute   string name;
+		attribute	ssn	   social_security_number;
+    };
+
+    interface IndexObject {
+    public:
+        attribute index<string,Person> name_to_person;
+        attribute index<ssn,string>    ssn_to_name;
+    };
+}
+
+module m2 {
+	import m1;
+    interface IO {
+    public:
+		// these two should yield the same LB
+        attribute index<string,Person> i1;
+        attribute index<string,ref<Person> > i2;
+    };
+}

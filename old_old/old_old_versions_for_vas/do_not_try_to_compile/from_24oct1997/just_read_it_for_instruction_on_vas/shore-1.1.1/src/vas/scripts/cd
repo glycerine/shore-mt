@@ -1,0 +1,23 @@
+# doesn't need any setup
+begin
+cd /
+cd //
+cd ///
+cd ///
+cd .
+cd ./
+cd ./.
+cd ././././.
+cd ./././././
+
+cd ..
+cd ../
+cd ../../..
+cd ../../../
+
+cd ..//././../..//////./
+cd ..//././../..//////./.
+cd ..//././../..//////./..
+
+commit
+return "cd done."

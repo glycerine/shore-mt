@@ -1,0 +1,29 @@
+// resulting .h file doesn't compile
+// and sdl doesn't catch the errors.
+// This is probably not sdl's responsibility
+
+module manyconsts {
+    export all;
+
+    const int tautology = true;
+    const boolean falsehood = ( false) + 2.3;
+
+    const float floater = "cheese";
+
+    const int integerconst = 3.3;
+
+    const string name = ("now is the time" + 2) * floater / tautology;
+
+	const int b1 = 0x1000 >> 3;
+}
+module m1  {
+	import manyconsts;
+	// const int b1 = 0x1000 > > 3;//  not legit anymore
+	const int b2 =  3;
+	
+	interface i {
+	public:
+		attribute int a[b1];
+	};
+}
+

@@ -1,0 +1,294 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Storage Facilities</TITLE>
+<META NAME="description" CONTENT="Storage Facilities">
+<META NAME="keywords" CONTENT="ssmapi">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmapi.css">
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="ssmapi.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html161"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html158"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html152"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html160"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html162"
+ HREF="node5.html">Transaction Facilities</A>
+<B> Up:</B> <A NAME="tex2html159"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html153"
+ HREF="node3.html">Initialization and Shutdown</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html163"
+ HREF="node4.html#SECTION00041000000000000000000">
+Devices</A>
+<LI><A NAME="tex2html164"
+ HREF="node4.html#SECTION00042000000000000000000">
+Volumes</A>
+<LI><A NAME="tex2html165"
+ HREF="node4.html#SECTION00043000000000000000000">
+Files of Records</A>
+<LI><A NAME="tex2html166"
+ HREF="node4.html#SECTION00044000000000000000000">
+B+tree Indexes</A>
+<LI><A NAME="tex2html167"
+ HREF="node4.html#SECTION00045000000000000000000">
+R*Tree Indexes</A>
+<LI><A NAME="tex2html168"
+ HREF="node4.html#SECTION00046000000000000000000">
+Identifiers</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="ssmapi:storage">&#160;</A><H1><A NAME="SECTION00040000000000000000000">
+Storage Facilities</A>
+</H1>
+<P>
+The SSM provides a hierarchy of storage structures.  A description
+of each type of storage structure is given below, followed by
+a description of the identifiers used to refer to them.
+<P><A NAME="ssmapi:devices">&#160;</A><H2><A NAME="SECTION00041000000000000000000">
+Devices</A>
+</H2>
+<P>
+A <EM>device</EM> is a location, provided by the operating system, for
+storing data.  In the current implementation, a device is either a
+disk partition or an operating system file.  A device is identified by
+the name used to access it through the operating system.  Each device
+is managed by a single server.  A device has a quota.  The sum of the
+quotas of all the volumes on a device cannot exceed the device quota.
+<EM>Note</EM> : Devices are currently limited to containing only one volume.
+<P>
+The device management interface is part of class <TT>ss_m</TT>
+and is described in
+<A NAME="tex2html11"
+ HREF="../man/device.ssm.html">device(ssm)</A>.
+<P>
+For each mounted device, the server forks a process called <TT>diskrw</TT>
+(determined by the <TT>sm_diskrw</TT> option) to perform asynchronous
+I/O on the device.  These processes communicate with the server
+through sockets and shared memory, so your operating system must be configured
+with shared memory support.
+<P><A NAME="ssmapi:volumes">&#160;</A><H2><A NAME="SECTION00042000000000000000000">
+Volumes</A>
+</H2>
+<P>
+A <EM>volume</EM> is a collection of file and index storage structures
+(described below) managed as a unit.  All storage structures reside
+entirely on one volume.  A volume has a quota specifying how
+must large it can grow.
+Every volume has a dedicated
+<A HREF="node4.html#ssmapi:btree">B+-tree index</A>, called the <EM>root index</EM>,
+to be used for cataloging the data on the volume.
+<P>
+The volume management interface is part of class <TT>ss_m</TT>
+and is described in
+<A NAME="tex2html12"
+ HREF="../man/volume.ssm.html">volume(ssm)</A>.
+<P><A NAME="ssmapi:files">&#160;</A><H2><A NAME="SECTION00043000000000000000000">
+Files of Records</A>
+</H2>
+<P>
+A <EM>record</EM> <A NAME="tex2html13"
+ HREF="footnode.html#330"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+is an un-typed container
+of bytes, consisting of a <EM>tag</EM>, <EM>header</EM> and <EM>body</EM>.
+The tag is a small, read-only location that stores the record size
+and other implementation-related information.  The header has a variable
+length, but it limited by the size of a physical disk page.
+A VAS may store -information about the record (such as its type) in the header.
+The body is the primary data storage location and can range in size from zero
+bytes to 4-GB.  A record can grow and shrink in size by operations
+that append and truncate bytes at the end of the record.
+<P>
+A <EM>file</EM> is a collection of records.  Files are used for
+clustering records and have an interface for iterating over all the
+records they contain.  The number of records that a file can hold is
+limited only by the space available on the volume containing the file.
+The minimum size of a file is 64K-bytes (8 pages).  We are working on
+ways to reduce this to 8K, but in any case, using a file to store
+a collection containing only a few small records will waste space.
+<P>
+Methods for creating/destroying files and creating/destroying/modifying
+records are part of class <TT>ss_m</TT> and described in
+<A NAME="tex2html14"
+ HREF="../man/file.ssm.html">file(ssm)</A>.
+There is a <TT>pin_i</TT> class for
+pinning records for reading and modifying.  This class is
+documented in <A NAME="tex2html15"
+ HREF="../man/pin_i.ssm.html">pin_i(ssm)</A>.
+There are the classes
+<TT>scan_file_i</TT> for iterating over the records in a file,
+and
+<TT>append_file_i</TT> for appending records to a file.
+Both are described in
+<A NAME="tex2html16"
+ HREF="../man/scan_file_i.ssm.html">scan_file_i(ssm)</A>.
+<P><A NAME="ssmapi:btree">&#160;</A><H2><A NAME="SECTION00044000000000000000000">
+B+tree Indexes</A>
+</H2>
+<P>
+The <EM>B+tree index</EM> facility provides associative access to data.
+Keys and their associated values can be variable length (up to the
+size of a page).  Keys can be composed of any of the basic C-language types
+or variable length character strings.  A bulk-loading facility is provided.
+The number of key-value pairs that an index can hold is limited only
+by the space available on the volume containing the index.  The minimum
+size of a B+tree index is 8K-bytes (1 page).
+<P>
+Methods for index operations are part of class
+<TT>ss_m</TT> and described in
+<A NAME="tex2html17"
+ HREF="../man/btree.ssm.html">btree(ssm)</A>.
+There is <TT>scan_index_i</TT> class for iterating over
+a range of keys in the index
+This class is documented in
+<A NAME="tex2html18"
+ HREF="../man/scan_index_i.ssm.html">scan_index_i(ssm)</A>.
+<P><A NAME="ssmapi:rtree">&#160;</A><H2><A NAME="SECTION00045000000000000000000">
+R*Tree Indexes</A>
+</H2>
+<P>
+An <EM>R-Tree</EM> is a height-balanced tree structure designed specifically
+for indexing multi-dimensional spatial objects. It stores the
+<EM>minimum bounding box</EM> (with 2 or more dimensions) of a spatial object
+as the key in the leaf pages.  The current implementation in SHORE is
+a variant of R-Tree called <EM>R*-Tree</EM>
+[<A
+ HREF="node12.html#bk:rtree">BKSS90</A>], which improves the search
+performance by using a better heuristic for redistributing entries
+and dynamically reorganizing the tree during insertion.
+Currently, only 2-dimensional R*-trees with integer coordinates
+are supported by the SSM.
+A bulk-loading facility is provided.
+The number of key-value pairs that an index can hold is limited only
+by the space available on the volume containing the index.
+The minimum size of an R*tree index is 64K-bytes (8 pages).
+<P>
+The R*-Tree implementation stores [key, value] pairs, where
+the key is of type
+<A NAME="tex2html19"
+ HREF="../man/nbox_t.common.html"><TT>nbox_t</TT></A>.
+and the value is of type
+<A NAME="tex2html20"
+ HREF="../man/vec_t.common.html"><TT>vec_t</TT></A>. A 2-D <TT>nbox_t</TT> is a
+rectangle which stores coordinates in the order of x_low, y_low,
+x_high, y_high (lower left point and higher right point). Currently,
+only  integer values are supported for the coordinates.
+<P>
+Methods for R*-tree index operations are part of class
+<TT>ss_m</TT> and described in
+<A NAME="tex2html21"
+ HREF="../man/rtree.ssm.html">rtree(ssm)</A>.
+There is <TT>scan_rt_i</TT> class for iterating over
+a range of keys in the index
+This class is documented in
+<A NAME="tex2html22"
+ HREF="../man/scan_rt_i.ssm.html">scan_rt_i(ssm)</A>.
+<P><A NAME="ssmapi:identifiers">&#160;</A><H2><A NAME="SECTION00046000000000000000000">
+Identifiers</A>
+</H2>
+<P>
+Volumes, files, records and indexes all have identifiers.
+There are two broad categories of identifiers: <EM>logical</EM> and
+<EM>physical</EM>.  Logical IDs are location-independent;
+there is a level of indirection for mapping the ID to a physical
+location.  Physical IDs are location-dependent; they
+refer to the physical location (usually location on disk) of the
+referenced object.
+<EM>Although the SSM has both physical and logical ID versions of its
+interface, only the version using logical IDs is supported at this
+time</EM>.
+<P>
+A volume ID (<TT>lvid_t</TT>) is a globally unique, 8-byte identifier;
+see <A NAME="tex2html23"
+ HREF="../man/lid_t.common.html"><TT>lid_t(common)</TT></A>.
+File, record, and index IDs are formed by appending to a volume ID
+a serial number (see <A NAME="tex2html24"
+ HREF="../man/serial_t.common.html"><TT>serial_t</TT></A>)
+unique to the volume containing them.
+Serial numbers are currently 4 bytes long, but we plan to make
+them 8 bytes long in the future.
+The complete ID for a file, index or record is a combination
+of the volume ID and serial number (<TT>lid_t</TT>) described
+in <A NAME="tex2html25"
+ HREF="../man/lid_t.common.html">lid_t(common)</A>.
+Serial numbers are never reused.
+A counter stored on the volume is used generate serial numbers.
+It is initialized when the volume is formatted an incremented each time
+a new serial number is needed.
+<P>
+When a pointer to a record is stored on disk, only the serial number is
+stored.  A bit in the serial number indicates whether the pointer is
+local (to a record on the volume) to remote.
+If the pointer is remote, an index on the volume is used to store
+the volume ID of the record.
+This technique can significantly reduce the size of databases containing many
+pointers.
+<P>
+Methods for operating on IDs and generating remote references
+are described in <A NAME="tex2html26"
+ HREF="../man/lid.ssm.html">lid(ssm)</A>.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html161"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html158"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html152"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html160"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html162"
+ HREF="node5.html">Transaction Facilities</A>
+<B> Up:</B> <A NAME="tex2html159"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html153"
+ HREF="node3.html">Initialization and Shutdown</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

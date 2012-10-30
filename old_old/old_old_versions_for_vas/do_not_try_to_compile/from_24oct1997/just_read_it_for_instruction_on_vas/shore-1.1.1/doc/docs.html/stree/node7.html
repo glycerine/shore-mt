@@ -1,0 +1,248 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Using Indexes</TITLE>
+<META NAME="description" CONTENT="Using Indexes">
+<META NAME="keywords" CONTENT="stree">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="stree.css">
+<LINK REL="next" HREF="node8.html">
+<LINK REL="previous" HREF="node6.html">
+<LINK REL="up" HREF="stree.html">
+<LINK REL="next" HREF="node8.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html187"
+ HREF="node8.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html184"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html178"
+ HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html186"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html188"
+ HREF="node8.html">Appendix: Program Sources</A>
+<B> Up:</B> <A NAME="tex2html185"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html179"
+ HREF="node6.html">Building and Running the</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="stree:indexes">&#160;</A><H1><A NAME="SECTION00070000000000000000000">
+Using Indexes</A>
+</H1>
+<P>
+As mentioned
+<A HREF="node2.html#stree:examplenongoals">above</A>,
+a binary search tree is not really an appropriate data structure for
+persistent data.
+Shore has a built-in index feature designed just for tasks such as this.
+The <TT>src/examples/stree</TT> sub-directory of the distribution contains
+a version of the search-trees example that uses a Shore index instead of
+a search tree.
+Instead of
+<TT>stree.sdl</TT>
+we use
+<TT>doc_index.sdl</TT>.
+The source file
+<TT>stree_defs.C</TT>
+is replaced by
+<TT>doc_index_defs.C</TT>,
+<TT>tree.C</TT>
+is replaced by
+<TT>docIndex.C</TT>,
+and
+<TT>main.C</TT>,
+<TT>word.C</TT>,
+<TT>cite.C</TT>,
+and
+<TT>document.C</TT>
+are replaced by
+<TT>ix_main.C</TT>,
+<TT>ix_word.C</TT>,
+<TT>ix_cite.C</TT>,
+and
+<TT>ix_document.C</TT>,
+respectively.
+Since most of the program is unchanged, we shall only consider the differences
+here.
+<P>
+First consider <TT>doc_index.sdl</TT>.
+We have removed from interface <TT>Word</TT> the attributes
+<TT>left</TT> and <TT>right</TT> and operations <TT>find_or_add</TT> and <TT>find</TT>
+and added a &quot;destructor&quot; named <TT>finalize</TT>.
+The interface <TT>SearchTree</TT> has been renamed <TT>DocIndex</TT>.
+Its attribute
+<PRE>
+    attribute ref&lt;Word&gt; root;
+</PRE>
+has been replaced by
+<PRE>
+    attribute index&lt;string,Word&gt; ind;
+</PRE>
+which declares an <EM>index</EM> mapping strings to <TT>Word</TT>
+references.<A NAME="tex2html18"
+ HREF="footnode.html#798"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+We have also added the operation <TT>delete_word</TT>, which we would have
+included in <TT>SearchTree</TT> if we weren't so <A HREF="node5.html#stree:lazy">lazy</A>.
+<P>
+Each of the source files
+<TT>main.C</TT>,
+<TT>word.C</TT>,
+<TT>cite.C</TT>,
+and
+<TT>document.C</TT>
+has been edited to replace
+<PRE>
+    #include &quot;stree.h&quot;
+</PRE>
+with
+<PRE>
+    #include &quot;doc_index.h&quot;,
+</PRE>
+replace occurrences of type <TT>Ref&lt;SearchTree&gt;</TT> with <TT>Ref&lt;DocIndex&gt;</TT>,
+etc.
+The code in <TT>main.C</TT> for the-p option has been extended to
+dump the contents of the index.
+<TT>Word.C</TT> has been edited to remove all mention of the deleted attributes
+<TT>left</TT> and <TT>right</TT> and operations <TT>find_or_add</TT> and <TT>find</TT>,
+and a new <TT>finalize</TT> operation has been added, which simply calls
+<TT>DocIndex::delete_word</TT>.
+<P>
+In <TT>cite.C</TT>, the <TT>finalize</TT> operation checks each <TT>Word</TT>
+cited by the <TT>Cite</TT> being deleted to see if its
+reference count has dropped to zero.
+If so, it calls the <TT>Word</TT>'s <TT>finalize</TT> method and destroys it.
+Note that the <TT>Word</TT> is first removed from <TT>Cite::cites</TT> relationship,
+which also removes the current <TT>Cite</TT> from the inverse
+<TT>Word::cited_by</TT> relationship, thus decrementing the <TT>Word</TT>'s
+reference count.
+<P>
+The only change from
+<TT>document.C</TT>
+to
+<TT>ix_document.C</TT>
+the name of the <TT>#include</TT> file.
+<P>
+Finally, consider the new source file
+<A HREF="node8.html#stree:docindexSRC"><TT>docIndex.C</TT></A>.
+The <TT>index</TT> attribute <TT>ind</TT> of interface <TT>DocIndex</TT>
+compiles into a data member whose type is derived from the pre-defined
+Shore type <TT>sdl_index_base</TT>.
+Each such index object must be initialized before it is used.
+The &quot;constructor&quot; <TT>DocIndex::initialize</TT>
+calls <TT>sdl_index_base::init</TT>, which takes a single argument
+of type <TT>IndexKind</TT>-an enumeration type that includes the
+values <TT>BTree</TT> and <TT>UniqueBtree</TT>.
+(Other values of this enumeration correspond to index types that are
+not yet supported.)
+In our case, we choose <TT>UniqueBtree</TT>, meaning that we want a
+B-tree that has at most one value for each key.
+The member function <A HREF="node8.html#stree:docindexinsertFUNC">DocIndex::insert</A>
+uses the member function
+<TT>sdl_index_base::find</TT>
+to determine whether a <TT>Word</TT> with the given key already exists in
+the index.
+If not, one is created and a reference to it is inserted into the index with
+the member function
+<TT>sdl_index_base::insert</TT>.
+Finally, the <TT>Word</TT> object that was found or created is updated
+to add the given <TT>Cite</TT> to its set of occurrences.
+<P><TT>DocIndex::insert_file</TT> is identical to
+<TT>SearchTree::insert_file</TT>, and
+<TT>DocIndex::find</TT> simply calls
+<TT>sdl_index_base::find</TT>.
+<TT>DocIndex::delete_word</TT> is called to remove reference to a <TT>Word</TT>
+from the index when it is no longer referenced.
+The member function
+<TT>sdl_index_base::remove</TT> has an input parameter of the key-type of the
+index, and an integer output parameter <TT>count</TT>.
+It removes all index entries whose keys match the first argument and
+returns a count of the number of entries removed.
+In our case, this count should always be one.
+<P><TT>DocIndex::print</TT> illustrates how to iterate through the entries
+in an index using the Shore template class <TT>IndexScanIter</TT>, which has
+two type parameter corresponding to the types of the keys and values
+of the index.
+The types given must match the types of the language binding, which
+might differ syntactically from the SDL type declarations.
+(For example, <TT>Ref&lt;Word&gt;</TT> must be used in place of <TT>Word</TT> here, 
+similarly
+SDL <TT>string</TT> translates to <TT>sdl_string</TT> in a C++ language binding.)
+<P>
+The iterator's constructor takes an index of the appropriate type (in this
+case <TT>DocIndex::ind</TT>) as a parameter.
+For ordered indices (such as B-trees), it also has two optional arguments
+to indicate lower and upper bounds.
+When these values are supplied, the iterator only returns keys in the
+indicated range.
+When they are omitted (as in this example) the iterator
+returns all entries in the index.
+<P>
+An iterator has a function member <TT>next</TT> to advance to
+the next entry, a data member <TT>eof</TT> to indicate if any more entries
+exist, and data members <TT>cur_key</TT> and <TT>cur_val</TT> representing
+the key and value of the current entry.
+As this code illustrates, the <TT>next</TT> function has to be called once
+at the start to &quot;prime the pump&quot;, and <TT>eof</TT> flag is
+false after advancing past the last entry.
+This interface may change in future releases.
+See the
+<A NAME="tex2html19"
+ HREF="../man/index.cxxlb.html"><EM>index(cxxlb)</EM></A>
+manual page for more details.
+<P>
+The script <TT>run_tests.sh</TT> included in the source distribution runs
+all of the tests listed above using both the <TT>stree</TT> and <TT>doc_index</TT>
+versions of the program.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html187"
+ HREF="node8.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html184"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html178"
+ HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html186"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html188"
+ HREF="node8.html">Appendix: Program Sources</A>
+<B> Up:</B> <A NAME="tex2html185"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html179"
+ HREF="node6.html">Building and Running the</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,20 @@
+source ../common/vas.tcllib
+connect
+source ../scripts/all.noerr
+set dir ../scripts
+
+foreach f {
+	batch.all
+} { 
+	cout $dir/$f
+	source $dir/$f 
+	cout $dir/$f done.
+}
+
+# index 
+# appendAnon createAnon truncateAnon truncateAnon.2
+# dismount.all
+# mklgpool
+time.all 
+
+disconnect

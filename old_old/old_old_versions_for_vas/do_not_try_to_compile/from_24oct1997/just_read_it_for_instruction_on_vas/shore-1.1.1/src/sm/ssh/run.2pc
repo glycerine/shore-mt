@@ -1,0 +1,251 @@
+#!/bin/sh 
+
+# 
+# Run various ssh 2pc tests
+# NEED: a directory with various subdirectories
+#	for the subordinates
+#  E.G.: ssh -- coordinator
+#     green, pink, blue -- subordinates
+#
+# optional argument: test# coordinator-name subordinates names script-number
+# optional alternative name: gdb.2pc
+#
+# USES: ssh scripts coordonly.3, coord.start
+#
+listonly=0
+testnumber=${1:-0}
+coordinator=${2:-coord}
+cpath=../ssh
+subordinates=${3:-"pink green blue"}
+tid=color
+scriptnum=${4:-3}
+
+# delays="delay@sub.after.resolve@40000 delay@sub.after.vote@40000 delay@sub.before.prepare@40000 delay@sub.after.prepare@40000 delay@sub.after.ack@40000"
+
+# delays = "delay@co.before.prepare@40000 delay@co.after.prepare@40000 delay@co.got.vote@40000 delay@co.after.vote@40000 delay@co.before.resolve@40000 delay@co.after.resolve@40000 delay@co.got.ack@40000 delay@co.after.ack@40000"
+
+delays="none@@"
+
+
+# removed crash@sub.after.ack@1 - sort of not needed
+# removed crash@sub.before.resolve@1 - pretty-much same as after.vote
+scrashes=" crash@sub.after.prepare@1 crash@sub.after.resolve@1 crash@sub.before.prepare@1 crash@sub.after.vote@1 "
+# scrashes="none@@"
+
+echo SUB CRASHES=$scrashes
+
+ccrashes="crash@co.after.ack@1 crash@co.after.prepare@1 crash@co.after.vote@1 crash@co.before.resolve@1 crash@co.after.resolve@1 crash@co.got.ack@1"
+#
+# the following really isn't in the domain of 2pc - it's a crash
+# prior to 2pc: crash@co.before.prepare@1
+# co.got.vote is essentially the same as co.after.prepare
+# co.after.vote is essentially the same as co.before.resolve
+#
+ccrashes=""
+echo COORD CRASHES=$ccrashes
+
+echo 
+echo
+
+numtests=0
+
+# COUNT SUBORDINATES
+sublist=""
+numsub=0
+for s in $subordinates; do
+numsub=`expr $numsub + 1`
+if test -x ../$s/ssh ;  then
+    sublist=$sublist.$s
+else
+    echo ../$s/ssh is not executable
+fi
+done
+
+echo $numsub subordinates
+
+# START COORDINATOR
+
+actions="readonly readwrite"
+finish="commit abort"
+sc=../scripts/coordonly.$scriptnum
+args1="-t subs=\"$subordinates\" -t coname=$coordinator -f $sc"
+
+doit() 
+{
+    tid=$1
+    sublist=$2
+    act=$3
+    fin=$4
+    crashlocal=$5
+    crashremote=$6
+    dlay=$7
+
+    numtests=`expr $numtests + 1`
+
+    if test $testnumber -ne 0; then
+	if test $numtests -lt $testnumber; then
+		return
+	fi
+    fi
+
+    echo TESTING: $tid $sublist $act $fin
+
+    gtid=$numtests.$tid.$sublist.$act.$fin
+    args="-t gtid=$gtid -t actions=$act -t finishes=$fin -t dinfo=$dlay -t clinfo=$crashlocal -t crinfo=$crashremote"
+
+    if test $0 = "gdb.2pc"; then
+	CMD="run $args $args1"
+	echo $CMD 1> .gdbrun
+	gdb ssh -x .gdbrun 
+    else 
+	CMD="ssh $args $args1"
+	if test $listonly -eq 0; then
+	    echo $CMD
+	    eval $CMD
+	fi
+    fi
+    res=$?
+    #  echo SSH RETURNS: $res
+    if test $res -eq 44; then
+	if test $listonly -eq 0; then
+	    if test $0 = "gdb.2pc"; then
+		CMD="run $args -t recoveronly=1 $args1"
+		echo $CMD 1> .gdbrun
+		gdb ssh -x .gdbrun 
+	    else 
+		CMD="ssh $args -t recoveronly=1 $args1"
+		eval $CMD
+	    fi
+	fi
+	res=$?
+    fi
+    if test $res -gt 0; then
+	echo "---------------------------------------------------------"
+	echo "<<<<<<<<<<<<<<<<<<<<     FAILURE    >>>>>>>>>>>>>>>>>>>>>"
+	echo $CMD
+	echo "---------------------------------------------------------"
+	echo Ran $numtests tests. 
+	exit 1
+    fi
+    echo "---------------------------------------------------------"
+    echo "++++++++++++++++++++     SUCCESS    +++++++++++++++++++++"
+    echo test $numtests :
+    echo $CMD
+    echo "---------------------------------------------------------"
+}
+
+
+dofin()
+{
+    tid=$1
+    sublist=$2
+    act=$3
+    numfin=$4
+    crshl=$5
+    crshr=$6
+    dly=$7
+
+    if test $numfin -ge 1; then
+	for f in $finish; do
+	    if test $numfin -ge 2; then
+		for g in $finish; do
+		    if test $numfin -ge 3; then
+			for h in $finish; do
+			    fin=$f.$g.$h
+			    doit $tid $sublist $act $fin $crshl $crshr $dly
+			done
+		    else
+			fin=$f.$g
+			doit $tid $sublist $act $fin $crshl $crshr $dly
+		    fi
+		done
+	    else
+		fin=$f
+		doit $tid $sublist $act $fin $crshl $crshr $dly
+	    fi
+	done
+    else
+	echo NO SUBS
+    fi
+}
+
+doact()
+{
+    tid=$1
+    sublist=$2
+    numact=$3
+    crshl=$4
+    crshr=$5
+    dly=$6
+
+    if test $numact -ge 1; then
+	for a in $actions; do
+	    if test $numact -ge 2; then
+		for b in $actions; do
+		    if test $numact -ge 3; then
+			for c in $actions; do
+			    act=$a.$b.$c
+
+			    dofin $tid $sublist $act $numact $crshl $crshr $dly
+			done
+		    else
+			act=$a.$b
+			dofin $tid $sublist $act $numact $crshl $crshr $dly
+		    fi
+		done
+	    else
+		act=$a
+		dofin $tid $sublist $act $numact $crshl $crshr $dly
+	    fi
+	done
+    else
+	echo NO SUBS
+    fi
+}
+
+dodelay() 
+{
+    tid=$1
+    sublist=$2
+    num=$3
+    crshl=$4
+    crshr=$5
+
+    for d in $delays; do
+	doact $tid $sublist $numsub $crshl $crshr $d
+    done
+}
+
+docrash() 
+{
+    tid=$1
+    sublist=$2
+    num=$3
+
+    # add extra none at end
+    for cr in $scrashes none@@; do
+	for cl in $ccrashes none@@; do
+	    dodelay $tid $sublist $num $cl $cr
+	done
+    done
+}
+
+if test -x $cpath/ssh ;  then
+    cd $cpath
+    if test $listonly -eq 0; then
+	echo 
+	echo "STARTING WITH CLEAN DISK"
+	/bin/rm -f log/* volumes/* ssh.log
+	set file=`ssh -f ../scripts/coord.start`
+    fi
+    echo "STARTING LOOP"
+
+    docrash $tid $sublist $numsub
+else
+    echo $cpath/ssh is not executable
+fi
+
+echo Ran $numtests tests. 
+exit 0
+
+# docrash -> dodelay -> doact -> dofin -> do

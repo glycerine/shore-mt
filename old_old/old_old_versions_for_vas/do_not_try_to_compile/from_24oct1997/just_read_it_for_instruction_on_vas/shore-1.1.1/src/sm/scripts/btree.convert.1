@@ -1,0 +1,242 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+#
+# The idea behind this script is to make sure that
+# if 2 txs are fiddling with a 1-page index, and it get
+# expanded by T1, T1 can abort and T2 can keep going.
+# This sort of tests the top-level-ness of the conversion from
+# 1-page btree to a full store.  It works also because you 
+# can't force the kind of interaction that this scripts *looks like*
+# it causes --- the aborting tx aborts and ends before the committing tx
+# can insert anything into the index. That's because the 1-page store
+# has a full X lock on it, resulting from the conversion.
+#
+
+global Use_logical_id
+
+source $script_dir/vol.init
+
+if {$Use_logical_id != 1} {
+    echo WARNING: btree.convert.1 cannot be run without logical IDs 
+    return
+}
+if {$multi_threaded_xct == 0 } {
+    echo "Not configured for multi-threaded xcts"
+    return
+}
+source $script_dir/bt.lib
+
+set keylist { 118 1493 1663 1797 235 2487 \
+	2786 2927 \
+	3174 373 \
+	3774 3787 \
+	3897 3912 \
+	900 800 700 600 500 400 399 398 397 396 395 394 393 392  }
+
+
+proc mkval { i e } {
+    global max_btree_entry_size
+    set maxsize [expr {$max_btree_entry_size - 30}]
+    set res [format "%0*s" $maxsize a]
+    return $res
+}
+
+# set maxnum 2022
+set maxnum 4044
+
+# 1 key/value per page:
+set elemlength 4044
+
+
+#
+# create index and load it up 
+#
+# make it start out a 1-page index and expand to a regular 
+# index.
+#
+#
+sm begin_xct
+set ndx [sm create_index $volid $unique regular b*1000 small]
+verbose created index $ndx
+sm commit_xct
+
+
+# 
+# insert values in list
+#
+set nrec [llength $keylist]
+
+verbose $nrec records: $keylist
+
+proc random_restart { a } {
+    set j [random 3]
+    for { set i 0 } { $i <= $j } { incr i } {
+	_restart $a
+    }
+    unset j
+}
+
+proc runtest { term } {
+    global keylist
+    global ndx
+    global nrec
+
+    verbose runtest $term
+	
+    set key 1
+    set value 1
+    sm begin_xct
+    for {set i 0} {$i < $nrec} {incr i} {
+	verbose inserting $i
+	set key [lindex $keylist $i] 
+	set value [mkval $i $key]
+
+	verbose sm create_assoc $ndx $key <elem $key length>
+	sm create_assoc $ndx $key $value
+
+	# verbose sm find_assoc $ndx $key
+	# set res [sm find_assoc $ndx $key]
+	# assert {[expr [string compare $value $res] == 0]}
+	# verbose FOUND
+    }
+    switch $term {
+       abort { 
+	    verbose sm abort_xct 
+	    sm abort_xct 
+	}
+       commit { 
+	    verbose sm commit_xct 
+	    sm commit_xct 
+	}
+       restart { 
+	    verbose random_restart
+	    random_restart false
+	}
+    }
+}
+
+# Gist:
+#
+# thread 1: insert until the index grows past 1 page
+#
+# thread 2: insert more
+# thread 1: abort
+#
+# thread 2: commit
+#
+# restart
+# 
+proc t1 { item } {
+    global keylist
+    global ndx
+    global nrec
+
+    set key 1
+    set value 1
+    sm begin_xct
+    for {set i 0} {$i < $nrec} {incr i} {
+	verbose t1 inserting $i
+	set key [lindex $keylist $i] 
+	set value [mkval $i $key]
+
+	verbose sm create_assoc $ndx $key <elem $key length>
+	sm create_assoc $ndx $key $value
+
+	if { $i == $item } {
+	   verbose t1 sync-1
+	   sync
+	   break
+	}
+    }
+    verbose t1 sync-2
+    sync
+    verbose t1 aborting ...
+    sm abort_xct
+}
+
+proc t2 { item } {
+    global keylist
+    global ndx
+    global nrec
+
+    set key 1
+    set value 1
+    sm begin_xct
+
+    verbose t2 sync-1
+    sync
+
+    for {set i [expr {$item + 1}]} {$i < $nrec} {incr i} {
+	verbose t2 inserting $i
+	set key [lindex $keylist $i] 
+	set value [mkval $i $key]
+
+	verbose sm create_assoc $ndx $key <elem $key length>
+	sm create_assoc $ndx $key $value
+    }
+
+    verbose t2 sync-2
+    sync
+    verbose t2 committing ...
+
+    sm commit_xct
+}
+
+set item 8
+
+set y2 [fork_thread t2 $item]
+verbose started t2: $y2
+set y1 [fork_thread t1 $item]
+verbose started t1: $y1
+
+verbose sync_thread $y1 $y2
+sync_thread $y1 $y2
+sync_thread $y1 $y2
+join_thread $y1 $y2
+
+verbose "success so far... restarting..."
+
+random_restart false
+
+#
+# scan the index and check for the expected values
+# in the expected order
+#
+sm begin_xct
+set start [expr {$item + 1} ]
+set len [llength $keylist] 
+set sorted [lsort [lrange $keylist $start $len ] ]
+set res [test_scan $ndx [expr {$len - $start}]]
+
+for {set i [expr {$item + 1}]} {$i < $len} {incr i} {
+   set resi [lindex $res $i]
+   set sorti [lindex $sorted $i]
+
+   # use string comparison rather than expr so that
+   # it works with entries that are not integers
+   if { [string compare $resi [lindex $sorted $i]] != 0 } {
+      verbose index $i: test_scan returns $resi expected $sorti
+   }
+}
+sm commit_xct
+
+# clean up:
+
+sm begin_xct
+verbose sm destroy_index $ndx
+sm destroy_index $ndx
+verbose destroyed index
+sm commit_xct
+
+
+unset sorted resi start res len i item y1 y2 sorti
+
+unset keylist nrec 
+unset maxnum
+unset ndx
+unset elemlength
+unset unique

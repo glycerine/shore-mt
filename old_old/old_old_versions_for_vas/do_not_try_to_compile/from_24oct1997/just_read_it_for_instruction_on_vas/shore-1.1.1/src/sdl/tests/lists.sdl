@@ -1,0 +1,19 @@
+
+
+module m1 {
+	export all;
+
+	interface opi {
+	public:
+		attribute long i;
+	};
+
+	interface attri {
+	public:
+		attribute int m1;
+
+        attribute list<opi> opi_list;
+
+	};
+
+}

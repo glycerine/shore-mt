@@ -1,0 +1,68 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+unsuppress umc *
+suppress umc rx_*
+suppress umc *; rx_*
+suppress umc qsort
+suppress umc *operator=
+suppress umc memcopy;vec_t::copy_from*
+suppress umc devid_t::devid_t
+
+# TCL
+suppress fmr StringValue; ...; Tcl_DeleteInterp
+suppress fmw StringValue; ...; Tcl_DeleteInterp
+
+suppress miu malloc; ... ; Tcl_CreateInterp
+
+suppress umc *; strtod; ExprParseString
+suppress umc *; *; strtod; ExprParseString
+suppress umc TclParseQuotes
+
+# Regular expressions
+suppress miu malloc; ... ; re_comp
+suppress miu malloc; ... ; regex_compile
+suppress umc memcpy; ... ; re_search
+
+# C library stuff
+suppress miu malloc;yp_unbind
+suppress miu malloc;...; endprotoent
+suppress miu malloc;...; getpwuid
+
+# OK
+suppress fmw sthread_core_switch
+suppress abr sthread_core_switch
+suppress miu malloc; ... ;sthread_core_init
+suppress miu malloc; ... ;sthread_init_t::sthread_init_t()
+suppress miu malloc; ... ;getgrent
+suppress miu malloc; ... ;getpwent
+suppress miu malloc; ... ;getpwnam
+suppress miu malloc; ... ;getnetgrent
+suppress miu malloc; ... ;endpwent
+suppress miu malloc; ... ;sthread_idle_t::sthread_idle_t() 
+suppress miu malloc; ...;tzsetwall
+suppress umr strcpy; ...; syslog
+suppress umr write; ...; _xflsbuf
+suppress umr write; writetcp; flush_out; xdrrec_endofrecord
+
+suppress miu malloc;...;w_statistics_t::add_module_static
+suppress miu malloc;...;rx_morecore
+
+# TODO: FIX
+suppress miu malloc; ...;sthread_main_t::run()
+suppress miu malloc; ...;ErrLog::_openlogfile(const char*)
+suppress bsr ...;sthread_core_switch
+
+# Questionable errors reported by 3.0
+# suppress abw ...;write_vhdr__5vol_tiR8volhdr_tb
+
+# for pvm
+suppress umr write; ... ; pvm_*
+
+# for gdbm
+suppress umr write; ... ; gdbm_store
+suppress umr  write;gdbm_open

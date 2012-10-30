@@ -1,0 +1,15 @@
+global verbose
+set oldverbose $verbose
+set verbose 0
+source ../scripts/largedir
+cout "largedir done."
+source ../scripts/largedir.3
+cout "largedir.3 done."
+#flaky order-- 3 comes before 2
+source ../scripts/largedir.2
+cout "largedir.2 done."
+source ../scripts/largedir.4
+cout "largedir.4 done."
+set verbose $oldverbose
+
+return "largedir.all done."

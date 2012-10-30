@@ -1,0 +1,18 @@
+module m1 {
+	struct struct_t1 {
+		int integer_member;
+	};
+	struct struct_t2 {
+		struct_t1 struct_member;
+	};
+    struct struct_t3 {
+        struct_t2 struct_member;
+    };
+
+    interface i {
+    public:
+        attribute struct_t1 member1;
+        attribute struct_t2 member2;
+        attribute struct_t3 member2; // duplicate name
+    };
+}

@@ -1,0 +1,107 @@
+source $script_dir/vol.init
+source $script_dir/bt.lib
+
+set keylist { 118 1493 1663 1797 235 2487 \
+	2786 2927 \
+	3174 373 \
+	3774 3787 \
+	3897 3912 \
+	900 800 700 600 500 400 399 398 397 396 395 394 393 392  }
+
+set maxnum 4044
+
+# 1 key/value per page:
+set elemlength 4044
+
+proc mkval { i e } {
+    global max_btree_entry_size
+    set maxsize [expr {$max_btree_entry_size - 30}]
+    if {$max_btree_entry_size <= 4048} {
+	set res [format "%0*s" $maxsize a]
+    } else {
+	set res [format "%0*s" $e a]
+    }
+    return $res
+}
+
+
+#
+# create index and load it up 
+#
+sm begin_xct
+set ndx [sm create_index $volid uni_btree]
+verbose created index $ndx
+sm commit_xct
+
+
+# 
+# insert values in list
+#
+set nrec [llength $keylist]
+
+verbose $nrec records: $keylist
+
+proc random_restart { a } {
+    set j [random 3]
+    for { set i 0 } { $i <= $j } { incr i } {
+	_restart $a
+    }
+}
+
+proc runtest { term op } {
+    global keylist
+    global ndx
+    global nrec
+
+    verbose RUNTEST $term
+	
+    set key 1
+    set value 1
+    sm begin_xct
+    for {set i 0} {$i < $nrec} {incr i} {
+	verbose inserting $i
+	set key [lindex $keylist $i] 
+	set value [mkval $i $key]
+
+	verbose sm $op $ndx $key <elem $key length>
+	sm $op $ndx $key $value
+
+	if [expr $key == 394 ] {
+		if [expr [string compare $op "destroy_assoc" ] == 0] {
+		    verbose random_restart
+		    random_restart false
+		    return
+		}
+	}
+
+	# verbose sm find_assoc $ndx $key
+	# set res [sm find_assoc $ndx $key]
+	# assert {[expr [string compare $value $res] == 0]}
+	# verbose FOUND
+    }
+    switch $term {
+       abort { 
+	    if {$logging==0} {
+		verbose "Logging off: sm abort_xct not done.  Committing instead."
+		sm commit_xct 
+	    } else {
+		verbose sm abort_xct 
+		sm abort_xct 
+	    }
+	}
+       commit { 
+	    verbose sm commit_xct 
+	    sm commit_xct 
+	}
+       restart { 
+	    verbose random_restart
+	    random_restart false
+	}
+    }
+}
+
+runtest commit create_assoc
+runtest restart destroy_assoc
+runtest commit destroy_assoc
+
+unset maxnum elemlength ndx nrec 

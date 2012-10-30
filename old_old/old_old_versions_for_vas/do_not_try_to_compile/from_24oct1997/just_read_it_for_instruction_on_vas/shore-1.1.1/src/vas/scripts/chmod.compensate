@@ -1,0 +1,14 @@
+source ../scripts/setup.all
+
+cout [pwd]
+cd /small/z
+cout [pwd]
+# compensating transaction
+begin
+	unlink tfile
+	unlink direct
+	unlink symxxx
+commit
+cout [pwd]
+
+return "cleaned up for chmod scripts"

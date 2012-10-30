@@ -1,0 +1,32 @@
+#
+# $RCSfile: Imakefile,v $
+# $Revision: 1.14 $
+# $Date: 1997/06/17 16:10:44 $
+# $Author: solomon $
+#
+#
+
+#if defined(IS_SOLARIS2)
+CPPFLAGS = -I.. -I/usr/ucbinclude -traditional
+#define Lib /* nothing */
+#else
+CPPFLAGS = -I.. 
+#define Lib ../rpc/librpclib.a
+#endif
+
+SRC= rpc_main.c rpc_hout.c rpc_cout.c rpc_parse.c rpc_scan.c rpc_util.c %
+	rpc_svcout.c rpc_clntout.c
+
+HFILES= rpc_util.h rpc_parse.h rpc_scan.h
+PURE_OPT=-inuse_at_exit
+
+OBJ = $(SRC:.c=.o)
+
+all_local:: rpcgen
+
+%GEN c_program(rpcgen, $(OBJ), Lib)
+
+%GEN install(bin, rpcgen)
+
+%GEN depend_target($(SRC))
+%GEN tags($(SRC) $(HFILES))

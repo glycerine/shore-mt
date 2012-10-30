@@ -1,0 +1,19 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+opt = 0x00020000 "Options Facility" {
+IllegalDescLine	Illegal option description line
+IllegalClass	Illegal option class name
+ClassTooLong	Option class name too long
+TooManyClasses	Too many option class levels
+Duplicate	 Option name is not unique
+NoOptionMatch	Unknown option name
+NoClassMatch	Unknown option class name
+Syntax		Bad syntax in configuration file
+BadValue	Bad option value
+NotSet		A required option was not set
+}

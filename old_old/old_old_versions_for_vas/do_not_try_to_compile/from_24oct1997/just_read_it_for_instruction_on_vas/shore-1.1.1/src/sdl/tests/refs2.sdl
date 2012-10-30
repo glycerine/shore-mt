@@ -1,0 +1,22 @@
+module m1 {
+	interface DBObject; // necessary forward decl
+	interface DBReference {
+	public:
+		attribute index<string, DBObject> attrs_;
+		attribute long type_;
+		relationship ref<DBObject> refers_to_ inverse referenced_by_;
+		relationship ref<DBObject> referred_by_ inverse references_;
+
+	    void makeRelationship( in ref<DBObject> from, in ref<DBObject> to, in long type );
+
+
+	};
+	interface DBObject {
+	public:
+		relationship set<DBReference>	referenced_by_ inverse refers_to_;
+		relationship set<DBReference>	references_ inverse referred_by_;
+		ref<DBReference> addReference( in long reftype, in ref<DBObject> obj );
+	};
+
+
+}

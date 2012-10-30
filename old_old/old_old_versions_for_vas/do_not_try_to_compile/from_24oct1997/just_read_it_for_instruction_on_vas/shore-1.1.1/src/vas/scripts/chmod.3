@@ -1,0 +1,18 @@
+# source ../scripts/chmod.3
+source ../scripts/chmod.compensate
+
+set true "1"
+set false "0"
+
+# One tx for testing a file
+begin
+	set subject tfile
+	set oid [mkuserdef $subject 0:1:0]
+
+#  TODO: test that you can get sysprops on something without
+# any access perms on that object
+#	see FSTAT_2_V_MAN_PAGE in Directory.C
+
+commit
+
+return "chmod.3 done."

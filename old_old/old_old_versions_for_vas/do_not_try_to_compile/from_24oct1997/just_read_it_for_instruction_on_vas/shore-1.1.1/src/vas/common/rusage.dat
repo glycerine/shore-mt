@@ -1,0 +1,28 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+
+
+unix Unix Resource Usage (rusage) = 0x00080000 rusage_flat {
+	long	utime_tv_sec;	 seconds user time 
+	long	utime_tv_usec;	 microseconds user time 
+	long	stime_tv_sec;	 seconds system time 
+	long	stime_tv_usec;	 microseconds system time 
+#ifndef SOLARIS2
+	long	ru_idrss;		 resident set size (in pages * clock ticks) 
+#endif
+	long	ru_minflt;		 any page faults not requiring I/O (reclaims) 
+	long	ru_majflt;		 any page faults requiring I/O 
+	long	ru_nswap;		 process swapped out of main memory 
+	long	ru_inblock;		 block input operations (file system) 
+	long	ru_oublock;		 block output operations  (file system)
+	long	ru_msgsnd;		 messages sent (sockets) 
+	long	ru_msgrcv;		 messages received (sockets) 
+	long	ru_nsignals;	 signals received 
+	long	ru_nvcsw;		 voluntary context switches 
+	long	ru_nivcsw;		 involuntary context switches 
+};

@@ -1,0 +1,80 @@
+# this: source ../scripts/1
+source ../scripts/setup.all
+
+# compensating tx
+begin
+	cd /small/pool
+	scanpool remove
+end
+
+
+#  use an xref to create anon objects
+begin
+	cd /large
+
+# 	do the next few txs by pool's oid
+	set p [sfile oid /small/pool]
+
+	# bad-length object?
+	# 	TODO FIX: this doesn't complain- makes a 0-length object
+	# 	Re-install this after vec_t is fixed to take unsigned int
+ 	set obj [mkanon $p :-1:0]
+	read $obj
+
+	# try a 0-length object
+	set obj [mkanon $p 0:0:NoText]
+	read $obj
+commit
+
+
+# check read,write,trunc,expand
+begin
+	set obj [mkanon $p 100:0:NoText]
+	expect "100" from {sfile size $obj} 
+	stat $obj
+	read $obj
+	read $obj 0 0
+	read $obj 0 1
+	expect SVAS_BadRange from {read $obj 100 100} 
+	expect SVAS_BadRange from {read $obj 100 } 
+	read $obj 99 
+
+	write $obj 30 10
+	expect "100" from {sfile size $obj} 
+	stat $obj
+	read $obj
+
+# trunc to 10 should give an error 
+	expect SVAS_CantChangeCoreSize from { trunc $obj 10} aborted
+
+begin
+
+# trunc to 101 should expand w/ zeroes
+	trunc $obj 101
+	stat $obj
+	read $obj
+	expect "101" from {sfile size $obj} 
+
+	append $obj 100
+	expect "201" from {sfile size $obj} 
+	stat $obj
+	read $obj
+
+	lock $obj X
+
+	trunc $obj 140
+	expect "140" from {sfile size $obj} 
+	stat $obj
+	read $obj
+commit
+
+# check pool scan
+begin
+	scanpool $p
+	scanpool $p readdata
+commit
+
+begin
+	rmpool $p
+commit
+

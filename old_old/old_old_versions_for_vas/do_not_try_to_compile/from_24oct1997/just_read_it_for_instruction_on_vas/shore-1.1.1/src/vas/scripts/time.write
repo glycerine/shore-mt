@@ -1,0 +1,38 @@
+# source ../scripts/time.write
+
+set debugflags ""
+export debugflags
+
+source ../scripts/setup.all
+
+set quiet 1
+export quiet
+
+begin
+cd /small
+
+time { nullcmd 1 } 1000
+time { fork { nullcmd 1 } } 1000
+abort
+
+proc doit {nb} {
+	cout BEGIN doit $nb 
+	begin
+	cout Object size : $nb 
+	set obj [mkanon pool $nb:0:NoText]
+	time { fork { write $obj 0 $nb }} 1000
+	time { fork { write $obj 0 $nb }} 1000
+	time { fork { write $obj 0 $nb }} 1000
+	time { write $obj 0 $nb } 1000
+	time { write $obj 0 $nb } 1000
+	time { write $obj 0 $nb } 1000
+	abort
+	cout END doit $nb 
+}
+
+#  doit {1}
+doit {100}
+doit {1000}
+
+rename doit ""
+

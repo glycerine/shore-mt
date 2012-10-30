@@ -1,0 +1,29 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * $Header: /p/shore/shore_cvs/src/lil/Imakefile,v 1.13 1997/06/17 16:10:29 solomon Exp $
+ */
+#define Subdirs oc
+
+#if defined(IS_SOLARIS2)
+/* Solaris does not require librpc.a, since it's in the default libraries */
+%GEN merge_library(libshore.a,,
+			../sdl/libsdl.a oc/liboc.a ../vas/common/libcommon.a
+			../vas/client/libvas.a ../common/libcommon.a ../fc/libfc.a)
+#else
+%GEN merge_library(libshore.a,,
+			../sdl/libsdl.a oc/liboc.a ../vas/common/libcommon.a
+			../vas/client/libvas.a ../common/libcommon.a ../fc/libfc.a
+			../rpc4.0/rpc/librpclib.a)
+#endif
+
+%GEN merge_library(libserver.a,../vas/server/main.o,
+			../vas/server/libserver.a ../vas/common/libcommon.a ../sm/libsm.a
+			../sthread/libst.a TclLib)
+
+%GEN install(lib, libshore.a libserver.a)

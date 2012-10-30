@@ -1,0 +1,12 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * $Header: /p/shore/shore_cvs/src/vas/Imakefile,v 1.18 1997/10/13 11:45:31 solomon Exp $
+ */
+#define Subdirs include common client server
+#define Tests tests scripts

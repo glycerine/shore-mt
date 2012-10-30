@@ -1,0 +1,101 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ *  $Id: Imakefile,v 1.56 1997/09/14 11:53:24 solomon Exp $
+ */
+
+#define Tests tests
+
+CPPFLAGS = -I../fc -I../sm Include(TclInclude) -I../common -fvolatile
+
+HDR = diskrw.h spin.h stcore.h sthread.h tsl.h shmc_stats.h sthread_stats.h %
+	strace.h
+
+#if defined(IS_MIPS_ULTRIX42)
+#   define Tsl ultrix_tsl.cc
+#elif defined(IS_RS6000_AIX41)
+#   define Tsl aix_tsl.cc
+#elif defined(IS_RS6000_AIX32)
+#   define Tsl fake_tsl.cc
+#else
+#   define Tsl /* empty */
+#endif
+
+/* This is temporary until the real sdisk stuff is incorporated. */
+DISKIO = sdisk_unix_sun.cc
+#ifdef UsePurify
+PURE_SUPPORT = shore_threads.cc
+#endif
+
+LIB = ../fc/libfc.a
+
+SRC = diskrw.cc stcore.c sthread.cc sthread_core.cc strace.cc readstats.cc \
+	sfile_handler.cc Tsl $(DISKIO)
+	
+SRC.asm = tsl.S
+
+OBJ.disk = diskrw.o tsl.o  $(DISKIO:.cc=.o)
+OBJ.stats = readstats.o
+OBJ.lib = stcore.o sthread.o tsl.o sthread_core.o \
+	strace.o sfile_handler.o $(DISKIO:.cc=.o) $(PURE_SUPPORT:.cc=.o)
+
+#if defined(IS_SPARC_SOLARIS2)
+AS=	/usr/ccs/bin/as
+#endif
+
+#if defined(IS_SOLARIS2)
+CPP= $(CC) -E $(CFLAGS)
+#else
+CPP= /lib/cpp
+#endif
+
+all_local:: diskrw readstats libst.a
+
+%## Special rule to build tsl.o (depends on platform)
+#if defined(IS_MIPS_ULTRIX42)
+tsl.o: tsl.h ultrix_tsl.cc
+	$(GCC) $(CFLAGS) $(DEBUGFLAGS) $(DEBUGSYMBOLS) -c ultrix_tsl.cc -o $@
+#elif defined(IS_MIPS_IRIX)
+tsl.o: tsl.h tsl.S
+	$(CPP) -D$(ARCH) -D$(OPSYS) tsl.S | grep -v '^#' > tsl.s
+	$(AS) -mips2 -o $@ tsl.s
+#elif defined(IS_I386)
+tsl.o: tsl.h tsl.S
+	$(CPP) -DSYSV -D$(ARCH) -D$(OPSYS) tsl.S | grep -v '^#' > tsl.s
+	$(AS) -o $@ tsl.s
+	-$(RM) -f tsl.s
+#elif defined(IS_RS6000_AIX32)
+tsl.o: tsl.h fake_tsl.cc
+	$(GCC) $(CFLAGS) $(DEBUGFLAGS) $(DEBUGSYMBOLS) -c fake_tsl.cc -o $@
+#elif defined(IS_RS6000_AIX41)
+tsl.o: tsl.h aix_tsl.cc
+	$(GCC) $(CFLAGS) $(DEBUGFLAGS) $(DEBUGSYMBOLS) -c aix_tsl.cc -o $@
+#else
+tsl.o: tsl.h tsl.S
+	$(CPP) -D$(ARCH) -D$(OPSYS) tsl.S | grep -v '^#' > tsl.s
+	$(AS) -o $@ tsl.s
+	-$(RM) -f tsl.s
+#endif
+%GEN clean_files(tsl.s)
+
+%GEN stats(sthread_stats.dat, shmc_stats sthread_stats)
+%GEN error_enum(st_error.dat,st)
+
+%GEN install(bin, diskrw)
+%GEN install(include, shmc_stats_def.i sthread_stats_def.i spin.h tsl.h)
+
+/* for vas writers */
+%GEN install(include,
+	sthread.h stcore.h st_error.h strace.h sdisk.hh sfile_handler.h)
+
+%GEN c_plus_program(diskrw, $(OBJ.disk), $(LIB))
+%GEN c_plus_program(readstats, $(OBJ.stats), $(LIB))
+%GEN library(libst.a, $(OBJ.lib))
+
+%GEN depend_target($(SRC) tsl.S)
+%GEN tags($(SRC) $(HDR))

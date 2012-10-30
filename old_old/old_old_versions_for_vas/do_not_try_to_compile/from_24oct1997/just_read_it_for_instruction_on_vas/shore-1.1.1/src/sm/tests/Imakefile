@@ -1,0 +1,28 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ *  $Id: Imakefile,v 1.6 1997/06/13 22:33:24 solomon Exp $
+ */
+
+SRC = file_scan.C options.C sm_app_test.C
+
+INCLUDE += $(SM_INCL) $(STHREAD_INCL) $(FC_INCL) $(COMMON_INCL)
+CPPFLAGS = -I.. -I../../fc -I../../common -I../../sthread Include(TclInclude)
+
+all_local:: sm_app_test file_scan
+
+LIB = ../libsm.a ../../common/libcommon.a ../../sthread/libst.a ../../fc/libfc.a
+
+%GEN c_plus_program(sm_app_test, sm_app_test.o, $(LIB))
+%GEN c_plus_program(file_scan, file_scan.o options.o, $(LIB))
+
+PURE_OPTIONS = $(PURE_OPT)
+%GEN purify_c_plus_program(sm_app_test, sm_app_test.o, $(LIB), $(PURE_OPTIONS))
+
+%GEN depend_target($(SRC))
+%GEN tags($(SRC))

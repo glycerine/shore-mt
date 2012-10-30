@@ -1,0 +1,23 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# SSH RC FILE
+#
+
+#
+# Device and volume information
+#
+# Format of ssh_device_list entries:
+#	{pathname size-in-KB volume-id}
+# 
+# For now, the scripts only use the first device, but all devices
+# are formatted and mounted.
+#
+set ssh_device_list {
+     { ./volumes/dev1 40000 1}
+}

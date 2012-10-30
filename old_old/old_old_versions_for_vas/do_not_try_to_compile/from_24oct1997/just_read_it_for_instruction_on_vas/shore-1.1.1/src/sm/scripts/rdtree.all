@@ -1,0 +1,28 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# RDTrees no longer compile. They are not built into the ssm 
+# anymore.
+#
+
+source $script_dir/vol.init
+
+set scripts [list rdtree.1 rdtree.2 ]
+
+echo CLEANUP BEFORE rdtree.all :
+cleanup stdout
+addcleanupvars {script}
+
+foreach script $scripts {
+    echo
+    echo RUNNING: $script 
+    source $script_dir/$script
+    checkstats  $script
+    puts stdout [concat CLEANUP AFTER  $script  : ]
+    cleanup stdout
+}

@@ -1,0 +1,19 @@
+module m1 {
+	interface a; // necessary forward decl
+
+	interface my_obj {
+	public:
+		// compiles if this first attr is removed:
+		// fails if this first attr is included
+        //attribute sequence<a> a_seq;
+
+		attribute set<a> a_set;
+		attribute bag<a> a_bag;
+	};
+
+	interface a {
+	public:
+        attribute long longattr;
+	};
+
+}

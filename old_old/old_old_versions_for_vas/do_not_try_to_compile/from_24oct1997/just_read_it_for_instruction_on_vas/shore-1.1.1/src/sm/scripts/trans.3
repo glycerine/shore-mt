@@ -1,0 +1,44 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  test 2pc recovery -- to do
+#  CRASHES NOT YET TESTED
+#
+
+set do_file_create 1
+source $script_dir/trans.lib
+
+proc crashtrans { action finish c } {
+	set cmd "trans $action $finish"
+	set cmd "crash $c $cmd"
+}
+
+set finishlist { 
+	commit.restart abort.restart
+	extern.abort.restart
+	extern.prepare.commit.restart extern.prepare.abort.restart
+	extern.prepare.restart.commit
+	extern.prepare.restart.abort
+	extern.restart
+	}
+
+set crashlist { 
+	unfinished_prepare
+	concurrent_prepare_log
+    }
+
+foreach a $actionlist {
+    foreach f $finishlist {
+	rtrans $a $f
+    }
+}
+
+sm begin_xct
+sm destroy_file $f0
+sm commit_xct
+

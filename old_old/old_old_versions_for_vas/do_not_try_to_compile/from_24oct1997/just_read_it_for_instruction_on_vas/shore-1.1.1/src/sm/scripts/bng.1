@@ -1,0 +1,94 @@
+# This script tries to find out the read write performance of the shore server 
+# using multiple disks
+if {$Use_logical_id == 1} {
+    echo WARNING: tmpfile.1 cannot be run (since logical IDs are turned on)
+    verbose WARNING: until we destroy tmp files properly on dismount for logical ids
+} else {
+
+    if {[is_set objsize] == 0} {
+	# Set size of each tuple
+	set objsize 100
+	set nobjs   100000
+	set update_count  10  
+    }
+
+
+    proc per_thread_write { fid } {
+	global objsize
+	global nobjs
+	global update_count
+
+	set hdr "" 
+	set body [format "%0*s" $objsize a]
+
+	# 
+	# create a huge file
+	#
+	set wtime [ time {
+	    sm begin_xct
+
+	    set tid [sm xct_to_tid [sm xct]]
+	    verbose Creating $nobjs objects of size $objsize in file $fid
+
+	    set scan [sm scan_file_create $fid t_cc_append]
+	    sm multi_file_append $scan $hdr $objsize $body $nobjs
+	    sm scan_file_destroy $scan
+	    sm commit_xct
+
+	    for {set i 0} {$i < $update_count} {incr i} {
+		sm begin_xct
+		set scan [sm scan_file_create $fid t_cc_file]
+		sm multi_file_update $scan $objsize 
+		sm scan_file_destroy $scan
+		sm commit_xct
+	    }
+
+	} 1 ]
+	verbose fid $fid took $wtime
+    }
+
+
+    # Initialize the disks
+    source $script_dir/bng.init
+
+    # Now print all the volids
+    verbose mounted devices: $volid_list
+
+    # Create one file per device
+    sm begin_xct
+
+    list fid_list
+    foreach i $volid_list {
+	lappend fid_list [sm create_file $i tmp ]
+    }
+    sm commit_xct
+
+    # Fork one thread per device to create a file on each device
+    list thread_list
+    set wtime [ time {
+
+	foreach i $fid_list {
+	    lappend thread_list [fork_thread per_thread_write $i]
+	}
+
+	verbose Thread list = $thread_list
+
+	# Wait for them to finish
+
+	foreach i $thread_list {
+	    join_thread $i
+	}
+    } 1 ]
+
+    verbose Total time, including tcl = $wtime
+
+    verbose forcing BP and invalidating ...
+    set wtime [ time {
+	    sm force_buffers true
+    } 1 ]
+    verbose Force time = $wtime
+
+    pstats
+
+    verbose Done !
+}

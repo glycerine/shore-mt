@@ -1,0 +1,29 @@
+
+#
+# PROBLEM: cannot dismount "/"
+#
+# another problem here: how to loop through the
+# two lists and tell which one is "/"
+
+set saveverbose $verbose
+set verbose 0
+set volumes [getmnt 1000 volid]
+set mntpts  [getmnt 1000 mnt]
+set verbose $saveverbose 
+unset saveverbose
+
+cd /
+
+set i 0
+foreach v $volumes {
+	set m [lindex $mntpts $i] 
+	incr i 1
+	set j [expr {$m == "0.0.0.0:0.0.225"}]
+	
+	if [not  $j] {
+		dismount $v
+	}
+}
+
+# re-mount them!
+source vas.rc

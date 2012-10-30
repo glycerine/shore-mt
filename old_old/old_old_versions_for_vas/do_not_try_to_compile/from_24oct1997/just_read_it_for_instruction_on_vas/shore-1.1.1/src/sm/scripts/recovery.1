@@ -1,0 +1,63 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test Create, Destroy, Read of Records
+#
+source $script_dir/vol.init
+
+set num_rec 15
+set id_width %07d
+
+set s [format data 1]
+
+sm begin_xct
+set fid [sm create_file $volid regular]
+sm commit_xct
+
+###############################################
+#   insert num_rec records
+#
+sm begin_xct
+
+verbose creating $num_rec
+
+set rid(0) $null_rid
+for {set i 1} {$i <= $num_rec} {incr i} {
+    set rid($i) [
+	sm create_rec $fid [format $id_width $i] 10 data.[format %07d $i]
+    ]
+    verbose $rid($i)
+}
+
+verbose "aborting ..."
+
+sm abort_xct
+
+sm begin_xct
+
+verbose creating $num_rec
+
+set rid(0) $null_rid
+for {set i 1} {$i <= $num_rec} {incr i} {
+    set rid($i) [
+	sm create_rec $fid [format $id_width $i] 10 data.[format %08d $i]
+    ]
+    verbose $rid($i)
+}
+
+verbose "committing ..."
+sm commit_xct
+
+verbose "restarting"
+restart 
+
+verbose "recovered ..."
+
+verbose "Done with recovery.1"
+unset s id_width num_rec  
+unset fid rid i

@@ -1,0 +1,58 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# start up
+#
+source $script_dir/vol.init
+if {$volid == 0} {
+    set volid 10
+    sm create_vol $volid force
+    set volid [sm init_vol_logical_id $volid 100]
+    sm mount
+}
+
+set nrec 4000
+
+proc probe {ndx first last} {
+    echo "probing:" $ndx $first $last
+    for {set i $first} {$i <= $last} {incr i} {
+	set el [sm find_assoc $ndx [format %03d $i] ]
+	assert [expr {[format %015d $i] == $el}]
+    }
+}
+
+#
+# create index and load it up 
+#
+sm begin_xct
+set ndx [sm create_index $volid btree]
+echo created index $ndx
+
+for {set i 1} {$i <= $nrec} {incr i} {
+    #echo inserting $i [format %03d $i] [format %015d $i]
+    if {$i%50 == 0} { echo inserting $i [format %03d $i] [format %015d $i] }
+    sm create_assoc $ndx [format %03d $i] [format %015d $i]
+    #set el [sm find_assoc $ndx [format %03d $i] ]
+    #assert [expr {[format %015d $i] == $el}]
+
+    if {$i > 3500 && $i%1 == 0 } {
+	probe $ndx [expr {$i - 50}]  $i
+    }
+    if {$i > 300 && $i%100 == 0 } {
+	probe $ndx 1 $i
+    }
+}
+echo "probe:"
+for {set i 1} {$i <= $nrec} {incr i} {
+    set el [sm find_assoc $ndx [format %03d $i] ]
+    assert [expr {[format %015d $i] == $el}]
+}
+echo probed [expr {$i - 1}]
+echo "---- successful"
+
+sm commit_xct

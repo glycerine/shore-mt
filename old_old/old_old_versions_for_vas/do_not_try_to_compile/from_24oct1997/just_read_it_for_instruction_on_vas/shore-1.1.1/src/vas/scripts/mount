@@ -1,0 +1,194 @@
+
+#####################################################
+# Proc locate_item -- see vas.tcllib
+#####################################################
+
+#####################################################
+# See if we have any persistent mounts 
+# with which to run tests
+#####################################################
+cd /
+set pm [list_pmounts]
+set l [llength $pm] 
+if [expr { $l == 0 }] {
+	return "NO PERSISTENT MOUNTS -- mount NOT RUN"
+}
+
+#####################################################
+# Local variables:
+#  item : { target-volid fmntpt-link-path parent-device-path 
+#		parent-volid reverse-link-path target-device-path }
+# 
+#  tvol : volid of target of link (to-volume, child-volume)
+#  fvol : volid of tail  of link (from-volume, parent-volume)
+#  fmntpt : path of tail of link 
+#  tmntpt : path of tail of reverse link
+#  pdevpath : path of device on which tail of link resides(parent)
+#  cdevpath : path of device on which target resides (child)
+#  pquota : quota of parent volume
+#  cquota : quota of child volume
+# 
+#####################################################
+set item [locate_item $pm]
+set tvol [lindex $item 0]
+set fmntpt [lindex $item 1]
+set pdevpath [lindex $item 2]
+set fvol [lindex $item 3]
+set tmntpt [lindex $item 4]
+set cdevpath [lindex $item 5]
+
+cout item = $item
+cout LINK: vol = $tvol, mountpoint = $fmntpt, on device $pdevpath
+cout REVLINK: vol = $fvol, mountpoint = $tmntpt, on device $cdevpath
+
+set pquota [lindex [quota $fvol] 0]
+set cquota [lindex [quota $tvol] 0]
+
+#####################################################
+#  Test 1
+#  disallow duplicate pmount
+#####################################################
+
+# test: try to re-mount it -- AlreadyMounted
+cout "expect SVAS_AlreadyMounted from { pmount $tvol $fmntpt }"
+expect SVAS_AlreadyMounted from { pmount $tvol $fmntpt }
+
+#####################################################
+#  Test 2
+#  dismount
+#####################################################
+# test: try to dismount it -- ok
+cout dismount $fmntpt
+dismount $fmntpt
+
+# put it back
+cout pmount $tvol $fmntpt 
+pmount $tvol $fmntpt 
+
+
+#####################################################
+#  Test 3
+#  dismount reverse link
+#####################################################
+
+# test: try to dismount reverse link
+cout expect OS_InUse from { dismount $tmntpt }
+expect OS_InUse from { dismount $tmntpt }
+
+
+#####################################################
+#  Test 4
+#  disallow format while mounted 
+#####################################################
+# try to format/mkfs it -- error while mounted/served
+# SmFailure because it's served & mounted
+cout expect SmFailure from { format $cdevpath $pquota }
+expect SVAS_SmFailure from { format $cdevpath $pquota }
+
+#####################################################
+#  Test 5
+#  disallow automount while unserved
+#####################################################
+# test: unserve it, try to follow link to it -- error
+cout unserve $cdevpath
+unserve $cdevpath
+cout expect SVAS_SmFailure from { cd $fmntpt }
+expect SVAS_SmFailure from { cd $fmntpt }
+# put it all back and try again -- should be ok
+serve $cdevpath
+cd $fmntpt
+cd /
+
+#####################################################
+#  Test 6
+#  disallow dismount while unserved
+#####################################################
+# test: unserve it, try to dismount it -- error
+cout unserve $cdevpath
+unserve $cdevpath
+cout expect SVAS_SmFailure from { dismount $fmntpt }
+expect SVAS_SmFailure from { dismount $fmntpt }
+expect SVAS_NotFound from { dismount $fmntpt }
+# put it all back and try again -- should be ok
+serve $cdevpath
+cd $fmntpt
+cd /
+
+#####################################################
+#  Test 7
+#  disallow aumomount after dismount
+#####################################################
+# test: dismount it while served -- ok
+cout dismount $fmntpt
+dismount $fmntpt
+# try to follow link -- error (link should be gone)
+cout expect SVAS_NotFound from { cd $fmntpt }
+expect SVAS_NotFound from { cd $fmntpt }
+# put it back
+cout pmount $tvol $fmntpt 
+pmount $tvol $fmntpt 
+
+#####################################################
+#  Test 8
+#  reformat the child end of a persistent link
+#####################################################
+# unserve --ok
+cout unserve $cdevpath
+unserve $cdevpath
+# format/mkfs it (force it) -- ok
+cout format $cdevpath $pquota true
+format $cdevpath $pquota true
+# serve --ok
+cout serve $cdevpath
+serve $cdevpath
+# try to follow link --error
+cout expect SVAS_SmFailure from { cd $fmntpt }
+expect SVAS_SmFailure from { cd $fmntpt }
+
+# patch it back up first
+cout patch $fmntpt 
+patch $fmntpt 
+
+# after mkfs this volume doesn't need patching 
+cout mkfs $cdevpath $pquota $tvol
+mkfs $cdevpath $pquota $tvol
+
+# now re-mount
+cout pmount $tvol $fmntpt 
+pmount $tvol $fmntpt 
+cd $fmntpt
+
+#####################################################
+#  Test 9
+#  reformat the parent end of a persistent link
+#####################################################
+
+# unserve --ok
+# have to cd / so that use-count on child directory == 0
+# for this to work
+cd /
+cout unserve $pdevpath
+unserve $pdevpath
+# format/mkfs it (force it) -- ok
+cout format $pdevpath $pquota true
+format $pdevpath $pquota true
+# serve --ok
+cout serve $pdevpath
+serve $pdevpath
+# try to follow link --error
+cout expect SVAS_NotMounted from { cd $fmntpt }
+expect SVAS_NotMounted from { cd $fmntpt }
+# patch it back up first
+cout patch $tvol
+patch $tvol
+
+# mkfs doesn't need patching 
+cout mkfs $pdevpath $pquota $fvol
+mkfs $pdevpath $pquota $fvol
+
+# now re-mount
+cout pmount $tvol $fmntpt 
+pmount $tvol $fmntpt 
+cd $fmntpt
+
+return "mount done."

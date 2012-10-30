@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>References and Relationships</TITLE>
+<META NAME="description" CONTENT="References and Relationships">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node15.html">
+<LINK REL="previous" HREF="node13.html">
+<LINK REL="up" HREF="sdlman.html">
+<LINK REL="next" HREF="node15.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html222"
+ HREF="node15.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html219"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html213"
+ HREF="node13.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html221"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html223"
+ HREF="node15.html">Operations</A>
+<B> Up:</B> <A NAME="tex2html220"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html214"
+ HREF="node13.html">Indexes</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="sdlman:relationship">&#160;</A><H1><A NAME="SECTION000140000000000000000000">
+References and Relationships</A>
+</H1>
+<PRE>
+    ref_type    : local_ref | remote_ref
+    local_ref   : 'lref' '&lt;' type_name '&gt;'
+    remote_ref  : ref_kind '&lt;' type_name '&gt;'
+    ref_kind    : 'ref' | 'set' | 'bag' | 'list'
+    relationship_dcl : 'relationship' ref_kind 
+            '&lt;' type_name '&gt;' [ 'inverse' scoped_name ] 
+            [ 'ordered_by' scoped_name ]
+</PRE>
+<EM>References</EM>
+are similar to pointers in a memory-based language such as Pascal or C.
+A
+<EM>local_reference</EM>(
+<EM>lref</EM>
+for short) is a pointer to another value in the same object.
+The
+<EM>type_name</EM>
+can designate any value type.
+A
+<EM>remote_reference</EM>
+is a set of zero or more pointers to other objects.
+The
+<EM>type_name</EM>
+must designate an object type (<EM>interface</EM>), called the <EM>target type</EM>
+of the relationship.
+A
+<EM>ref</EM>
+points to zero or one objects,
+a
+<EM>set</EM>
+points to zero or more distinct objects,
+and a
+<EM>bag</EM>
+or
+<EM>list</EM>
+points to zero or more objects that are not necessarily distinct
+(that is, a bag or list contains the identity of each object zero or more
+times).
+<em>Lists are not supported.</em>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

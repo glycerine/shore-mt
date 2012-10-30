@@ -1,0 +1,47 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# Test a bug caused when recovering after a file destroy.
+#
+source $script_dir/vol.init
+
+sm begin_xct
+set f10 [sm create_file $volid]
+set rec_size %0[expr $max_small_rec/2]d
+for {set i 1} {$i <= 3} {incr i} {
+    # record r is first on a new page
+    set r($i) [sm create_rec $f10 "" 11 [format $rec_size $i]]
+    sm create_rec $f10 "" 11 "dummy record"
+    sm create_rec $f10 "" 11 "dummy record"
+}
+
+sm destroy_file $f10
+sm force_buffers
+verbose testing for bug by calling abort
+sm abort_xct
+
+
+sm begin_xct
+set f10 [sm create_file $volid]
+set rec_size %0[expr $max_small_rec/2]d
+for {set i 1} {$i <= 3} {incr i} {
+    # record r is first on a new page
+    set r($i) [sm create_rec $f10 "" 11 [format $rec_size $i]]
+    sm create_rec $f10 "" 11 "dummy record"
+    sm create_rec $f10 "" 11 "dummy record"
+}
+
+sm destroy_file $f10
+verbose forcing vol hdr buffers
+sm force_vol_hdr_buffers $volid
+verbose testing for bug by calling abort
+restart
+
+verbose "Done with file_destroy.1"
+
+unset i f10 r rec_size

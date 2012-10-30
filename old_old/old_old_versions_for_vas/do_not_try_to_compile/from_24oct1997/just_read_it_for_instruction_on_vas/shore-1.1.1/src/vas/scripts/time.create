@@ -1,0 +1,33 @@
+# source ../scripts/time.create
+
+set debugflags ""
+export debugflags
+
+source ../scripts/setup.all
+
+set quiet 1
+export quiet
+
+begin
+cd /large
+if [not [sfile exists pool] ] {
+	mkpool pool
+}
+set  pool [sfile oid pool]
+commit
+
+proc doit {nb} {
+	cout BEGIN doit $nb 
+	begin
+	cout Object size : $nb 
+	time {fork {mkanon pool $nb:0:NoText}} 1000
+	time {mkanon pool $nb:0:NoText} 1000
+	abort
+	cout END doit $nb 
+}
+
+#  doit {1}
+doit {100}
+doit {1000}
+
+rename doit ""

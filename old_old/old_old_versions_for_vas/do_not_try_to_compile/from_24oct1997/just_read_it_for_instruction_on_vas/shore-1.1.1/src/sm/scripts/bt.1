@@ -1,0 +1,32 @@
+# UNDER CONSTRUCTION
+
+source $script_dir/vol.init
+source $script_dir/bt.lib
+
+
+
+set keylist { 118 1493 1663 1797 235 2487 \
+	2786 2927 \
+	3174 373 \
+	3774 3787 \
+	3897 3912 \
+	587 511 }
+
+sm begin_xct
+set uniq 1
+set ndx [sm create_index $volid uni_btree]
+verbose created index $ndx
+sm commit_xct
+
+do_until_stat bt_splits 10 insert 1 s l commit
+sm gather_stats
+
+sm begin_xct
+scan $ndx [llength $keylist]
+sm commit_xct
+
+do_until_stat bt_shrinks 10 remove 1 s m commit
+sm gather_stats
+sm begin_xct
+scan $ndx [llength $keylist]
+sm commit_xct

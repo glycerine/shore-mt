@@ -1,0 +1,147 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  Like alloc.2 but instead of scanning to destroy recs,
+#  it remembers the rids and destroys the recs w/o a scan.
+#
+#
+#	Test allocation & deallocation of pages
+#   the statistics-gathering checks assertions on the files 
+#   and in current form, fails
+#
+
+source $script_dir/vol.init
+
+# format for body size -- >= one page
+set form %0${lg_rec_page_space}d
+
+set nrecs 10
+
+proc t1 {} {
+    global volid  f0 r0 form nrecs
+    sm begin_xct
+    verbose t1 is xact [sm xct]
+
+verbose sync t1-1
+    sync
+
+
+    verbose t1 creating $nrecs more recs ...
+    set scan [sm scan_file_create $f0 t_cc_append]
+    sm multi_file_append $scan h$nrecs 1000 [format $form $nrecs] $nrecs
+    verbose t1 created $nrecs recs file $f0
+    sm scan_file_destroy $scan
+
+verbose sync t1-2
+    sync
+
+    scanit $f0 
+    sm commit_xct
+
+verbose t1 committed -- syncing
+verbose dstatsnoaudit in t1, before sync
+dstatsnoaudit $volid
+
+    verbose sync t1-3
+    sync
+
+    sm begin_xct
+    verbose t1 2nd xct re-scanning
+    scanit $f0 
+    sm commit_xct
+verbose dstats-2 in t1
+dstats $volid
+verbose finished t1
+}
+proc scanit { f } {
+    set scan [sm scan_file_create $f t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+	verbose $pin
+	set pin [sm scan_file_next $scan 0]
+	set i [expr {$i+1} ]
+    }
+    sm scan_file_destroy $scan
+    verbose scan found $i records
+}
+proc t2 {} {
+    global volid  f0 rid logging
+    sm begin_xct
+    verbose t2 xact [sm xct]
+    verbose t2 destroying all records ...
+    for { set i 1} { $i <= 10} { incr i} {
+	verbose t2 sm destroy_rec $rid($i) ...
+	sm destroy_rec $rid($i)
+	verbose t2 destroyed $rid($i)
+    }
+    verbose t2 destroyed $i recs file $f0
+    verbose t2 dstatsnoaudit t2 xxx
+    dstatsnoaudit $volid
+verbose sync t2-1
+sync
+    verbose t2 dstatsnoaudit t2 yyy
+    dstatsnoaudit $volid
+    verbose t2 dstatsnoaudit t2 zzz
+    dstatsnoaudit $volid
+    if {$logging==0} {
+	verbose t2 Logging off: substituting commit for abort
+	sm commit_xct
+    } else {
+	verbose t2 aborting...
+	sm abort_xct
+    }
+verbose sync t2-2
+sync
+    verbose t2 dstatsnoaudit t2 qqq
+    dstatsnoaudit $volid
+verbose sync t2-3
+sync
+}
+
+
+sm begin_xct
+set f0 [sm create_file $volid]]
+verbose created file $f0
+for { set i 1} { $i <= 10} { incr i} {
+    set j [sm create_rec $f0 h$i 1000 [format $form $i] ]
+    set rid($i) $j
+    verbose created rec $rid($i)
+}
+verbose created 10 recs file $f0
+sm commit_xct
+
+dstats $volid
+
+set y1 [fork_thread t1 {}]
+set y2 [fork_thread t2 {}]
+
+
+verbose sync_thread $y1 $y2
+sync_thread $y1 $y2
+
+verbose sync_thread $y1 $y2
+sync_thread $y1 $y2
+
+verbose sync_thread $y1 $y2
+sync_thread $y1 $y2
+
+verbose join_thread $y1 $y2
+join_thread $y1 $y2
+
+verbose after join
+dstats $volid
+
+sm begin_xct
+scanit $f0
+sm commit_xct
+
+dstats $volid
+
+pstats
+unset f0 y1 y2 form nrecs rid i j

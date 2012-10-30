@@ -1,0 +1,22 @@
+#!/bin/csh -f
+
+unsetenv DEBUG_FLAGS
+unsetenv DEBUG_FILE
+unsetenv CRASHTEST
+unsetenv CRASHTESTVAL
+
+echo "cleaning up...."
+/bin/rm -f log/* volumes/* debug.out
+
+echo "SCRIPTS...."
+ssh -lf ../scripts/all
+
+echo "CRASH TESTS...."
+runtests.pl
+
+echo "re-RUN ssh INDEFINITELY, killing it at random times...."
+echo "This will run indefinitely, and needs to be killed by hand."
+
+runssh
+
+

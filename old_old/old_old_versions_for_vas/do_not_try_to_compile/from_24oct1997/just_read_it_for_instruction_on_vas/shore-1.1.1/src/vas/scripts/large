@@ -1,0 +1,113 @@
+source ../scripts/setup.all
+#
+# A few large objects.
+# Make some large objects various configurations
+# of heap, core, text
+#
+# append,write
+# read back
+#
+
+#compensating transaction
+begin
+	cd /large
+	foreach f { lg1 lg2 lg3 lg4 } {
+		unlink $f
+	}
+commit
+
+set objsiz  [expr {$pagesize * 2}]
+set verbose 0
+begin
+	cd /large
+	if [sfile exists lg1] {
+		if [sfile isfile lg1] { 
+			rmunixfile lg1 
+		} else  {
+			error "lg1 already exists"
+			exit 1
+		}
+	}
+	mkuserdef lg1 $objsiz
+	set lg1size [sfile size lg1]
+	if [expr {$lg1size != $objsiz} ] {
+		error "BAD SIZE"
+	}
+	unset lg1size
+
+	set lg [sfile oid lg1]
+#	initialized  heap, all text, no core
+#	expect: t     [$objsiz]
+	read $lg
+	rmunixfile lg1 
+
+
+	if [sfile exists lg2] {
+		if [sfile isfile lg2] {
+			rmunixfile lg2
+		} else {
+			error "lg2 already exists"
+		}
+	}
+	mkuserdef lg2 $objsiz:$objsiz:NoText
+	set lg2size [sfile size lg2]
+	if [expr {$lg2size != 2* $objsiz} ] {
+		error "BAD SIZE"
+	}
+	unset lg2size
+
+	set lg [sfile oid lg2]
+#	initialized  core, heap, no text
+#	expect: c     [$objsiz]
+#	        h     [$objsiz]
+	read lg2
+	rmunixfile lg2 
+
+	if [sfile exists lg3] {
+		if [sfile isfile lg3] {
+			rmunixfile lg3
+		} else  {
+			error "lg3 already exists"
+		}
+	}
+	mkuserdefnodata lg3 $objsiz:0:NoText
+	set lg3size [sfile size lg3]
+	if [expr {$lg3size != $objsiz} ] {
+		error "BAD SIZE"
+	}
+	unset lg3size
+
+	set lg [sfile oid lg3]
+	stat lg3
+#	uninitialized  core, no heap, no text
+#   expect: $objsiz bytes 
+	read lg3
+	rmunixfile lg3 
+
+	if [sfile exists lg4] {
+		if [sfile isfile lg4] {
+			rmunixfile lg4
+		} else  {
+			error "lg4 already exists"
+		}
+	}
+	mkuserdef lg4 $pagesize
+	set lg4size [sfile size lg4]
+	if [expr {$lg4size != $pagesize} ] {
+		error "BAD SIZE"
+	}
+	unset lg4size
+
+	set lg [sfile oid lg4]
+	write $lg 0 $pagesize
+	write $lg 0 $pagesize
+	write $lg 0 $pagesize
+
+	append $lg 642
+	write $lg $pagesize 642
+	write $lg $pagesize 642
+	read $lg
+	rmunixfile lg4 
+
+commit
+return "large done."

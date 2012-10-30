@@ -1,0 +1,9 @@
+
+module m1 {
+	interface a {
+	private:
+		attribute ref<Pool> p;
+	public:
+		ref<Pool> mypool();
+	};
+}

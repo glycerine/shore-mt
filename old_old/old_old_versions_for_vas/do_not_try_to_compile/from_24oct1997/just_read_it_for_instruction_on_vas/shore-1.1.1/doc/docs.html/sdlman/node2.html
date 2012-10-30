@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Introduction</TITLE>
+<META NAME="description" CONTENT="Introduction">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node3.html">
+<LINK REL="previous" HREF="node1.html">
+<LINK REL="up" HREF="sdlman.html">
+<LINK REL="next" HREF="node3.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html82"
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html79"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html73"
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html81"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html83"
+ HREF="node3.html">Lexical Syntax</A>
+<B> Up:</B> <A NAME="tex2html80"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html74"
+ HREF="node1.html">Contents</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="sdlman:intro">&#160;</A><H1><A NAME="SECTION00020000000000000000000">
+Introduction</A>
+</H1>
+<P>
+The Shore Data Language (SDL) is a language for specifying the types of
+persistent objects.
+Although the design of SDL is heavily influenced by C++, it is intended to
+be independent of any particular target language.
+Definitions written in SDL are compiled by the SDL compiler
+(see the manual page
+<A NAME="tex2html2"
+ HREF="../man/sdl.sdl.html">sdl(sdl)</A>)
+into objects stored in the database.
+These objects are then used to generate data declarations appropriate
+to a particular language, called a <EM>language binding</EM>.
+(Currently, only a C++ language binding exists).
+<P>
+SDL is derived from and inspired by the object-definition language
+ODL being developed by the Object Database Management Group (ODMG) as a proposed
+standard for object-oriented databases.
+At the time of this writing, the ODMG standard was not suitable for our
+purposes.
+That standard actually defines two languages.
+ODL <EM>per se</EM> is a variant of the Interface Description Language (IDL)
+defined by the Object Management Group (OMG) in connection with the
+Common Request Object Broker (CORBA) standardization effort.
+IDL is essentially a specification language for remote procedure call (RPC)
+interfaces.
+As such, it assumes complete encapsulation of objects.
+For example, it provides no way to specify the public and private parts
+of an object, since it is assumed that the private parts need not
+be mentioned in the specification.
+Thus an IDL (or ODL) specification does not have enough information to
+determine the layout of the data in an object, or even its total size.
+As such, it is inadequate for an &quot;object-shipping&quot; implementation
+in which cached copies of objects are directly manipulated by application
+programs.
+Moreover, the ODL specification is currently incomplete.
+While there is a (nearly) LALR grammar describing the syntax,
+many of the constructs
+have no semantics specified.
+<P>
+The ODMG specification also describes a specification language called
+&quot;ODL-C++&quot;.
+No syntax for this language is given.
+Rather, it is described informally in terms of modifications of the
+type-specification fragment of C++; some features are prohibited and a
+few extensions are outlined.
+This language does not meet Shore's needs for a language-independent
+type specification language that would support access and manipulation of
+a single database by application programs written in a variety of languages.
+<P>
+The Shore project continues to monitor the progress of the ODMG standardization
+effort and hopes to reconcile SDL with ODL at some time in the future.
+<P>
+The current document is intended to be a reference manual rather than
+a tutorial introduction to SDL.
+See the document <A NAME="tex2html3"
+ HREF="../stree/stree.html"><EM>Getting Started with Shore</EM></A>
+for a detailed example that illustrates most of the features of SDL.
+The manual page <A NAME="tex2html4"
+ HREF="../man/intro.sdl.html">intro(sdl)</A> and other manual
+pages cited there describe the C++ language binding for Shore in detail.
+<P>
+Features that are not supported in the current release of SDL are
+<em>
+indicated this way.
+</em><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html82"
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html79"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html73"
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html81"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html83"
+ HREF="node3.html">Lexical Syntax</A>
+<B> Up:</B> <A NAME="tex2html80"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html74"
+ HREF="node1.html">Contents</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

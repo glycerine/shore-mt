@@ -1,0 +1,5 @@
+
+begin
+time { nullcmd 1 } 1000
+time { fork { nullcmd 1 } } 1000
+commit

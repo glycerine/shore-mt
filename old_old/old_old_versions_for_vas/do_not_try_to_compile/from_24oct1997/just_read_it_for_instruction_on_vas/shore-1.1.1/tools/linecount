@@ -1,0 +1,15 @@
+#!/bin/csh -f
+
+if ($#argv < 1) then
+	echo usage linecount dirs ...
+	exit 1
+endif
+
+#find $argv -name "*.[Cch]" -type f -print | xargs cat | wc -l
+#find $argv -name "*.[Cch]" -type f -print | xargs egrep ";|{" | wc -l
+
+set f = (`find $argv -name "*.[Cch]" -type f -print`)
+
+echo Raw lines of text: `cat $f | wc  -l`
+echo "Real lines of code (those with ';' and '{')": `egrep ";|{" $f | wc -l`
+exit 0

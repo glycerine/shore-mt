@@ -1,0 +1,85 @@
+# source ../scripts/mkdir
+
+source ../scripts/mkdir.compensate
+
+set me	  	  [getuid]
+set mygrp	  [getgid]
+
+set parent dira
+set child  dirb
+set subject  dirc
+
+set oldumask [umask]
+
+# These are tests for proper error-code
+# return values as described in the man pages
+# for mkdir, rmdir
+
+cd /small
+umask 022
+begin
+	mkdir $parent
+	mkdir $parent/$child
+commit
+
+begin
+
+# 	EACCES
+#	turn off execute mode for something
+# 	in a path
+	chmod 0644 $parent
+
+#	now try to mkdir using that path
+	expect OS_PermissionDenied from { mkdir $parent/$child/$subject }
+
+#	turn on execute mode and off write perm for dir in which
+#	we want to create something
+	chmod 0755 $parent
+	chmod 0555 $parent/$child
+	expect OS_PermissionDenied from { mkdir $parent/$child/$subject }
+
+#	EEXIST
+	chmod 0755 $parent/$child
+	mkdir $parent/$child/$subject
+	expect OS_AlreadyExists from { mkdir $parent/$child/$subject }
+
+#	ELOOP -- see xref script
+
+#	EMLINK -- don't know what this means
+
+
+#	ENOENT -- don't know what this means
+	expect OS_Missing from { mkdir $parent/missing/$child/$subject }
+
+#	ENOTDIR -- don't know what this means
+	mkuserdef $parent/file 0:10:0
+	expect OS_NotADirectory from { mkdir $parent/file/$subject }
+
+#	EROFS -- TODO: 
+commit
+
+begin
+
+#	ENAMETOOLONG -- 
+	# 50 chars long
+	set subject aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+	set s2 $subject.$subject
+	set s4 $s2.$s2
+	set s8 $s4.$s4
+	set s16 $s8.$s8
+	mkdir $parent/$child/$s16
+
+abort
+
+begin
+
+#	ENOENT --  directory being removed does not exist
+	expect OS_Missing from { mkdir $parent/missing }
+
+#	EINVAL --  see mkdir, second tx
+
+#	EBUSY --  directory being removed is a mount point
+# 	for another filesystem -- TODO: need pmount
+
+abort
+

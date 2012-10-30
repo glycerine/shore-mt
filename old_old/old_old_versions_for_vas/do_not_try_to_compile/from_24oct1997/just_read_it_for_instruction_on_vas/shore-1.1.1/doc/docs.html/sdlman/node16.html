@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Appendix A: Collected Grammar</TITLE>
+<META NAME="description" CONTENT="Appendix A: Collected Grammar">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node17.html">
+<LINK REL="previous" HREF="node15.html">
+<LINK REL="up" HREF="sdlman.html">
+<LINK REL="next" HREF="node17.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html244"
+ HREF="node17.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html241"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html235"
+ HREF="node15.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html243"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html245"
+ HREF="node17.html">Appendix B: Grammar in</A>
+<B> Up:</B> <A NAME="tex2html242"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html236"
+ HREF="node15.html">Operations</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="sdlman:appendixa">&#160;</A><H1><A NAME="SECTION000160000000000000000000">
+Appendix A:  Collected Grammar</A>
+</H1>
+<P>
+This section includes the entire SDL grammar, expressed in the notation
+described above in the
+<B>Grammatical Conventions</B>
+section.
+<P>
+See Appendix B for a version of the grammar acceptable to YACC.
+<P><PRE>
+// ================= sdlman.tex : 193
+specification : module*
+module : 'module' ID '{' mod_export* mod_import* 
+        module_member* '}' [';']
+mod_export : 'export' ( ID | 'all' ) ';'
+mod_import : 'use' module_name [ 'as' ID ] ';'
+    | 'import' module_name ';'
+module_name : STRING_LITERAL
+module_member : const_dcl ';'
+    | type_dcl ';'
+    | interface_dcl ';'
+scoped_name : ID ( '::' ID )*
+// ================= sdlman.tex : 413
+interface_dcl : 'interface' ID [ interface_body ]
+interface_body : [ inheritance ] '{' interface_dcls '}'
+inheritance : ':' parent ( ',' parent )*
+parent : access_spec scoped_name
+access_spec : 'private' | 'protected' | 'public'
+interface_dcls : ( access_spec ':' interface_members )*
+interface_members : interface_member*
+interface_member : const_dcl ';'
+    | type_dcl ';'
+    | attr_dcl ';'
+    | relationship_dcl ';'
+    | op_dcl ';'
+    | override ';'
+override : 'override' scoped_name ( ',' scoped_name )*
+// ================= sdlman.tex : 603
+const_dcl : 'const' const_type ID '=' const_exp
+const_type : integer_type | boolean_type | 
+        floating_pt_type | 'string' 
+        | type_name // must designate a simple type
+integer_type : [ 'unsigned' ] ( 'long' | 'short' )
+boolean_type : 'boolean'
+floating_pt_type : 'float' | 'double'
+const_exp : exp1 ( '|' exp1 )*
+exp1 : exp2 ( '^' exp2 )*
+exp2 : exp3 ( '&amp;' exp3 )*
+exp3 : exp4 ( shift_op exp4 )*
+exp4 : exp5 ( add_op exp5 )*
+exp5 : exp6 ( mul_op exp6 )*
+exp6 : [ unary_op ] atom
+atom : const_name | literal | '(' const_exp ')'
+shift_op : '&lt;&lt;' | '&gt;&gt;'
+add_op : '+' | '-'
+mul_op : '*' | '/' | '%'
+unary_op : '+' | '-' | '~'
+literal :
+    INTEGER_CONSTANT
+    | STRING_LITERAL
+    | CHARACTER_CONSTANT
+    | FLOATING_CONSTANT
+    | 'true' | 'false'
+const_name : scoped_name // must designate a const
+// ================= sdlman.tex : 674
+type_dcl : 'typedef' type_spec declarators
+    | struct_type | union_type | enum_type | external_type
+type_spec : simple_type | constructed_type
+simple_type : atomic_type
+    | string_type
+    | enum_type
+    | ref_type
+    | type_name
+constructed_type : struct_type
+    | union_type
+    | sequence_type
+atomic_type : floating_pt_type
+    | integer_type
+    | char_type
+    | boolean_type
+    | octet_type
+    | any_type
+type_name : scoped_name
+declarators : declarator ( ',' declarator )*
+declarator : ID [ array_size ]
+array_size : '[' positive_int_const ']'
+positive_int_const : const_exp 
+        // must evaluate to a positive integer
+
+octet_type : 'octet'
+char_type : 'char'
+any_type : 'any'
+
+struct_type : 'struct' ID [ struct_body ]
+struct_body : '{' struct_member* '}'
+struct_member : type_spec declarators ';'
+
+union_type : 'union' ID [ union_body ]
+union_body : 'switch' '(' discriminator ')' '{' case* '}'
+discriminator : scalar_type ID
+scalar_type : integer_type
+    | char_type
+    | boolean_type
+    | enum_type
+    | type_name // denoting a scalar type
+case : case_label+ ( type_spec declarators ';' )+
+case_label : 'case' const_exp ':' | 'default' ':'
+
+enum_type : 'enum' ID '{' ID ( ',' ID )* '}'
+sequence_type :
+    'sequence' '&lt;' type_name [ ',' positive_int_const ] '&gt;'
+string_type :
+    'string' [ '&lt;' positive_int_const '&gt;' ]
+
+external_type : 'external' external_qualifier ID 
+external_qualifier : 'typedef' | 'class' | 'enum' |  
+        'union' | 'struct'  
+        
+// ================= sdlman.tex : 1019
+attr_dcl : [ 'indexable' ] 'attribute' type_spec declarators
+// ================= sdlman.tex : 1079
+type_spec : 'index' '&lt;' simple_type_spec ','  
+        simple_type_spec '&gt;'  
+        // ================= sdlman.tex : 1114
+ref_type    : local_ref | remote_ref
+local_ref   : 'lref' '&lt;' type_name '&gt;'
+remote_ref  : ref_kind '&lt;' type_name '&gt;'
+ref_kind    : 'ref' | 'set' | 'bag' | 'list'
+relationship_dcl : 'relationship' ref_kind 
+        '&lt;' type_name '&gt;' [ 'inverse' scoped_name ] 
+        [ 'ordered_by' scoped_name ]
+// ================= sdlman.tex : 1249
+op_dcl : result_type ID '(' [ parameters ] ')' [ 'const' ]
+result_type : type_spec | 'void'
+parameters : parameter (',' parameter)*
+parameter : mode type_spec declarator
+mode : 'in' | 'out' | 'inout'
+</PRE>
+<P>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

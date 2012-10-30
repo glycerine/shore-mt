@@ -1,0 +1,12 @@
+
+# this is for testing purposes
+#
+shore.client.cli*.inputfile: stdin 
+*.svas_log: syslogd
+
+shore.client.?.svas_host: titan
+shore.client.?.svas_shellrc: vas.rc
+shore.client.?.svas_shm_small_obj: 8
+shore.client.?.svas_shm_large_obj: 8
+# shore.client.?.svas_use_pmap: no
+shore.client.?.svas_print_user_errors: yes

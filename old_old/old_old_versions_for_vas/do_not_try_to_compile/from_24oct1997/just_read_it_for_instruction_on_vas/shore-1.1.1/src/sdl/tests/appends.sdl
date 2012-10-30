@@ -1,0 +1,11 @@
+
+module m1 {
+	interface myobj {
+	private:
+	public:
+		attribute int	array[10];
+		attribute string sarray[32000];
+		attribute sequence<long> seq;
+
+	};
+}

@@ -1,0 +1,64 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  Test savepoint
+#
+
+#
+# start up
+#
+source $script_dir/vol.init
+
+set nrec 120
+
+#
+# create index and load it up 
+#
+sm begin_xct
+set ndx [sm create_index $volid btree]
+verbose created index $ndx
+sm commit_xct
+
+dstats $ndx
+
+sm begin_xct
+
+#make sure empty savepoint at xct begin works
+set sp [sm save_work]
+verbose roll back to $sp
+sm rollback_work $sp
+
+for {set i 1} {$i <= $nrec} {incr i; incr i} {
+    verbose inserting $i
+    sm create_assoc $ndx [format $short_form $i] $i
+}
+set sp [sm save_work]
+verbose save point $sp
+for {set i 2} {$i <= $nrec} {incr i; incr i} {
+    verbose inserting $i
+    sm create_assoc $ndx [format $short_form $i] $i
+}
+verbose roll back to $sp
+sm rollback_work $sp
+set scan [sm create_scan $ndx >= neg_inf <= pos_inf]
+for {set i 1} {$i <= $nrec} {incr i; incr i} {
+    set r [sm scan_next $scan]
+    if {$r == "eof"} then {break }
+    set key [string trimleft [lindex $r 0] 0]
+    set el [lindex $r 1]
+    verbose "scanned ($key, $el, $i)"
+    assert {expr $key == $el}
+    assert {expr $i == $key}
+}
+assert {expr $i > $nrec}
+assert {expr [string compare [sm scan_next $scan] eof] == 0}
+sm destroy_scan $scan
+sm destroy_index $ndx
+sm commit_xct
+
+unset ndx nrec i r el key scan sp

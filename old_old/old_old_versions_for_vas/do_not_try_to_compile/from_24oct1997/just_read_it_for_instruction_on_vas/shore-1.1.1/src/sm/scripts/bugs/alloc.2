@@ -1,0 +1,90 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test allocation & deallocation of pages
+#   the statistics-gathering checks assertions on the files 
+#   and in current form, fails
+#
+
+source $script_dir/vol.init
+
+set form %08090d
+
+
+proc t1 {} {
+    global volid  f0 r0 form
+    sm begin_xct
+    echo xact [sm xct]
+sync
+    echo creating 10 more recs ...
+    for { set i 1} { $i <= 10} { incr i} {
+	set j [sm create_rec $f0 h$i 1000 [format $form $i] ]
+	echo created rec $j
+    }
+    echo created 10 recs file $f0
+sync
+    sm commit_xct
+}
+proc scanit { f } {
+    set scan [sm scan_file_create $f t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+	echo $pin
+	set pin [sm scan_file_next $scan 0]
+	set i [expr {$i+1} ]
+    }
+    sm scan_file_destroy $scan
+    echo scan found $i records
+}
+proc t2 {} {
+    global volid  f0
+    sm begin_xct
+    echo xact [sm xct]
+    echo destroying all records ...
+    set scan [sm scan_file_create $f0 t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+	echo $pin
+	sm destroy_rec [sm pin_rid $pin]
+	set pin [sm scan_file_next $scan 0]
+	set i [expr {$i+1} ]
+    }
+    sm scan_file_destroy $scan
+    echo destroyed $i recs file $f0
+sync
+sync
+    echo aborting...
+    sm abort_xct
+}
+
+
+sm begin_xct
+set f0 [sm create_file $volid]]
+echo created file $f0
+for { set i 1} { $i <= 10} { incr i} {
+    set j [sm create_rec $f0 h$i 1000 [format $form $i] ]
+    echo created rec $j
+}
+echo created 10 recs file $f0
+sm commit_xct
+
+dstats $volid
+set y1 [fork_thread t1 {}]
+set y2 [fork_thread t2 {}]
+
+sync_thread $y1 $y2
+sync_thread $y1 $y2
+join_thread $y1 $y2
+
+sm begin_xct
+scanit $f0
+sm commit_xct
+
+dstats $volid

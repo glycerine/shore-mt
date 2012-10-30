@@ -1,0 +1,7 @@
+sdl-gram.tab.C
+sdl-gram.tab.h
+lex.yy.C
+sdl
+sdl_cxx
+libsdl.a
+local.tmpl

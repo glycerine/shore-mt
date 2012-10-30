@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>The shrc Class</TITLE>
+<META NAME="description" CONTENT="The shrc Class">
+<META NAME="keywords" CONTENT="shrc">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="shrc.css">
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="up" HREF="shrc.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html50"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html47"
+ HREF="shrc.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html41"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html49"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html51"
+ HREF="node4.html">Macros for Transaction Management</A>
+<B> Up:</B> <A NAME="tex2html48"
+ HREF="shrc.html">Handling Errors in a Application</A>
+<B> Previous:</B> <A NAME="tex2html42"
+ HREF="node2.html">Introduction</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="shrc:class">&#160;</A><H1><A NAME="SECTION00030000000000000000000">
+The <TT>shrc</TT> Class</A>
+</H1>
+<P>
+Most methods in Shore return an error indicator of type <TT>shrc</TT>.
+The shrc type contains not only an integer error code, but
+also a stack trace showing where the error occurred and the series
+of function calls that triggered the error.
+<P>
+Shrc is a C++ class, and it contains various member functions that
+application programmers may find useful.  The following is a portion of the
+class definition of shrc
+(<TT>shrc</TT> is the same type as <TT>w_rc_t</TT>, which is defined in <TT>w_rc.h</TT>):
+<P><PRE>
+    class shrc
+    {
+     public:
+        bool is_error() const;
+        int  err_num() const;
+        operator const void*() const;
+
+        friend ostream &amp;operator&lt;&lt;(ostream&amp; o, const shrc &amp;rc);
+    };
+</PRE>
+<P>
+If a Shore method completes successfully, it returns the constant <TT>RCOK</TT>.
+If a Shore method returns something other than <TT>RCOK</TT>, then an
+application can use then <TT>shrc::err_num</TT> method to get the integer
+error code corresponding to the error.
+The possible error codes are listed in the manual page
+<A NAME="tex2html3"
+ HREF="../man/errors.oc.html">errors(OC)</A>.
+Each error code has a <TT>#define</TT>ed value, which is
+included in your sources if you include <TT>ShoreApp.h</TT>.
+<P>
+Shrc includes <TT>operator const void*()</TT> to allow applications to say
+things like
+<PRE>
+    shrc rc = ...;
+    if (rc) ...
+</PRE>
+Shrc also includes an
+overloaded version of the C++ &lt;&lt; operator.
+<P>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

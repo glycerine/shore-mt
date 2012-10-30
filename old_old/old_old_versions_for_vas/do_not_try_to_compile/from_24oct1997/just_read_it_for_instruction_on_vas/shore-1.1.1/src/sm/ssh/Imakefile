@@ -1,0 +1,40 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+SRC = ssh.cc ssh_random.cc shell.cc shell2.cc tcl_thread.cc  ssh_error.cc 
+CFILES = $(SRC) random_kick.cc ssh_random.cc
+HFILES = ovt.h shell.h ssh.h ssh_error.h %
+	ssh_random.h tcl_thread.h
+OBJ = $(SRC:.cc=.o)
+
+CPPFLAGS = -I.. -I../../sthread -I../../common -I../../fc Include(TclInclude)
+
+LIB = ../libsm.a ../../sthread/libst.a ../../common/libcommon.a %
+	../../fc/libfc.a TclLib
+
+all_local:: ssh random_kick
+
+%GEN error_def(../e_error.dat,e)
+%GEN error_def(../../common/opt_error.dat,opt)
+%GEN error_def(../../sthread/st_error.dat,st)
+%GEN error_def(../../fc/fc_error.dat,fc)
+
+%GEN c_plus_program(ssh, $(OBJ), $(LIB))
+%# random_kick is used with runssh for crash tests
+%GEN c_plus_program(random_kick, random_kick.o, -lm)
+
+#ifdef IS_SP2
+%GEN poe_c_plus_program(ssh.poe, $(OBJ), $(LIB))
+#endif
+
+PURE_OPTIONS = $(PURE_OPT)
+QUANT_OPTIONS = -collection-granularity=line -record-system-calls=yes -record-register-window-traps=yes
+%GEN purify_c_plus_program(ssh, $(OBJ), $(LIB), $(PURE_OPTIONS))
+%GEN quantify_c_plus_program(ssh, $(OBJ), $(LIB), $(QUANT_OPTIONS))
+PURECOV_OPT += -best-effort  $(PURE_OPT)
+%GEN purecov_c_plus_program(ssh, $(OBJ), $(LIB), $(PURECOV_OPT))
+%GEN depend_target($(CFILES))
+%GEN tags($(CFILES) $(HFILES))

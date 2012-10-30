@@ -1,0 +1,32 @@
+/////////////
+// see PR 223 -- control chars (fixed)
+// see PR 268 -- scopes for consts (not yet fixed)
+/////////////
+
+// 
+// This is an example right out of the sdl
+// manual.
+// The sdl manual will be changed
+// not to include this duplicate def of
+// CharacterWidth.
+//
+
+module constants {
+	export TitleSize;
+	const long CharacterWidth = 1;
+	const long TitleSize = 40*CharacterWidth;
+}
+
+module m1 {
+	export all;
+	use "constants" as C;
+	typedef char Title[C::TitleSize];
+}
+
+module m2 {
+	export all;
+	import "constants";
+	const long CharacterWidth = 2;
+	typedef char header[TitleSize]; 
+}
+

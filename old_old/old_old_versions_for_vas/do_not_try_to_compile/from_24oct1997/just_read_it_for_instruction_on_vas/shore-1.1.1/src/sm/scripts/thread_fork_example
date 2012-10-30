@@ -1,0 +1,55 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+source $script_dir/vol.init
+
+sm begin_xct
+
+verbose creating file
+set f1 [sm create_file $volid ]
+
+set PG_SZ       952
+
+# change body width
+set id_body_width %0[expr {$PG_SZ * .48}]d
+
+verbose [format $id_body_width 1]
+
+verbose creating r1 and r2
+set r1 [ sm create_rec $f1 "" 11 [format $id_body_width 1] ]
+set r2 [ sm create_rec $f1 "" 11 [format $id_body_width 2] ]
+verbose $r1 $r2
+
+sm commit_xct
+
+proc remove { name rid } {
+	sm begin_xct
+	sync
+	verbose $name destroy
+	sm destroy_rec $rid
+	sync
+	verbose $name abort
+	sm abort_xct
+}
+
+verbose forking 1
+set t1 [ fork_thread remove xct-1 $r1 ]
+verbose forking 2
+set t2 [ fork_thread remove xct-2 $r2 ]
+
+sync_thread $t1
+sync_thread $t2
+sync_thread $t1
+sync_thread $t2
+join_thread $t1 $t2
+
+
+unset t1 t2 PG_SZ r1 r2 f1
+
+checkstats thread_fork_example 
+puts stdout [concat CLEANUP AFTER  thread_fork_example: ]
+cleanup stdout

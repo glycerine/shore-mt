@@ -1,0 +1,340 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+%#>>>>>>>>>>>> $Header: /p/shore/shore_cvs/config/Imake.rules,v 1.91 1997/09/30 21:14:11 solomon Exp $
+
+/****************************************************************
+ * Imake.rules:  "Library procedures" for building up a Makefile.
+ * Each of these rules is envoked by a line of the form
+ *   %GEN rule_name(arg1,arg2)
+ ****************************************************************/
+
+/****************************************************************
+ * Build a C program from .o files and libraries.
+ ****************************************************************/
+%DEF c_program(program,objlist,libs)
+clean_local::
+	-$(RM) -f program objlist
+
+program: objlist libs
+	$(LINK.c) -o program objlist libs GlobalLibraries
+%ENDDEF
+
+/****************************************************************
+ * Build a C++ program from .o files and libraries
+ ****************************************************************/
+%DEF c_plus_program(program,objlist,libs)
+clean_local::
+	-$(RM) -f program objlist
+
+program: objlist libs
+	$(LINK.cc) -o program objlist libs GlobalLibraries
+%ENDDEF
+
+/****************************************************************
+ * Build a Purified C++ program from .o files and libraries.
+ ****************************************************************/
+#ifdef UsePurify
+%DEF purify_c_plus_program(program,objlist,libs,pure_options)
+clean_local::
+	-$(RM) -f program.pure objlist real-ld .pure *_pure_*.o lib*pure*.a
+program.pure: objlist libs
+	Purify/purify PureFlags %
+		$(LINK.cc) -o program.pure objlist libs PurifyLibrary GlobalLibraries
+%ENDDEF
+#else
+%DEF purify_c_plus_program(program,objlist,libs,pure_options)
+/* nothing */
+%ENDDEF
+#endif /* UsePurify */
+
+/****************************************************************
+ * Build a Quantified C++ program from .o files and libraries.
+ ****************************************************************/
+#ifdef UseQuantify
+%DEF quantify_c_plus_program(program,objlist,libs,quant_options)
+clean_local::
+	-$(RM) -f program.quant objlist real-ld .quant *_quant_*.o lib*quant*.a
+program.quant: objlist libs
+	Quantify/quantify %
+		$(LINK.cc) -o program.quant objlist libs PurifyLibrary GlobalLibraries
+%ENDDEF
+#else
+%DEF quantify_c_plus_program(program,objlist,libs,quant_options)
+/* nothing */
+%ENDDEF
+#endif /* UseQuantify */
+
+/****************************************************************
+ * Build a PureCoveraged C++ program from .o files and libraries.
+ ****************************************************************/
+#ifdef UsePureCoverage
+%DEF purecov_c_plus_program(program,objlist,libs,pure_options)
+clean_local::
+	-$(RM) -f program.purecov objlist real-ld .pure *_pure_*.o lib*pure*.a
+program.purecov: objlist libs
+	PureCoverage/purecov %
+		$(LINK.cc) -o program.purecov objlist libs PurifyLibrary GlobalLibraries
+%ENDDEF
+#else
+%DEF purecov_c_plus_program(program,objlist,libs,pure_options)
+/* nothing */
+%ENDDEF
+#endif /* UsePureCoverage */
+
+/****************************************************************
+ * How to make a library
+ *    lib:      the library
+ *    objlist:  the files that go in it
+ * Also arranges for "make clean" to remove the libarary, its component files,
+ * and purify and quantify versions of it.
+ ****************************************************************/
+%DEF library(lib,objlist)
+lib: objlist
+	-$(RM) -f lib
+	Ar qv  lib  objlist
+#ifdef Ranlib
+	Ranlib lib
+#endif
+clean_local::
+	-$(RM) -f lib objlist li*pure*.a  li*pure_q*.a
+%ENDDEF
+
+/****************************************************************
+ * Build lib from objlist and the objects in each of otherlibs.
+ ****************************************************************/
+%DEF merge_library(lib,objlist,otherlibs)
+lib:: objlist otherlibs
+	@echo "(re)build joint library " lib
+	@echo "from objects " objlist
+	-$(RM) -f lib
+	Ar qv lib objlist
+	@echo "add libraries " otherlibs
+	$(TOP)/tools/combinelibs Ar lib otherlibs  
+clean_local::
+	-$(RM) -f lib objlist li*pure_q*.a li*pure*.a
+%ENDDEF
+
+/****************************************************************
+ * Add srcs to the list of files to be analyzed by "make depend" or "make
+ * tags".  These rules are invoked directly from Imakefiles for hand-written
+ * sources.  They are also invoked indirectly, through generated_srcs (see
+ * below), for source files built by other tools (such as Perl scripts).
+ * The rules only add the file names to the values of Make macros DEPEND_SOURCE
+ * (TAGS_SOURCE) so that the dependencies (tags) can be built all at once
+ * in rules near the start of Imake.targets.
+ ****************************************************************/
+%DEF depend_target(srcs)
+DEPEND_SOURCE += srcs
+%ENDDEF
+
+%DEF tags(srcs)
+TAGS_SOURCE += srcs
+%ENDDEF
+
+/****************************************************************
+ * Additional files to be removed with "make clean", "make distclean", etc.
+ * This rule is seldom needed in Imakefiles.  Various other rules in
+ * this file explicitly add the files they build to the list of files
+ * removed by "make clean".
+ ****************************************************************/
+%DEF clean_files(files)
+clean_local::
+	-$(RM) -f files
+%ENDDEF
+
+/****************************************************************
+ * Extra rules for sources that are generated by various pre-processors
+ * (such as rpcgen or perl scripts).
+ * Generated_headers and generated srcs differ only in that the former
+ * are supplied as dependencies but not inputs to the rule the makes the
+ * .depend file.   Thus if foo.h, bar.h, foo.cc and bar.cc are generated files,
+ * the resulting Makefile would have something similar to
+ *    depend_local: foo.cc bar.cc
+ *        makedepend foo.cc bar.cc >.depend
+ *    depend_local: foo.h bar.h
+ * In both cases, the named files are candidates for removal on "make clean",
+ * inputs to "make tags", and dependencies of the special PHONY target
+ * "automatic", which is a prerequisite for many things.
+ ****************************************************************/
+%DEF generated_headers(targets)
+depend_local: targets
+clean_local::
+	-$(RM) -f targets
+automatic:: targets
+%GEN tags(targets)
+%ENDDEF
+
+%DEF generated_srcs(targets)
+%GEN depend_target(targets)
+clean_local::
+	-$(RM) -f targets
+automatic:: targets
+%GEN tags(targets)
+%ENDDEF
+
+/****************************************************************
+ * Generate source files (usually C++ source or header files) from other
+ * files using a Perl script.
+ *   targets:      files to be produced
+ *   script:       script that does the work
+ *   dependencies: files implicitly used by the script
+ *   flags:        initial command-line options to the script
+ *   inputs:       explicit file arguments to the script.
+ * Ensures that targets are built by "make depend", removed by "make clean",
+ * included in the ctags, and listed as dependencies of the special PHONY
+ * target "automatic", which is a prerequisite for many things.
+ ****************************************************************/
+%DEF generate_source(targets,script,dependencies,flags,inputs)
+targets: script dependencies inputs
+	Perl script flags inputs
+%GEN generated_headers(targets)
+%ENDDEF
+
+/**** Special cases of generate_source ****/
+
+/****************************************************************
+ * Rule for invoking stats.pl.
+ *   datfile:  the specification file
+ *   name:     the "layer names" defined in the specification file.
+ ****************************************************************/
+%DEF stats(datfile,names)
+%GEN generate_source(%CROSS(names,_msg.i _def.i _struct.i _op.i),
+	$(TOP)/tools/stats.pl,,,datfile)
+%ENDDEF
+%DEF cstats(datfile,names)
+%GEN generate_source(%CROSS(names,_msg.i _def.i _struct.i _op.i),
+	$(TOP)/tools/stats.pl,,-C,datfile)
+%ENDDEF
+
+/****************************************************************
+ * Rules for invoking errors.pl.
+ * Use error_enum for errors.pl -e and error_def for errors.pl -d.
+ *   datfile:  the specification file
+ *   name:     the "layer names" defined in the specification file.
+ ****************************************************************/
+%DEF error_enum(datfile,names)
+%GEN generate_source(%CROSS(names,_error.i _einfo.i _error.h),
+	$(TOP)/tools/errors.pl,,-e,datfile)
+%ENDDEF
+
+%DEF error_def(datfile,names)
+%GEN generate_source(
+	%CROSS(names,_error.i _einfo.i _einfo_bakw.i _error_def.h),
+	$(TOP)/tools/errors.pl,,-d,datfile)
+%ENDDEF
+
+/****************************************************************
+ * Copy files to installation location
+ *
+ * Target install_only unconditionally copies the files to the installation
+ * directory.  It does not try to build them, and does not check for
+ * existing installed copies.
+ *
+ * Target install builds all the files and only copies them to the
+ * installation directory if necessar (if the installed versions are missing
+ * or out of date).
+ *
+ * NB:  These rules assum mkdir understands the '-p' option (no error if
+ * existing, make parent directories as needed).  If your platform doesn't
+ * support this option, use gnu mkdir, or fix this rule!
+ ****************************************************************/
+%DEF install(dir,toinstall)
+%NON_NULL toinstall
+install_local:: $(INSTALL_DIR)/dir %CROSS($(INSTALL_DIR)/dir/, toinstall)
+$(INSTALL_DIR)/dir::
+	@mkdir -p $(INSTALL_DIR)/dir
+%FOREACH(file,toinstall,$(INSTALL_DIR)/dir/file: file
+	cp -p file $(INSTALL_DIR)/dir/file
+)
+
+install_only_local:: $(INSTALL_DIR)/dir
+	cp -p toinstall $(INSTALL_DIR)/dir
+
+uninstall_local::
+	@echo "Uninstalling from dir: toinstall"
+	for i in toinstall; do %
+		$(RM) -f $(INSTALL_DIR)/dir/`basename $$i`; %
+	done
+%ENDDEF
+
+/****************************************************************
+ * Install_check is like install except that the generated rules only
+ * check for existence of the installed files; they do not try to copy them
+ * from somewhere else.  
+ * A typical use is
+ *   %GEN merge_library($(INSTALL_DIR)/lib/libshore.a,,...)
+ *   %GEN install_check(lib, libshore.a)
+ * The install_check rule ensures that "make install" will try to make
+ * $(INSTALL_DIR)/lib/libshore.a, and the merge_library rule explains how
+ * to do that without creating a local copy of libshore.
+ ****************************************************************/
+%DEF install_check(dir,toinstall)
+%NON_NULL toinstall
+install_only_local install_local:: $(INSTALL_DIR)/dir %CROSS($(INSTALL_DIR)/dir/, toinstall)
+$(INSTALL_DIR)/dir::
+	@mkdir -p $(INSTALL_DIR)/dir
+
+uninstall_local::
+	@echo "Uninstalling from dir: toinstall"
+	for i in toinstall; do %
+		$(RM) -f $(INSTALL_DIR)/dir/`basename $$i`; %
+	done
+%ENDDEF
+
+/****************************************************************
+ * Special version of install where the file changes name as it's installed:
+ *
+ * 'src' is installed as '$(INSTALL_DIR)/dir/dest'
+ ****************************************************************/
+%DEF install_as(dir,dest,src)
+install_local:: $(INSTALL_DIR)/dir $(INSTALL_DIR)/dir/dest
+$(INSTALL_DIR)/dir::
+	@mkdir -p $(INSTALL_DIR)/dir
+$(INSTALL_DIR)/dir/dest: src
+	cp -p src $(INSTALL_DIR)/dir/dest
+
+install_only_local:: $(INSTALL_DIR)/dir
+	cp -p src $(INSTALL_DIR)/dir/dest
+
+uninstall_local::
+	@echo "Uninstalling from dir: dest"
+	$(RM) -f $(INSTALL_DIR)/dir/dest
+%ENDDEF
+
+/****************************************************************
+ * Mechanism for generating a recursive walk of a directory tree.
+ * If "make commands" is invoked in this directory, it will cause
+ * "make commands" to be recursively envoked in each of the directories
+ * named in "subdirs".  The "set -e" is used to ensure that the loop
+ * is immediately existed if any of the recursive MAKEs fails.
+ * This rule is only explicitly used in Imake.targets in the config directory.
+ ****************************************************************/
+%DEF do_subdirs(commands,subdirs)
+%NON_NULL subdirs
+commands::
+	@set -e; %
+	for i in subdirs; %
+	do %
+		if test -d $$i; %
+		then %
+			echo '===START' making $@ in `pwd`/$$i; %
+			$(MAKE) -C $$i --no-print-directory $@; %
+			echo '===END' making $@ in `pwd`/$$i; %
+		fi; %
+	done
+%ENDDEF
+
+/****************************************************************
+ * Rule to replace all .C, .cc, and .c in a list of files with .o
+ * Note that this depends on a rather special feature of GnuMake.
+ ****************************************************************/
+%DEF c_to_o(obj,src)
+obj = $(patsubst %%.C,%%.o,$(patsubst %%.cc,%%.o,$(patsubst %%.c,%%.o,src)))
+%ENDDEF
+
+%#<<<<<<<<<<<< end of Imake.rules

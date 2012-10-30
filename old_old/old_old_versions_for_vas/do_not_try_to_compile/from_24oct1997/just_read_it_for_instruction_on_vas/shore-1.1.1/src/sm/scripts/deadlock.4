@@ -1,0 +1,55 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+# Test Upgrade deadlock detection
+#
+#    {1IS, 2IS, 3IX} <-- 1SH <-- 2SH 
+#
+set o1 "10"
+
+proc t1 {} {
+    global o1
+    sm begin_xct
+    sm lock $o1 IS LONG
+    verbose "t1: acquired IS on o1"
+    sync
+    verbose "t1: attempt to acquire SH on o1"
+    sm lock $o1 SH LONG
+    sm commit_xct
+}
+
+proc t2 {} {
+    global o1
+    sm begin_xct
+    sm lock $o1 IS LONG
+    verbose "t2: acquire IS on o1"
+    sync
+    verbose "t2: attempt to acquire SH on o1"
+    catch {sm lock $o1 SH LONG} errorno
+    # no deadlock
+    assert { expr {[error_is $errorno E_OK] == 1} }
+    sm commit_xct
+}
+
+proc t3 {} {
+    global o1
+    sm begin_xct
+    sm lock $o1 IX LONG
+    verbose "t3: acquire IX on o1"
+    sync
+    sm commit_xct
+}
+
+set x [fork_thread t1 {} ]
+set y [fork_thread t2 {} ]
+set z [fork_thread t3 {} ]
+
+sync_thread $x $y
+sync_thread $z
+join_thread $x $y $z
+
+unset x y z o1 

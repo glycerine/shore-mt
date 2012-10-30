@@ -1,0 +1,168 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# MOVED TO BUGS/alloc.2  -- replace when it works!
+
+#
+#
+#	Test allocation & deallocation of pages
+#   the statistics-gathering checks assertions on the files 
+#   and in current form, fails
+#
+
+source $script_dir/vol.init
+
+# format for body size -- >= one page
+set form %0${lg_rec_page_space}d
+
+set nrecs 10
+
+proc t1 {} {
+    global volid  f0 r0 form nrecs
+    sm begin_xct
+    verbose t1 is xact [sm xct]
+
+verbose sync t1-1
+sync
+
+    verbose t1 creating $nrecs more recs ...
+    for { set i 1} { $i <= $nrecs} { incr i} {
+	set j [sm create_rec $f0 h$i 1000 [format $form $i] ]
+	verbose t1 created rec $j
+    }
+    verbose t1 created $nrecs recs file $f0
+
+verbose sync t1-2
+sync
+
+    scanit $f0 t1
+    sm commit_xct
+
+verbose dstatsnoaudit in t1, before sync
+dstatsnoaudit $volid
+
+    sm begin_xct
+    verbose t1 2nd xct re-scanning
+    scanit $f0 t1
+    sm commit_xct
+verbose dstats-2 in t1
+dstats $volid
+verbose finished t1
+}
+proc scanit { f who } {
+    global verbose_flag
+    verbose LOCK TABLE BEFORE SCAN in $who:
+    if {$verbose_flag}  {
+	sm dump_locks
+    }
+
+
+    set scan [sm scan_file_create $f t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+	verbose $who scanned [sm pin_rid $pin]
+	set pin [sm scan_file_next $scan 0]
+	set i [expr {$i+1} ]
+    }
+
+    # verbose LOCK TABLE AFTER SCAN in $who:
+    # sm dump_locks
+
+    sm scan_file_destroy $scan
+    verbose $who scan found $i records
+}
+proc t2 {} {
+    global volid  f0 logging
+    sm begin_xct
+    verbose t2 xact is  [sm xct]
+    verbose t2 destroying all records ...
+    set scan [sm scan_file_create $f0 t_cc_record]
+    set pin [sm scan_file_next $scan 0]
+    set i 0
+    while {$pin != "NULL"} {
+	verbose $pin
+	verbose t2 destroy_rec [sm pin_rid $pin]
+	sm destroy_rec [sm pin_rid $pin]
+	set pin [sm scan_file_next $scan 0]
+	set i [expr {$i+1} ]
+    }
+    sm scan_file_destroy $scan
+    verbose t2 destroyed $i recs file $f0
+
+    scanit $f0 t2
+
+verbose sync t2-1
+sync
+
+    if {$logging==0} {
+	verbose Logging off: substituting commit for abort
+	sm commit_xct
+    } else {
+	verbose t2 aborting...
+	sm abort_xct
+	verbose t2 aborted finished...
+    }
+
+    sm begin_xct
+    verbose t2 2nd xct re-scanning
+    scanit $f0 t2
+    sm commit_xct
+
+    verbose dstatsnoaudit in t2, before sync 3
+    dstats $volid
+verbose sync t2-3
+sync
+
+verbose end of t2:
+dstats $volid
+}
+
+
+sm begin_xct
+set f0 [sm create_file $volid]]
+verbose created file $f0
+for { set i 1} { $i <= $nrecs } { incr i} {
+    set j [sm create_rec $f0 h$i 1000 [format $form $i] ]
+    verbose created rec $j
+}
+verbose created $nrecs recs file $f0
+sm commit_xct
+
+sm begin_xct
+scanit $f0 t0
+sm commit_xct
+
+
+dstats $volid
+set y1 [fork_thread t1 {}]
+set y2 [fork_thread t2 {}]
+
+# sm dump_threads
+
+verbose sync_thread $y1 $y2
+sync_thread $y1 $y2
+
+verbose sync_thread $y1 $y2
+sync_thread $y1 $y2
+
+verbose join_thread $y1 $y2
+join_thread $y1 $y2
+
+verbose after join
+dstatsnoaudit $volid
+
+sm begin_xct
+scanit $f0 t0
+sm commit_xct
+
+dstats $volid
+
+unset f0 y1 y2 nrecs form i j
+
+pstats

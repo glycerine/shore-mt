@@ -1,0 +1,3 @@
+/^#include "\/tmp\/msg.h"/s="\/tmp/\msg.h"="msg.h"=
+/__sys_types_h/s=ifndef=ifdef=
+/xdr_string(/s=objp=(string_t *)objp=

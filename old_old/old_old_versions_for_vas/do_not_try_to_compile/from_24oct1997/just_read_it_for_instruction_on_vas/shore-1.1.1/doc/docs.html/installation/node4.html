@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Installing the Documentation Release</TITLE>
+<META NAME="description" CONTENT="Installing the Documentation Release">
+<META NAME="keywords" CONTENT="installation">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="installation.css">
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="installation.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html78"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html75"
+ HREF="installation.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html69"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html77"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html79"
+ HREF="node5.html">Installing a Binary Release</A>
+<B> Up:</B> <A NAME="tex2html76"
+ HREF="installation.html">Shore Software Installation Manual</A>
+<B> Previous:</B> <A NAME="tex2html70"
+ HREF="node3.html">Requirements</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="installation:docs">&#160;</A><H1><A NAME="SECTION00040000000000000000000">
+Installing the Documentation Release</A>
+</H1>
+<P>
+If you are installing Shore for the first time and you just
+copied the tar files with FTP and followed the instructions
+in the README file there, you will already have 
+finished this step, and you can skip to the 
+<A HREF="node5.html#installation:binary">next section</A>.
+<P>
+Set the shell variables TARDIR and SHROOT and create the directory $SHROOT.
+Then extract the documentation.
+<P><PRE>
+    set TARDIR=directory-that-holds-tar-files
+    set SHROOT=directory-in-which-to-install-shore
+</PRE>
+If you use the Bourne shell (<TT>/bin/sh</TT>) or one of the shells derived
+from it, such as ksh, omit the word &quot;set&quot;.
+<PRE>
+    mkdir $SHROOT
+    cd $SHROOT
+    gzip -d -c $TARDIR/doc.tar.gz | tar -xvf -
+</PRE>
+<P>
+This step creates three directories, <TT>docs.html</TT>, <TT>docs.ps</TT>,
+and <TT>examples</TT>.
+The <TT>$SHROOT/docs.html</TT> directory contains
+HTML versions of the documentation.  You can read these documents
+with a World-Wide-Web (WWW) browser such as Netscape or Mosaic.
+Click the &quot;<TT>Open...</TT>&quot; button and type
+<PRE>
+    file://localhost/SHROOT/docs.html/homepage.html
+</PRE>
+where <EM>SHROOT</EM>  is the directory where you un-<TT>tar</TT>'ed the documentation
+release.
+<P>
+These documents are also available over the network at
+<PRE>
+    http://cs.wisc.edu/shore/doc
+</PRE>
+You may delete <TT>docs.html</TT> if you do not want to keep local copies.
+<P>
+The directory <TT>$SHROOT/docs.ps</TT>
+contains Postscript versions of the documents suitable for
+printing on a laser printer.
+You may delete this directory after printing the documentation.
+<P>
+The <TT>examples</TT> directory contains example and test programs
+discussed in the documentation.
+You can get the examples without the HTML or Postscript documentation
+by fetching <TT>examples.tar.gz</TT> rather than <TT>doc.tar.gz</TT>.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html78"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html75"
+ HREF="installation.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html69"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html77"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html79"
+ HREF="node5.html">Installing a Binary Release</A>
+<B> Up:</B> <A NAME="tex2html76"
+ HREF="installation.html">Shore Software Installation Manual</A>
+<B> Previous:</B> <A NAME="tex2html70"
+ HREF="node3.html">Requirements</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

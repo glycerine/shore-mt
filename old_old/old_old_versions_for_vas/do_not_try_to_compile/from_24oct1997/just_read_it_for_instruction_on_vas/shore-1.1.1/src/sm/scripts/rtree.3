@@ -1,0 +1,75 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# start up
+#
+source $script_dir/vol.init
+
+set nrec 200
+set u "2.-1500.-1500.1500.1500"
+
+#
+#create and load a file with boxes
+#
+sm begin_xct
+set f1 [sm create_file $volid]
+verbose f1 = $f1
+for {set i 0} {$i < $nrec} {incr i} {
+    set box($i) [sm next_box $u]
+#    verbose $r
+    sm create_typed_rec $f1 $box($i) 4 $i spatial
+}
+sm commit_xct
+
+#
+# create and load rtree
+#
+sm begin_xct
+set ndx [sm create_md_index $volid 2 rtree]
+verbose created rtree $ndx
+
+set stat [sm blkld_md_ndx $ndx $f1 70 110 $u]
+verbose created and loaded rtree $ndx
+verbose stat: $stat
+
+#sm draw_rtree $ndx
+#sm print_md_index $ndx
+
+sm commit_xct
+
+sm begin_xct
+verbose probe:
+for {set i 1} {$i < $nrec} {incr i} {
+    set r [sm find_md_assoc $ndx $box($i)]
+    set el [lindex $r 0]
+#    verbose $i $box($i) $el
+    assert {expr $i == $el}
+}
+verbose "---- successful"
+
+sm commit_xct
+
+sm begin_xct
+
+sm rtree_stats $ndx
+
+#set q "2.-500.-500.500.500"
+set q "2.-100.-100.100.100"
+
+sm rtree_query $ndx / $q
+sm rtree_query $ndx || $q
+sm rtree_query $ndx << $q
+
+sm commit_xct
+
+dstats $volid
+
+unset stat 
+unset f1 
+unset nrec ndx box i q r u el
+

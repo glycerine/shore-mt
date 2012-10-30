@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Installing a Binary Release</TITLE>
+<META NAME="description" CONTENT="Installing a Binary Release">
+<META NAME="keywords" CONTENT="installation">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="installation.css">
+<LINK REL="next" HREF="node6.html">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="installation.html">
+<LINK REL="next" HREF="node6.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html89"
+ HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html86"
+ HREF="installation.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html80"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html88"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html90"
+ HREF="node6.html">Compiling and Installing the</A>
+<B> Up:</B> <A NAME="tex2html87"
+ HREF="installation.html">Shore Software Installation Manual</A>
+<B> Previous:</B> <A NAME="tex2html81"
+ HREF="node4.html">Installing the Documentation Release</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="installation:binary">&#160;</A><H1><A NAME="SECTION00050000000000000000000">
+Installing a Binary Release</A>
+</H1>
+<P>
+A Shore binary release contains contains everything needed to write,
+compile and run Shore applications.  A binary release is specific
+to a particular hardware/OS platform and is compiled with either
+debugging/auditing support or extra optimization and no debugging support.
+<P>
+Set the shell variables TARDIR and SHROOT and create the directory $SHROOT
+as explained in
+<A HREF="node3.html#installation:vars">the <B>Requirements</B> section</A>.
+Follow these steps to install a binary release for SPARC Solaris 1.5 with
+full debugging support.
+<P><PRE>
+    cd $SHROOT
+    gzip -d -c $TARDIR/sparc.dbg.tar.gz | tar -xvf -
+</PRE>
+<P>(Substitute <TT>x86</TT> for <TT>sparc</TT> and/or <TT>opt</TT> for <TT>dbg</TT>
+as appropriate.)
+<P>
+This step creates sub-directories <TT>bin, lib</TT> and <TT>include</TT>
+in <TT>$SHROOT</TT>.  
+If you are installing both debugging and non-debugging binaries,
+un-<TT>tar</TT> them in distinct subdirectories of $SHROOT.
+<P>
+That's it!  You can test your installation by following the
+instructions in the
+Section&nbsp;<A HREF="node7.html#installation:testing">Testing Your Installation</A>.
+<P>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

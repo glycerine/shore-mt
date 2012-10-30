@@ -1,0 +1,99 @@
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#   Test rollback of a file destroy.
+
+set_config_info
+
+set npages 500
+
+# 1 per page
+set objsize 8000
+
+set nobjs [expr { ($max_small_rec/$objsize) * $npages } ]
+
+source ../scripts/vol.init
+
+# make an objsize buffer full of alphabetic characters
+set ten "abcde12345"
+set hundred ""
+# make 100 bytes
+for {set i 0} {$i < 10} {incr i}  {
+    set hundred "$hundred$ten"
+}
+
+set body ""
+for {set i 100} {$i < $objsize} {set i [expr $i + 100]}  {
+    set body "$body$hundred"
+}
+
+
+set hdr "" 
+# set id_body_width zvec%d
+# set body [format $id_body_width $objsize]
+
+# 
+# in existing file, create a buncha records
+# in one transaction
+#
+# First, clear out the file
+#
+set fid 0
+
+sm begin_xct
+    if {$fid!=0} {
+	sm destroy_file $fid 
+	set fid 0
+    }
+
+    # Now, start over and time it
+    set fid [sm create_file $volid ]
+    echo fid=$fid
+sm commit_xct
+
+echo CREATING $nobjs RECS of size $objsize
+
+set i 0
+
+sm begin_xct
+set dummy [sm gather_stats reset]
+set wtime [ time {
+	for {set i 0} {$i < $nobjs} {set i [expr $i + 1]} {
+	    sm create_rec $fid $hdr $objsize $body
+	}
+	sm force_buffers true
+} 1 ]
+
+echo CREATED $nobjs RECS of size $objsize, forced buffers
+echo total create time = $wtime
+set dummy [sm gather_stats reset]
+echo $dummy
+sm commit_xct
+
+echo forcing buffers again
+sm force_buffers true
+
+echo DESTROYING FILE 
+
+sm begin_xct
+set dummy [sm gather_stats reset]
+set wtime [ time {
+	sm destroy_file $fid
+	sm force_buffers true
+} 1 ]
+echo
+
+echo DESTROYED file
+echo total destroy time = $wtime
+set dummy [sm gather_stats reset]
+echo $dummy
+
+sm abort_xct
+
+unset r wtime dummy fid i body hdr
+
+echo shutting down

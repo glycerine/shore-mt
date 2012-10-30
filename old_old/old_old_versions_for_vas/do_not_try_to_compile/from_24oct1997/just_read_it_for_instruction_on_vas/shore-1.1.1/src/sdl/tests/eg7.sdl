@@ -1,0 +1,16 @@
+// example from sdl manual
+
+    module m1 {
+        external class a;
+        external enum b;
+        external typedef c;
+        external union d;
+        external struct e;
+
+        interface eg {
+            // ...
+        public:
+            e op(in a a_, in b b_, out c c_, out d d_);
+        };
+    }
+

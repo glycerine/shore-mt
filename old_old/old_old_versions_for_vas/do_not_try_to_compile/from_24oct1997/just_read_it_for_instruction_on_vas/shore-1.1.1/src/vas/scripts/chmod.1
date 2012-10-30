@@ -1,0 +1,32 @@
+# source ../scripts/chmod.1
+
+source ../scripts/chmod.compensate
+
+set true "1"
+set false "0"
+
+#
+# Tests CHMOD_2_V_MAN_PAGE comment in Registered.C
+#
+begin
+	set subject tfile
+	set oid [mkuserdef $subject 0:1:0]
+
+
+#   test that writing to file turns off
+#	set-uid and set-gid bits
+#
+	chmod 06755 $subject
+	assert [expr { [sfile mode $subject] == "0106755" }]
+	readablefile $subject $true
+	writeablefile $subject $true
+	execablefile $subject $true
+	assert [expr { [sfile mode $subject] == "0100755" }]
+
+#	TODO
+#	also the set GID bit is turned off if unpriv 
+#   user tries to change set_gid   bit  and file is
+#   owned by group not in users groups
+commit
+
+return "chmod.1 done."

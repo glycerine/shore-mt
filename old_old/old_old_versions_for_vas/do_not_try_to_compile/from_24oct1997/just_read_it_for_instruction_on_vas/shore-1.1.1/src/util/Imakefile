@@ -1,0 +1,13 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * Imakefile for utilities.
+ *
+ * $Header: /p/shore/shore_cvs/src/util/Imakefile,v 1.13 1997/06/13 22:33:37 solomon Exp $
+ */
+#define Subdirs mount

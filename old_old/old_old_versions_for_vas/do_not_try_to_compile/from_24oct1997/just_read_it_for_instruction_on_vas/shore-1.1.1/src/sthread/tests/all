@@ -1,0 +1,48 @@
+#!/bin/ksh 
+
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+function run_thread3 {
+    thread3 | sort
+}
+
+function execute  {
+    print -n "$1\t--> running --> "
+    print "running $1" >> $2
+
+    if [[ -a $3 ]]; then
+	of=/tmp/$$
+	if $1 > $of 2>&1; then
+	    if diff $of $3 >> $2; then
+		print "ok"
+	    else
+		print "failed"
+	    fi
+	else
+	    print "failed"
+	fi
+	cat $of >> $2
+	rm $of
+
+    elif $1 >> $2 2>&1; then
+	print "ok"
+    else
+	print "failed"
+    fi
+}
+
+
+outf=/tmp/all$$.out
+rm -f /tmp/all*.out
+execute thread1 $outf
+execute thread2 $outf
+execute run_thread3 $outf thread3.out
+execute thread4 $outf
+
+print
+print "result in $outf"

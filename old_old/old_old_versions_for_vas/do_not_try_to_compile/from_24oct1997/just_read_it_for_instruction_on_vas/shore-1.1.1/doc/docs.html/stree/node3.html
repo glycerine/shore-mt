@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Defining Data Types</TITLE>
+<META NAME="description" CONTENT="Defining Data Types">
+<META NAME="keywords" CONTENT="stree">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="stree.css">
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="up" HREF="stree.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html131"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html128"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html122"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html130"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html132"
+ HREF="node4.html">Implementing the Operations</A>
+<B> Up:</B> <A NAME="tex2html129"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html123"
+ HREF="node2.html">Introduction</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="stree:types">&#160;</A><H1><A NAME="SECTION00030000000000000000000">
+Defining Data Types</A>
+</H1>
+<P>
+The first step in building an application to run under Shore is to define
+the data types of all persistent data that will be used by the application.
+These declarations are written in a type-definition language called SDL
+(for <A NAME="tex2html6"
+ HREF="../sdlman/sdlman.html"><EM>Shore Data-definition Language</EM></A>).
+The file
+<A HREF="node8.html#stree:sdlSRC">stree.sdl</A>
+contains the type definitions for the binary search tree example.
+This file contains one
+<A HREF="../sdlman/node6.html#sdlman:module">module</A>,
+called <TT>stree</TT>, which defines four types:
+<TT>SearchTree</TT>,
+<TT>Word</TT>,
+<TT>Document</TT>,
+and
+<TT>Cite</TT>.
+These types are defined by <EM>interface</EM> definitions, which are
+quite similar to class definitions in C++.
+<P><A HREF="node8.html#stree:searchtreeIF"><TT>SearchTree</TT></A>
+is the top-level object.
+The example program will create exactly one object of this type.
+Its public interface consists of three operations:
+<TT>initialize</TT>,
+<TT>insert</TT>,
+and
+<TT>find</TT>.
+It also defines one private operation, an alternate (overloaded)
+version of <TT>insert</TT>, and one attribute, a <TT>ref</TT> (persistent
+pointer) to the <TT>Word</TT> object that is the root of the tree.
+The comments in
+<A HREF="node8.html#stree:sdlSRC">stree.sdl</A>
+explain the semantics of the operations
+and attributes;
+we will remark here only on aspects of the definition that illustrate
+features of SDL.
+<P>
+The <TT>initialize</TT> operation of a <TT>SearchTree</TT> should be invoked
+once immediately after it is created.
+SDL does not yet have the counterpart of constructors and destructors
+in C++.  (This deficiency may be rectified in a future version.)
+The <TT>insert</TT> operation is intended to be invoked with one argument, which
+is a (transient) C++ character string.  We use type
+type <TT>lref&lt;char&gt;</TT>, which translates to <TT>char *</TT> in the C++ binding.
+This is a bit of a kludge.  Future versions of SDL will probably have
+a more general mechanism for declaring operations whose parameters have
+&quot;opaque&quot; (i.e., non-SDL) types.
+<P><A HREF="node8.html#stree:wordIF"><TT>Word</TT></A>
+represents a node in the search tree.  The private part of
+the interface is similar to the way one might define a binary search tree
+node in C++ or C.  A <TT>Word</TT> has a string value and pointers to
+its left and right subtrees.  The type <TT>string</TT> is a pre-defined
+type in SDL representing an arbitrary-length character string.
+The <TT>relationship</TT> declaration indicates that <TT>Word</TT>s participate
+in an N-M (many-to-many) relationship with
+<A HREF="node8.html#stree:citeIF"><TT>Cite</TT>s</A>.
+That is, for each instance <TT>w</TT> of <TT>Word</TT>, <TT>w.cited_by</TT> is
+a set of zero or more references to <TT>Cite</TT> objects.  Moreover,
+<TT>Word::cited_by</TT> and <TT>Cite::cites</TT> are to be kept
+<EM>consistent</EM>:
+<TT>w.cited_by</TT> should contain a reference to an instance <TT>c</TT> of <TT>Cite</TT> if and only if <TT>c.cites</TT> contains a reference to <TT>w</TT>.
+The operations <TT>find_or_add</TT> and <TT>find</TT> are intended only
+to be called from the operations of <TT>SearchTree</TT>.  They would
+be in the private part of the interface if SDL had the equivalent of the
+<EM>friend</EM> declaration of C++.
+<P>
+A <A HREF="node8.html#stree:citeIF"><TT>Cite</TT></A>
+object represents a citation (an occurrence of a word in
+a line of a document).
+The <TT>offset</TT> attribute indicates the offset of the cited line
+from the beginning of the document, in bytes.
+If SDL supported first class relationships in
+the sense of the entity-relationship model-that is, if relationships
+could have attributes-<TT>Cite</TT> would have been declared as a
+relationship
+between <TT>Word</TT> and <TT>Document</TT> with attribute <TT>offset</TT>.
+Instead, a <EM>Cite</EM> is represented by a separate object, with a
+many-to-many relationship to <TT>Word</TT> (each word may occur on many lines
+and each line may cite several words) and a many-to-one relationship to
+<TT>Documment</TT> (a document may have many lines, but each line cites a unique
+document).
+<P>
+Finally,  <A HREF="node8.html#stree:documentIF"><TT>Document</TT></A>
+represents an actual document stored in the repository.
+The type <TT>text</TT> of the attribute <TT>body</TT> is the same as <TT>string</TT>,
+but has the additional function of declaring that when a <TT>Document</TT>
+is accessed through the Unix compatibility interface, it will appear to
+be a file whose contents are the contents of this field.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html131"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html128"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html122"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html130"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html132"
+ HREF="node4.html">Implementing the Operations</A>
+<B> Up:</B> <A NAME="tex2html129"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html123"
+ HREF="node2.html">Introduction</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

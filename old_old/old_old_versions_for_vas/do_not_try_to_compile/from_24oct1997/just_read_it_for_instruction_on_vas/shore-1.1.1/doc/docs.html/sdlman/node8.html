@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Name Scopes</TITLE>
+<META NAME="description" CONTENT="Name Scopes">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node9.html">
+<LINK REL="previous" HREF="node7.html">
+<LINK REL="up" HREF="sdlman.html">
+<LINK REL="next" HREF="node9.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html149"
+ HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html146"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html140"
+ HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html148"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html150"
+ HREF="node9.html">Interfaces</A>
+<B> Up:</B> <A NAME="tex2html147"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html141"
+ HREF="node7.html">Linking</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html151"
+ HREF="node8.html#SECTION00081000000000000000000">
+Examples</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="sdlman:namespace">&#160;</A><H1><A NAME="SECTION00080000000000000000000">
+Name Scopes</A>
+</H1>
+<P>
+The body of a
+<TT>module</TT>,
+<TT>interface</TT>,
+<TT>struct</TT>,
+or
+<TT>union</TT>
+declaration is a
+<EM>name scope</EM>.
+Each scope contains a sequence of
+<EM>definitions</EM>,
+each of which defines one or more names and binds each of them to a constant,
+type, interface, attribute, or operation.
+Names defined in a scope must be distinct.
+Each scope also has a name.
+Name
+<EM>N</EM>
+defined in scope
+<EM>S</EM>
+can be referred to unambiguously with the
+<TT>scoped_name</TT>
+<EM>S::N</EM>.
+Since scopes nest, this construction may be iterated.
+For example,
+<EM>S::T::N</EM>
+refers to the name
+<EM>N</EM>
+defined in scope
+<EM>T</EM>,
+which was defined in scope
+<EM>S</EM>.
+In this document,
+&quot;name&quot;
+means unqualified name (one with no
+&quot;::&quot;)
+unless specified otherwise.
+A use of an unqualified name
+<EM>N</EM>
+refers to the definition of
+<EM>N</EM>
+in the smallest scope enclosing the use that defines
+<EM>N</EM>
+(but see also the discussion of
+inheritance in
+<A HREF="node9.html#sdlman:inheritance">the next section)</A>.
+<P>
+The
+<TT>import</TT>
+clause of a module and the
+<TT>inheritance</TT>
+clause of an interface effectively
+merge the sets of scoped names defined in two or more scopes.
+Names defined in more than one of these scopes must be qualified to
+prevent ambiguity.
+<A NAME="sdlman:namespaceexample">&#160;</A><H2><A NAME="SECTION00081000000000000000000">
+Examples</A>
+</H2>
+<P><PRE>
+    module m1 { 
+        export all;    
+        const long C = 1;    
+    } 
+    module m2 { 
+        import &quot;m1&quot;; 
+        const long D = C; // error: ambiguous (m1::C or m2::C) 
+        const long C = 2; 
+        const long E = m1::C; // ok: E = 1  
+    }
+</PRE>
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html149"
+ HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html146"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html140"
+ HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html148"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html150"
+ HREF="node9.html">Interfaces</A>
+<B> Up:</B> <A NAME="tex2html147"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html141"
+ HREF="node7.html">Linking</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

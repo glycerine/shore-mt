@@ -1,0 +1,77 @@
+####  global variables  ####
+
+# pagesize = 1024
+# lgdatasize = 960
+# smdatasize = 936
+
+set unit $pagesize 
+set verbose 0
+
+
+####  procedures  ####
+
+proc float2int { float_num } {
+    return [format "%.0f" $float_num]
+}
+
+proc truncate_obj { pool core heap trunc } {
+    global unit
+
+    set core_sz [ float2int [expr { $core * $unit }] ]
+    set heap_sz [ float2int [expr { $heap * $unit }] ]
+    set trunc_sz [ float2int [expr { $trunc * $unit }] ]
+
+    puts stdout "$core_sz $heap_sz $trunc_sz" nonewline
+
+    set o1 [mkanon $pool ${core_sz}:${heap_sz}:0]
+    set o2 [mkanon $pool ${core_sz}:${heap_sz}:0]
+    set o3 [mkanon $pool ${core_sz}:${heap_sz}:0]
+
+    for { set i 1 } { $i <= 10 } { incr i } {
+        set heap_sz [expr {$heap_sz - $trunc_sz}]
+        if { $heap_sz < 0 } { break }
+
+#  
+#  NOTE: the argument given to trunc command is the new length
+#	 of the object after the truncation.  
+#  
+        trunc $o1 [expr { $core_sz + $heap_sz }] 
+        trunc $o2 [expr { $core_sz + $heap_sz }] 
+        trunc $o3 [expr { $core_sz + $heap_sz }]
+        puts stdout "." nonewline
+    }
+    puts stdout ""
+}
+
+
+####  main  ####
+
+begin
+cd ned
+mkpool p
+commit
+
+foreach core { 0.01 0.1 0.2 0.9 0.99 1.0 2.0 10.0 50.0 100.0 } {
+  foreach heap { 0.01 0.1 0.2 0.9 0.99 1.0 2.0 10.0 50.0 100.0 } {
+    foreach trunc { 0.01 0.1 0.2 0.9 0.99 1.0 2.0 10.0 40.0 0.9 0.1 0.01 } {
+	if { $heap >= $trunc } {
+#	    begin
+#	    truncate_obj p $core $heap $trunc
+#	    commit
+
+	    begin
+	    truncate_obj p $core $heap $trunc
+	    puts stdout "Verify begins   " nonewline
+	    verify
+	    puts stdout "Verify ends"
+#	    printovt active
+	    abort
+	}
+    }
+  }
+}
+
+# puts stdout "Verify begins"
+# verify
+# puts stdout "Verify ends"
+# printovt commit

@@ -1,0 +1,52 @@
+/////////////////////////////////////////////////
+// The point of this test is to see the LB for
+// the method aoperation, below: It passes
+// "param" by value; it should pass it by reference.
+//
+/////////////////////////////////////////////////
+module m1 {
+	interface I;
+	struct junk_t {
+		char large[1000];
+	};
+	struct junk {
+		sequence<ref<I> > 	s;
+		sequence<junk_t>	j;
+        int  				int_array[3000];
+	};
+
+	interface I {
+	public:
+		void aoperation(
+			in 			junk a,
+			inout 		junk_t b,
+			out	 		int	c
+			) const;
+
+		void op1(
+			in int a,
+			inout int b, 
+			out int c);
+
+		typedef sequence<int> z;
+
+
+		void op2(
+			in 			string a,
+			in 			ref<I> b,
+			in 	 		int	c,
+			in 			lref<int>	d,
+			in			lref<char>	e,
+			// PR - doesn't work:
+			in			sequence<char>	f, // error
+
+			// in			z	f1,
+			// out			z	f2,
+
+			// in			sequence<I>	k - not legit
+			in			set<I>	g
+			) const;
+		
+	};
+
+}

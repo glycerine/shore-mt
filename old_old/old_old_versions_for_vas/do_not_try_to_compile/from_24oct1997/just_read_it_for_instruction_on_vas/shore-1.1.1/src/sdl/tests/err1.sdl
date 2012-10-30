@@ -1,0 +1,13 @@
+
+module m1 {
+interface A {
+public:
+  attribute string s;
+};
+
+interface B {
+public:
+  attribute A a;
+};
+
+}

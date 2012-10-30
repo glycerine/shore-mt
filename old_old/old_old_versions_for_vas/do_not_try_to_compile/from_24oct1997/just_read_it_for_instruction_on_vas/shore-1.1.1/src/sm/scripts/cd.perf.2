@@ -1,0 +1,19 @@
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#   Uses cd.perf, but set the objsize and npages and nobjs
+#   parameters here:
+#
+
+set_config_info
+
+set npages 500
+
+# 2 per page
+set objsize 3000 
+
+source $script_dir/cd.perf

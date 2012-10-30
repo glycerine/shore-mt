@@ -1,0 +1,66 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  load a btree, and verify its split behavior. A probe is done
+#  after a few inserts.
+#  -- same as btree.2 but uses vlong_form for element (value)
+#  AND uses vlong_form for key
+#
+
+#
+# start up
+#
+source $script_dir/vol.init
+
+
+set nrec 800
+
+#
+# create index and load it up 
+#
+sm begin_xct
+set ndx [sm create_index $volid btree]
+verbose created index $ndx
+for {set i 1} {$i <= $nrec} {incr i} {
+    #verbose inserting $i [format $vlong_form $i] [format $vlong_form $i]
+    if {$i%20 == 0} { 
+	verbose inserting $i [format $vlong_form $i] [format $vlong_form $i] 
+    }
+    sm create_assoc $ndx [format $vlong_form $i] [format $vlong_form $i]
+    #set el [sm find_assoc $ndx [format $vlong_form $i] ]
+    #assert {[expr {[format $vlong_form $i] == $el}]}
+
+    if {$i > 280 && $i%50 == 0 } {
+	for {set j 1} {$j <= $i} {incr j} {
+	    set el [sm find_assoc $ndx [format $vlong_form $j] ]
+	    #assert {[expr {[format $vlong_form $j] == $el}]}
+	    if {[format $vlong_form $j] != $el} {
+	        verbose [format $vlong_form $j] != $el
+		assert {0}
+	    }
+	}
+    }
+}
+verbose "probe:"
+for {set i 1} {$i <= $nrec} {incr i} {
+    set el [sm find_assoc $ndx [format $vlong_form $i] ]
+    assert {[expr {[format $vlong_form $i] == $el}]}
+}
+verbose probed [expr {$i - 1}]
+verbose "---- successful"
+
+sm commit_xct
+
+verbose testing integer key btree
+sm begin_xct
+sm test_int_btree $volid $nrec
+sm commit_xct
+
+unset ndx
+unset nrec
+unset i

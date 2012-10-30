@@ -1,0 +1,29 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+This directory contains an example program called "shls" (Shore ls),
+which is a simple "ls" program for Shore directories.
+To compile it, copy
+Makefile.template to Makefile, edit the INSTALL_DIR variable in
+Makefile to point to the top of your Shore installation directory, and
+type "make".
+
+The usage of shls is: shls [-i] [path...]
+
+Shls run without any arguments is equivalent to "shls /".  Any number of
+pathnames can be given.  If a path refers to a directory, then its
+contents are listed.  Otherwise, the given pathname is listed if it is a
+valid name.
+
+Shls optionally accepts the "-i" flag, which, by analogy with the "-i"
+flag of UNIX ls, prints the logical oid corresponding to each pathname
+along with the pathname itself.
+
+Shls always considers itself to be in the root directory ("/") of the
+Shore filesystem.  Therefore, it make no difference whether the
+pathname arguments are relative or absolute, although shls accepts
+either form.

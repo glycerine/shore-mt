@@ -1,0 +1,87 @@
+# set fileType to tmp or regular
+# set logging to yes or no here AND in .shoreconfig
+if {$Use_logical_id == 1} {
+    echo WARNING: tmpfile.1 cannot be run (since logical IDs are turned on)
+    verbose WARNING: until we destroy tmp files properly on dismount for logical ids
+} else {
+
+	set recsize 300
+	set fileType tmp
+	set logging yes
+	set numTests 1
+	set id_width %08d
+
+	proc test {fileType numObjs numTimes recSize}  {
+		global id_width volid buffer 
+
+		for {set j 0} {$j < $numTimes} {incr j}  {
+			sm begin_xct
+			set fid [sm create_file $volid $fileType]
+			verbose "**** new file $fid $numObjs $recSize"
+			for {set i 0} {$i < $numObjs} {incr i}  {
+			# sm create_rec $fid [format $id_width $i] $recSize $buffer
+		sm create_rec $fid [format $id_width $i] $recSize [format "%0*d" $recSize 2]
+			}
+		   #  sm dump_buffers
+			# sm dump_threads
+			verbose "**** change property $fid"
+			sm set_store_property $fid regular
+
+			verbose "**** beginning scan $fid"
+			set scan [sm scan_file_create $fid t_cc_file]
+			verbose scan = $scan fid=$fid
+			set pin [sm scan_file_next $scan 0]
+			while {$pin != "NULL"}  {
+				set r [sm read_rec [sm pin_rid $pin] 0 0]
+				set pin [sm scan_file_next $scan 0]
+			}
+			sm scan_file_destroy $scan
+			verbose sm scan_file_destroy $scan fid=$fid
+
+		
+			verbose "**** begin destroy fid=$fid"
+			sm destroy_file $fid
+			sm commit_xct
+			verbose "**** after destroy fid=$fid"
+		}
+	}
+
+	# make a 64K buffer
+	set buffer ""
+	set c 1
+	for {set i 48} {$i < 112} {incr i}  {
+		set c [format "%c" $i]
+		set buffer "$buffer$c"
+	}
+	for {set i 0} {$i < 10} {incr i}  {
+		set buffer "$buffer$buffer"
+	}
+
+	verbose "********************************"
+	verbose "** fileType: $fileType, logging: $logging, numTest: $numTests"
+	verbose "********************************"
+
+	source ../scripts/vol.init
+	clearstats
+
+	# set testTime [time {test $fileType} $numTests]
+	set t1 [fork_thread test "tmp" 1000 4 $recsize]
+	set t2 [fork_thread test "tmp" 8000 4 $recsize]
+	set t3 [fork_thread test "tmp" 100 3 $recsize]
+	set t4 [fork_thread test "tmp" 150 8 $recsize]
+	join_thread $t1 $t2 $t3 $t4
+	# join_thread $t1 
+
+
+	verbose
+	# verbose testTime=$testTime
+	verbose ********************************
+	verbose STAT NUMBERS ARE FOR $numTests RUNS.
+	verbose ********************************
+	verbose [sm gather_stats]
+	verbose
+	verbose
+
+	unset buffer logging c recsize fileType numTests id_width
+	unset t1 t2 t3 t4
+}

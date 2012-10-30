@@ -1,0 +1,53 @@
+# this: source ../scripts/connect
+# CLIENT ONLY
+vas localhost
+source ../scripts/setup.small
+
+cout "Done with setup.small" 
+cout "Beginning a new transaction." 
+begin
+cd /small
+set obj [mkanon pool 10:10:NoText]
+read  $obj
+commit
+disconnect
+
+proc doit { h n m } {
+	global obj
+	cout "********************* " 
+	cout "BEGIN doit " $h $n $m 
+	cout "END doit " $h $n $m 
+
+	vas $h $n $m
+	begin
+	stat $obj
+	read $obj
+	read $obj
+	commit
+	stats
+	disconnect
+}
+
+foreach h {
+	localhost
+	bounty
+} {
+	cout "********************* " $h
+	vas $h 
+	stats
+	disconnect
+
+	doit  $h 0 0 
+
+	foreach f {
+		3 10 8
+	} {
+		doit $h $f $f
+		doit $h $f 0 
+	}
+}
+
+rename doit ""
+
+expect SVAS_BadParam2 from {vas bounty 0 3} 
+expect SVAS_BadParam2 from {vas localhost 0 3} 

@@ -1,0 +1,992 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Appendix: Program Sources</TITLE>
+<META NAME="description" CONTENT="Appendix: Program Sources">
+<META NAME="keywords" CONTENT="stree">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="stree.css">
+<LINK REL="previous" HREF="node7.html">
+<LINK REL="up" HREF="stree.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif_gr.gif"> 
+<A NAME="tex2html193"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html191"
+ HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html195"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Up:</B> <A NAME="tex2html194"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html192"
+ HREF="node7.html">Using Indexes</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html196"
+ HREF="node8.html#SECTION00081000000000000000000">
+stree.sdl</A>
+<LI><A NAME="tex2html197"
+ HREF="node8.html#SECTION00082000000000000000000">
+main.C</A>
+<LI><A NAME="tex2html198"
+ HREF="node8.html#SECTION00083000000000000000000">
+tree.C</A>
+<LI><A NAME="tex2html199"
+ HREF="node8.html#SECTION00084000000000000000000">
+word.C</A>
+<LI><A NAME="tex2html200"
+ HREF="node8.html#SECTION00085000000000000000000">
+cite.C</A>
+<LI><A NAME="tex2html201"
+ HREF="node8.html#SECTION00086000000000000000000">
+document.C</A>
+<LI><A NAME="tex2html202"
+ HREF="node8.html#SECTION00087000000000000000000">
+stree_defs.C</A>
+<LI><A NAME="tex2html203"
+ HREF="node8.html#SECTION00088000000000000000000">
+swc</A>
+<LI><A NAME="tex2html204"
+ HREF="node8.html#SECTION00089000000000000000000">
+sedit</A>
+<LI><A NAME="tex2html205"
+ HREF="node8.html#SECTION000810000000000000000000">
+docIndex</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="stree:appendix">&#160;</A><H1><A NAME="SECTION00080000000000000000000">
+Appendix:  Program Sources</A>
+</H1>
+<P><A NAME="stree:sdlSRC">&#160;</A><H2><A NAME="SECTION00081000000000000000000">
+stree.sdl</A>
+</H2>
+<PRE>
+module stree {
+    // interfaces defined here
+    interface SearchTree;   // the top-level construct
+    interface Word;         // a binary search tree node -- represents one word
+    interface Document;     // a document stored in the repository
+    interface Cite;         // a reference to a line in a document
+</PRE><A NAME="stree:searchtreeIF">&#160;</A><PRE>
+    // A binary search tree of Word objects
+    interface SearchTree {
+      private:
+        attribute ref&lt;Word&gt; root;   // the root of the tree
+
+        // Update the entry matching WORD to add a citation.
+        // Add a new Word if necessary.
+        void insert(in lref&lt;char&gt; word, in ref&lt;Cite&gt; cite);
+
+      public:
+        // Constructor:  make an empty tree
+        void initialize();
+
+        // Insert a new Document into the repository.  The argument is a
+        // pathname to be interpreted in the Unix name space as the name of a
+        // Unix file containing the raw data.  A new Document object with
+        // the same base name is created in the current Shore directory,
+        // filled with a copy of the file's context, and indexed by all of
+        // its words.
+        void insert_file(in lref&lt;char&gt; src);
+
+        // Retrieve the Word object matching the argument.
+        // Return NULL if not found.
+        ref&lt;Word&gt; find(in lref&lt;char&gt; word) const;
+    };
+</PRE><A NAME="stree:wordIF">&#160;</A><PRE>
+    // There is one Word object for each distinct word appearing in any
+    // document in the repository.
+    interface Word {
+    private:
+        attribute string value;
+        attribute ref&lt;Word&gt; left, right;
+    public:
+        relationship set&lt;Cite&gt; cited_by inverse cites;
+        // Constructor: empty occurrences list
+        void initialize(in lref&lt;char&gt; word);
+
+        // How many occurrences?
+        long count() const;
+
+        // Get ith occurrence (returns NULL if not that many)
+        ref&lt;Cite&gt; occurrence(in long i) const;
+
+        // The following methods are meant to be used only by SearchTree.
+
+        // Find decendant matching WORD creating one if necessary
+        ref&lt;Word&gt; find_or_add(in lref&lt;char&gt; word);
+
+        // Find only, return NULL on not found
+        ref&lt;Word&gt; find(in lref&lt;char&gt; word) const;
+
+        // Debugging dump
+        void print(in long verbose) const;
+
+        // Add an occurence
+        void occurs_on(in ref&lt;Cite&gt; cite);
+    };
+</PRE><A NAME="stree:citeIF">&#160;</A><PRE>
+    // A Cite object represents a citation.  There is one Cite object for each
+    // line of each document in the repository.  There is thus a many-many
+    // relationship from Cite to Word and a many-one relationship from Cite
+    // to Document.
+    interface Cite {
+    private:
+        attribute long offset;
+    public:
+        relationship ref&lt;Document&gt; doc inverse cited_by;
+        relationship set&lt;Word&gt; cites inverse cited_by;
+        // Constructor
+        void initialize(in ref&lt;Document&gt; d, in long o);
+
+        // Print the referenced line
+        void print(in long vflag) const;
+
+        // Destructor
+        void finalize();
+    };
+</PRE><A NAME="stree:documentIF">&#160;</A><PRE>
+    // A Document is a chunk of text that looks like a Unix file.
+    // We also record the file name under which it was created.
+    // (The need to record the name may go away when Shore adds a way to find
+    // the pathname of a registered object given a Ref to it.)
+    interface Document {
+    private:
+        attribute text body;
+        attribute string name;
+        attribute long cur_len;
+    public:
+        relationship set&lt;Cite&gt; cited_by inverse doc;
+        // Constructor:  The body is empty.
+        void initialize(in lref&lt;char&gt; base_name, in long len);
+
+        // Add some text to the end of the body.
+        void append(in lref&lt;char&gt; str);
+
+        // Read-only access to the file name.
+        lref&lt;char&gt; get_name() const;
+
+        // Current length of text
+        long size() const;
+
+        // Print a line starting at OFFSET
+        void print_line(in long offset) const;
+
+        // Destructor
+        void finalize();
+    };
+
+}
+</PRE>
+<A NAME="stree:mainSRC">&#160;</A><H2><A NAME="SECTION00082000000000000000000">
+main.C</A>
+</H2>
+<PRE>
+/*
+ * ShoreConfig.h is needed only by applications
+ * that distinguish platforms.  (Stree does not,
+ * but we include this for documentation purposes.)
+ */
+#include &lt;ShoreConfig.h&gt;
+
+#include &lt;iostream.h&gt;
+#include &lt;fstream.h&gt;
+#include &lt;std.h&gt;
+#include &quot;stree.h&quot;
+
+Ref&lt;SearchTree&gt; repository;
+Ref&lt;Pool&gt; nodes;        // Place to create new anonymous objects
+
+const char *DEMO_DIR = &quot;stree&quot;;
+
+char *argv0;
+int verbose;
+extern &quot;C&quot; int optind;
+
+enum OPERATION {
+    OP_NONE, OP_ADD, OP_LIST, OP_DEL, OP_POOL_LIST, OP_CLEAR
+} operation = OP_NONE;
+
+static void add_files(int argc, char *const*argc);
+static void list_files(char *str);
+static void delete_files(int argc, char *const*argc);
+static void pool_list();
+static void clear_all();
+
+void usage() {
+    cerr &lt;&lt; &quot;usage:&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;\t&quot; &lt;&lt; argv0 &lt;&lt; &quot; -a[V] fname [fname ...]&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;\t&quot; &lt;&lt; argv0 &lt;&lt; &quot; -l[V] word&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;\t&quot; &lt;&lt; argv0 &lt;&lt; &quot; -d fname [fname ...]&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;\t&quot; &lt;&lt; argv0 &lt;&lt; &quot; -p&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;\t&quot; &lt;&lt; argv0 &lt;&lt; &quot; -c&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;\t&quot; &lt;&lt; &quot;the -V option turns on verbose mode&quot; &lt;&lt; endl;
+    exit(1);
+}
+
+int main(int argc, char *argv[]) 
+{
+    argv0 = argv[0];
+    shrc rc;
+</PRE><A NAME="stree:initcall">&#160;</A><PRE>
+    // initialize connection to server
+    SH_DO(Shore::init(argc, argv, 0, getenv(&quot;STREE_RC&quot;)));
+
+    // get command-line options
+    int c;
+    while ((c = getopt(argc,argv,&quot;aldpcV&quot;)) != EOF) switch(c) {
+        case 'a': operation = OP_ADD; break;
+        case 'l': operation = OP_LIST; break;
+        case 'd': operation = OP_DEL; break;
+        case 'p': operation = OP_POOL_LIST; break;
+        case 'c': operation = OP_CLEAR; break;
+        case 'V': verbose++; break;
+        default: usage();
+    }
+
+    if (operation == OP_NONE)
+        usage();
+</PRE><A NAME="stree:begintrans">&#160;</A><PRE>
+    // Start a transaction for initialization
+    SH_BEGIN_TRANSACTION(rc);
+    if (rc)
+        rc.fatal(); // this terminates the program with extreme prejudice
+
+    // Check that our demo directory exists
+    rc = Shore::chdir(DEMO_DIR);
+    if (rc != RCOK) {
+        if (rc != RC(SH_NotFound))
+            SH_ABORT_TRANSACTION(rc);
+
+        // Not found.  Must be the first time through.
+        // Create the directory
+        SH_DO(Shore::mkdir(DEMO_DIR, 0755));
+        SH_DO(Shore::chdir(DEMO_DIR));
+</PRE><A NAME="stree:createrepository">&#160;</A><PRE>
+        // Make a new SearchTree object ...
+        repository = new(&quot;repository&quot;, 0644) SearchTree;
+        repository.update()-&gt;initialize();
+
+        // ... and a pool for allocating Nodes.
+        SH_DO(nodes.create_pool(&quot;pool&quot;, 0644, nodes));
+    } else { // not first time
+
+        // Get the repository root from the database ...
+        SH_DO(Ref&lt;SearchTree&gt;::lookup(&quot;repository&quot;,repository));
+
+        // ... and the pool for creating nodes
+        SH_DO(nodes.lookup(&quot;pool&quot;, nodes));
+    }
+
+    SH_DO(SH_COMMIT_TRANSACTION);
+
+    switch (operation) {
+        case OP_ADD:
+            add_files(argc-optind, argv+optind);
+            break;
+        case OP_LIST:
+            if (optind != argc-1)
+                usage();
+            list_files(argv[optind]);
+            break;
+        case OP_DEL:
+            delete_files(argc-optind, argv+optind);
+            break;
+        case OP_POOL_LIST:
+            pool_list();
+            break;
+        case OP_CLEAR:
+            clear_all();
+            break;
+        default: break;
+    }
+
+    return 0;
+} // main
+
+// Add all the named files to the repository
+static void add_files(int argc, char *const*argv) {
+    shrc rc;
+
+    SH_BEGIN_TRANSACTION(rc);
+    if (rc)
+        rc.fatal();
+    for (int i=0; i&lt;argc; i++)
+        repository.update()-&gt;insert_file(argv[i]);
+    if (verbose)
+        cout &lt;&lt; &quot;about to commit&quot; &lt;&lt; endl;
+    SH_DO(SH_COMMIT_TRANSACTION);
+    if (verbose)
+        cout &lt;&lt; &quot;committed&quot; &lt;&lt; endl;
+} // add_files
+
+// List all uses of a word
+static void list_files(char *str) {
+    shrc rc;
+    int occurrences=0;
+
+    SH_BEGIN_TRANSACTION(rc);
+    if (rc)
+        rc.fatal();
+    Ref&lt;Word&gt; w = repository-&gt;find(str);
+    if (verbose)
+        cout &lt;&lt; &quot;========== &quot; &lt;&lt; str &lt;&lt; endl;
+    if (w &amp;&amp; w-&gt;count() &gt; 0) {
+        Ref&lt;Cite&gt; c;
+        for (int i=0; c = w-&gt;occurrence(i); i++) {
+            occurrences++;
+            c-&gt;print(verbose);
+        }
+    } else if (verbose) {
+        cout &lt;&lt; &quot;**** Not found&quot; &lt;&lt; endl;
+        occurrences = -1;
+    }
+    if(occurrences &gt;= 0 &amp;&amp; verbose) {
+        cout &lt;&lt; &quot;**** &quot; &lt;&lt; occurrences &lt;&lt; &quot; citation&quot;
+            &lt;&lt; (char *)(occurrences==1?&quot;&quot;:&quot;s&quot;) &lt;&lt; endl;
+    }
+    SH_DO(SH_COMMIT_TRANSACTION);
+} // list_files
+</PRE><A NAME="stree:deletefilesFUNC">&#160;</A><PRE>
+// Removed the named files from the repository
+static void delete_files(int argc, char *const*argv) {
+    shrc rc;
+
+    SH_BEGIN_TRANSACTION(rc);
+    if (rc)
+        rc.fatal();
+
+    for (int i=0; i&lt;argc; i++) {
+        Ref&lt;Document&gt; d;
+        SH_DO(d.lookup(argv[i],d));
+        d.update()-&gt;finalize();
+        SH_DO(Shore::unlink(argv[i]));
+    }
+    if (verbose)
+        cout &lt;&lt; &quot;about to commit&quot; &lt;&lt; endl;
+    SH_DO(SH_COMMIT_TRANSACTION);
+    if (verbose)
+        cout &lt;&lt; &quot;committed&quot; &lt;&lt; endl;
+} // delete_files
+</PRE><A NAME="stree:poollistFUNC">&#160;</A><PRE>
+static void pool_list() {
+    shrc rc;
+
+    SH_BEGIN_TRANSACTION(rc);
+    if (rc)
+        rc.fatal();
+
+    Ref&lt;any&gt; ref;
+    Ref&lt;Word&gt; w;
+    Ref&lt;Cite&gt; c;
+    {
+        PoolScan scan(&quot;pool&quot;);
+        if (scan != RCOK)
+            SH_ABORT_TRANSACTION(scan.rc());
+
+        while (scan.next(ref, true) == RCOK) {
+            if (w = TYPE_OBJECT(Word).isa(ref)) {
+                w-&gt;print(1);
+            }
+            else if (c = TYPE_OBJECT(Cite).isa(ref)) {
+                c-&gt;print(2);
+            }
+            else cout &lt;&lt; &quot; Unknown type of object&quot; &lt;&lt; endl;
+        }
+    }
+    SH_DO(SH_COMMIT_TRANSACTION);
+} // pool_list
+</PRE><A NAME="stree:clearallFUNC">&#160;</A><PRE>
+static void clear_all() {
+    shrc rc;
+
+    SH_BEGIN_TRANSACTION(rc);
+    if (rc)
+        rc.fatal();
+
+    rc = Shore::unlink(&quot;repository&quot;);
+    if (rc)
+        cout &lt;&lt; rc &lt;&lt; endl;
+
+    SH_DO(nodes.lookup(&quot;pool&quot;, nodes));
+    SH_DO(nodes.destroy_contents());
+    rc = Shore::unlink(&quot;pool&quot;);
+    if (rc)
+        cout &lt;&lt; rc &lt;&lt; endl;
+
+    rc = Shore::chdir(&quot;..&quot;);
+    if (rc)
+        cout &lt;&lt; rc &lt;&lt; endl;
+
+    SH_DO(Shore::rmdir(DEMO_DIR));
+
+    SH_DO(SH_COMMIT_TRANSACTION);
+} // clear_all
+</PRE>
+<A NAME="stree:treeSRC">&#160;</A><H2><A NAME="SECTION00083000000000000000000">
+tree.C</A>
+</H2>
+<PRE>
+// Member functions of the SearchTree class
+#include &lt;iostream.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+#include &quot;stree.h&quot;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/stat.h&gt;
+
+extern Ref&lt;Pool&gt; nodes;
+static int getword(const char *&amp;p, char *res, int size);
+
+extern int verbose; // defined in main.C
+
+void SearchTree::initialize() {
+    root = NULL;
+}
+</PRE><A NAME="stree:searchtreeinsertFUNC">&#160;</A><PRE>
+void SearchTree::insert(char *s, Ref&lt;Cite&gt; c) {
+    Ref&lt;Word&gt; w;
+    if (root) {
+        w = root.update()-&gt;find_or_add(s);
+    }
+    else {
+        root = new(nodes) Word;
+        root.update()-&gt;initialize(s);
+        w = root;
+    }
+    w.update()-&gt;occurs_on(c);
+}
+
+void SearchTree::insert_file(char *fname) {
+    shrc rc;
+
+    if (verbose)
+        cout &lt;&lt; &quot;Indexing file &quot; &lt;&lt; fname &lt;&lt; endl;
+
+    // Open input file
+    ifstream in(fname);
+    if (!in) {
+        perror(fname);
+        SH_ABORT_TRANSACTION(rc);
+    }
+    // do a unix stat to get the total size of the file.
+    struct stat in_stat;
+    if (stat(fname,&amp;in_stat)) {
+        perror(fname);
+        SH_ABORT_TRANSACTION(rc);
+    }
+
+    // Create target document
+
+    // Strip leading path from file name;
+    char *base_name = strrchr(fname, '/');
+    if (base_name)
+        base_name++;
+    else
+        base_name = fname;
+
+    Ref&lt;Document&gt; doc;
+    rc = doc.new_persistent(base_name, 0644, doc);
+    if (rc) {
+        perror(base_name);
+        SH_ABORT_TRANSACTION(rc);
+    }
+    doc.update()-&gt;initialize(base_name,in_stat.st_size);
+
+    // for each line of the document ...
+    char linebuf[1024];
+    while (in.getline(linebuf, sizeof linebuf -1)) {
+        long off = doc-&gt;size();
+
+        // copy the line to the body of the document
+        doc.update()-&gt;append(linebuf);
+        doc.update()-&gt;append(&quot;\n&quot;);
+
+        // allocate a new Cite object for this line
+        Ref&lt;Cite&gt; cite = new (nodes) Cite;
+        cite.update()-&gt;initialize(doc, off);
+
+        // for each word on the line ...
+        char word[100];
+        const char *p = linebuf;
+        while (getword(p, word, sizeof word)) {
+            // link the citation to the word
+            insert(word, cite);
+        }
+    }
+}
+</PRE><A NAME="stree:searchtreefindFUNC">&#160;</A><PRE>
+Ref&lt;Word&gt; SearchTree::find(char *str) const {
+    if (root)
+        return root-&gt;find(str);
+    return NULL;
+}
+
+// Copy a word of at most SIZE characters (including terminating null)
+// in to the buffer starting at RES.  Start searching at location P.
+// Words are delimited by white space.  The result is translated to lower
+// case, with all non-letters eliminated.
+// P is updated to point to the first character not copied.
+// The result is 1 if a word is found, 0 if '\0' is encountered first.
+static int getword(const char *&amp;p, char *res, int size) {
+    for (;; ) {
+        // skip leading white space
+        while (isspace(*p))
+            p++;
+
+        // check for eoln
+        if (*p == 0)
+            return 0;
+
+        // gather non-space characters, translating to lower case and
+        // ignoring non-alpha characters
+        int len;
+        for (len = 0; len &lt; size-1 &amp;&amp; *p &amp;&amp; !isspace(*p); p++) {
+            if (isupper(*p))
+                res[len++] = tolower(*p);
+            else if (islower(*p))
+                res[len++] = *p;
+        }
+        if (len &gt; 0) {
+            res[len] = 0;
+            return 1;
+        }
+        // otherwise, word was all digits and punctuation, so try again.
+    }
+}
+</PRE>
+<A NAME="stree:wordSRC">&#160;</A><H2><A NAME="SECTION00084000000000000000000">
+word.C</A>
+</H2>
+<PRE>
+// Member functions of the Word class
+#include &lt;iostream.h&gt;
+#include &lt;string.h&gt;
+#include &quot;stree.h&quot;
+
+extern Ref&lt;Pool&gt; nodes;
+</PRE><A NAME="stree:wordinitializeFUNC">&#160;</A><PRE>
+void Word::initialize(char *word) {
+    value = word;
+    left = NULL;
+    right = NULL;
+}
+
+long Word::count() const {
+    return cited_by.get_size();
+}
+</PRE><A NAME="stree:wordoccurrenceFUNC">&#160;</A><PRE>
+Ref&lt;Cite&gt; Word::occurrence(long i) const {
+    return cited_by.get_elt(i);
+}
+
+Ref&lt;Word&gt; Word::find_or_add(char *s) {
+    int i = strcmp(s,value);
+    if (i == 0)
+        return this;
+    if (i &lt; 0) {
+        if (left) return left.update()-&gt;find_or_add(s);
+        else {
+            left = new(nodes) Word;
+            left.update()-&gt;initialize(s);
+            return left;
+        }
+    }
+    else {
+        if (right) return right.update()-&gt;find_or_add(s);
+        else {
+            right = new(nodes) Word;
+            right.update()-&gt;initialize(s);
+            return right;
+        }
+    }
+}
+
+Ref&lt;Word&gt; Word::find(char *s) const {
+    int i = strcmp(s,value);
+    if (i == 0) return this;
+    if (i &lt; 0) return left ? left-&gt;find(s) : (Ref&lt;Word&gt;)NULL;
+    return right ? right-&gt;find(s) : (Ref&lt;Word&gt;)NULL;
+}
+</PRE><A NAME="stree:wordoccursonFUNC">&#160;</A><PRE>
+void Word::occurs_on(Ref&lt;Cite&gt; cite) {
+    cited_by.add(cite);
+}
+
+void Word::print(long verbose) const {
+    if (verbose) {
+        int s = cited_by.get_size();
+        cout &lt;&lt; &quot;Word '&quot; &lt;&lt; (char *)value
+            &lt;&lt; &quot;' occurs on &quot; &lt;&lt; s &lt;&lt; &quot; line&quot; &lt;&lt; (s==1 ? &quot;&quot; : &quot;s&quot;) &lt;&lt; endl;
+    }
+    else cout &lt;&lt; (char *)value;
+}
+</PRE>
+<A NAME="stree:citeSRC">&#160;</A><H2><A NAME="SECTION00085000000000000000000">
+cite.C</A>
+</H2>
+<PRE>
+// Member functions of the Cite class
+#include &lt;iostream.h&gt;
+#include &quot;stree.h&quot;
+
+void Cite::initialize(Ref&lt;Document&gt; d, long o) {
+    doc = d;
+    offset = o;
+}
+
+void Cite::print(long v) const {
+    switch (v) {
+        default:
+        case 0: // just the file name
+            cout &lt;&lt; doc-&gt;get_name() &lt;&lt; endl;
+            break;
+        case 1: // the file name and the corresponding line
+            cout &lt;&lt; doc-&gt;get_name() &lt;&lt; &quot;: &quot;;
+            doc-&gt;print_line(offset);
+            break;
+        case 2: // debugging version
+            cout &lt;&lt; &quot;Cite, offset &quot; &lt;&lt; offset
+                &lt;&lt; &quot; in file &quot; &lt;&lt; doc-&gt;get_name()
+                &lt;&lt; &quot; cites&quot;;
+            {
+                int count = cites.get_size();
+                for (int i = 0; i &lt; count; i++) {
+                    Ref&lt;Word&gt; w = cites.get_elt(i);
+                    cout &lt;&lt; &quot; &quot;;
+                    w-&gt;print(0);
+                }
+                cout &lt;&lt; endl;
+            }
+            break;
+    }
+}
+
+void Cite::finalize() {
+    while (cites.delete_one()) {}
+}
+</PRE>
+<A NAME="stree:documentSRC">&#160;</A><H2><A NAME="SECTION00086000000000000000000">
+document.C</A>
+</H2>
+<PRE>
+// Member functions of the Document class
+#include &lt;iostream.h&gt;
+#include &lt;string.h&gt;
+#include &quot;stree.h&quot;
+
+void Document::initialize(char *base_name, long ilen) {
+    body = 0;
+    name = base_name;
+    // set a char at the end of the body to initialze the
+    // string space.
+    body.set(ilen-1,0);
+    // initialize cur_len.
+    cur_len = 0;
+}
+</PRE><A NAME="stree:documentappendFUNC">&#160;</A><PRE>
+void Document::append(char *str) {
+    // body.set(str, body.length(), ::strlen(str));
+    int str_size = ::strlen(str);
+    body.set(str, cur_len, str_size);
+    cur_len += str_size;
+}
+
+char *Document::get_name() const {
+    return name;
+}
+
+long Document::size() const {
+    // return body.strlen();
+    return cur_len;
+}
+
+void Document::print_line(long offset) const {
+    char buf[100];
+
+    body.get(buf, offset, sizeof buf);
+    buf[sizeof buf - 1] = 0;
+    char *p = strchr(buf, '\n');
+    if (p) *++p = 0;
+    cout &lt;&lt; buf;
+}
+</PRE><A NAME="stree:documentfinalizeFUNC">&#160;</A><PRE>
+void Document::finalize() {
+    Ref&lt;Cite&gt; p;
+    while (p = cited_by.delete_one()) {
+        p.update()-&gt;finalize();
+        SH_DO(p.destroy());
+    }
+}
+</PRE>
+<A NAME="stree:streedefsSRC">&#160;</A><H2><A NAME="SECTION00087000000000000000000">
+stree_defs.C</A>
+</H2>
+<PRE>
+#define MODULE_CODE
+#include &quot;stree.h&quot;
+</PRE>
+<A NAME="stree:swcSRC">&#160;</A><H2><A NAME="SECTION00088000000000000000000">
+swc</A>
+</H2>
+<PRE>
+#!/bin/sh
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+# $Header: /p/shore/shore_cvs/src/examples/stree/swc,v 1.3 1995/04/26 11:03:06 solomon Exp $
+
+mountpoint=/shoremnt
+program=stree
+
+if test $1x = -ix
+then
+    program=doc_index
+    shift
+fi
+
+if test $# -ne 1
+then
+    echo &quot;usage: $0 [-i] keyword&quot;
+    exit 1
+fi
+
+prog_path=`pwd`/$program
+
+cd $mountpoint/$program
+wc `$prog_path -l $1 | sort -u`
+</PRE>
+<A NAME="stree:seditSRC">&#160;</A><H2><A NAME="SECTION00089000000000000000000">
+sedit</A>
+</H2>
+<PRE>
+#!/bin/sh
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+# $Header: /p/shore/shore_cvs/src/examples/stree/sedit,v 1.3 1995/04/26 11:03:03 solomon Exp $
+
+mountpoint=/shoremnt
+program=stree
+
+if test $1x = -ix
+then
+    program=doc_index
+    shift
+fi
+
+if test -t 0
+then
+    edit=${EDITOR:-emacs}
+else
+    edit=&quot;echo EDIT&quot;
+fi
+
+if test $# -ne 1
+then
+    echo &quot;usage: $0 [-i] keyword&quot;
+    exit 1
+fi
+
+prog_path=`pwd`/$program
+
+files=&quot;`$prog_path -l $1`&quot; || exit 1
+if [ -n &quot;$files&quot; ]
+then
+    cd $mountpoint/$program
+    $edit $files
+else
+    echo $1 not found
+fi
+</PRE>
+<A NAME="stree:docindexSRC">&#160;</A><H2><A NAME="SECTION000810000000000000000000">
+docIndex</A>
+</H2>
+<PRE>
+// Member functions of the DocIndex class
+#include &lt;iostream.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &quot;doc_index.h&quot;
+
+extern Ref&lt;Pool&gt; nodes;
+static int getword(const char *&amp;p, char *res, int size);
+
+extern int verbose; // defined in main.C
+
+void DocIndex::initialize() {
+    SH_DO(ind.init(UniqueBTree));
+}
+</PRE><A NAME="stree:docindexinsertFUNC">&#160;</A><PRE>
+void DocIndex::insert(char *s, Ref&lt;Cite&gt; c) {
+    Ref&lt;Word&gt; w;
+    bool found;
+
+    SH_DO(ind.find(s,w,found));
+    if (!found) {
+        w = new(nodes) Word;
+        w.update()-&gt;initialize(s);
+        SH_DO(ind.insert(s,w));
+    }
+    w.update()-&gt;occurs_on(c);
+}
+
+void DocIndex::insert_file(char *fname) {
+    shrc rc;
+
+    if (verbose)
+        cout &lt;&lt; &quot;Indexing file &quot; &lt;&lt; fname &lt;&lt; endl;
+
+    // Open input file
+    ifstream in(fname);
+    if (!in) {
+        perror(fname);
+        SH_ABORT_TRANSACTION(rc);
+    }
+    // do a unix stat to get the total size of the file.
+    struct stat in_stat;
+    if (stat(fname,&amp;in_stat)) {
+        perror(fname);
+        SH_ABORT_TRANSACTION(rc);
+    }
+
+    // Create target document
+
+    // Strip leading path from file name;
+    char *base_name = strrchr(fname, '/');
+    if (base_name)
+        base_name++;
+    else
+        base_name = fname;
+
+    Ref&lt;Document&gt; doc;
+    rc = doc.new_persistent(base_name, 0644, doc);
+    if (rc) {
+        perror(base_name);
+        SH_ABORT_TRANSACTION(rc);
+    }
+    doc.update()-&gt;initialize(base_name,in_stat.st_size);
+
+    // for each line of the document ...
+    char linebuf[1024];
+    while (in.getline(linebuf, sizeof linebuf -1)) {
+        long off = doc-&gt;size();
+
+        // copy the line to the body of the document
+        doc.update()-&gt;append(linebuf);
+        doc.update()-&gt;append(&quot;\n&quot;);
+
+        // allocate a new Cite object for this line
+        Ref&lt;Cite&gt; cite = new (nodes) Cite;
+        cite.update()-&gt;initialize(doc, off);
+
+        // for each word on the line ...
+        char word[100];
+        const char *p = linebuf;
+        while (getword(p, word, sizeof word)) {
+            // link the citation to the word
+            insert(word, cite);
+        }
+    }
+}
+</PRE><A NAME="stree:docindexfindFUNC">&#160;</A><PRE>
+Ref&lt;Word&gt; DocIndex::find(char *str) const {
+    Ref&lt;Word&gt; w;
+    bool found;
+
+    SH_DO(ind.find(str,w,found));
+    if (found)
+        return w;
+    return NULL;
+}
+
+// Copy a word of at most SIZE characters (including terminating null)
+// in to the buffer starting at RES.  Start searching at location P.
+// Words are delimited by white space.  The result is translated to lower
+// case, with all non-letters eliminated.
+// P is updated to point to the first character not copied.
+// The result is 1 if a word is found, 0 if '\0' is encountered first.
+static int getword(const char *&amp;p, char *res, int size) {
+    for (;; ) {
+        // skip leading white space
+        while (isspace(*p))
+            p++;
+
+        // check for eoln
+        if (*p == 0)
+            return 0;
+
+        // gather non-space characters, translating to lower case and
+        // ignoring non-alpha characters
+        int len;
+        for (len = 0; len &lt; size-1 &amp;&amp; *p &amp;&amp; !isspace(*p); p++) {
+            if (isupper(*p))
+                res[len++] = tolower(*p);
+            else if (islower(*p))
+                res[len++] = *p;
+        }
+        if (len &gt; 0) {
+            res[len] = 0;
+            return 1;
+        }
+        // otherwise, word was all digits and punctuation, so try again.
+    }
+}
+
+void DocIndex::delete_word(sdl_string w) {
+    int count;
+    SH_DO(ind.remove(w,count));
+    if (verbose)
+        cout &lt;&lt; &quot;deleted &quot; &lt;&lt; count &lt;&lt; (count==1 ? &quot; copy&quot; : &quot; copies&quot;)
+            &lt;&lt; &quot; of word '&quot; &lt;&lt; (char *)w &lt;&lt; &quot;' from the index&quot; &lt;&lt; endl;
+}
+
+void DocIndex::print() const {
+    // index_iter&lt;typeof(ind)&gt; iterator(ind);
+    IndexScanIter&lt;sdl_string,Ref&lt;Word&gt; &gt; iterator(this-&gt;ind);
+    SH_DO(iterator.next());
+    while (!iterator.eof) {
+        cout &lt;&lt; &quot;key: '&quot; &lt;&lt; iterator.cur_key &lt;&lt; &quot;' value: &quot;;
+        iterator.cur_val-&gt;print(1);
+        SH_DO(iterator.next());
+    }
+}
+</PRE>
+<P>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

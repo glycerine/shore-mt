@@ -1,0 +1,139 @@
+# set fileType to tmp or regular or no_log
+# set logging in .shoreconfig
+
+set fileType no_log
+set logging no
+set id_width %08d
+
+set nfiles 3 
+set total 1000000
+set nobjeach [expr $total / $nfiles ]
+echo $nobjeach objects per file
+
+proc doscans { numfiles nobj p } {
+    global fid
+    for {set j 0} {$j < $numfiles} {incr j}  {
+	set scan($j) [sm scan_file_create $fid($j) t_cc_record $p]
+    }
+    set t [time {
+	set pin 0
+	while {$pin != "NULL"} {
+	    for {set j 0} {$j < $numfiles} {incr j}  {
+		set pin [sm scan_file_next $scan($j) 0]
+		if {$pin != "NULL"} {
+		    sm pin_rid $pin
+		    # don't ruin scan context
+		    # sm pin_unpin $pin
+		}
+	    }
+	}
+    } 1]
+    echo scan time (prefetch=$p): $t
+    for {set j 0} {$j < $numfiles} {incr j}  {
+	sm scan_file_destroy $scan($j)
+    }
+}
+
+proc cleanup { numfiles }  {
+    global fid
+
+    for {set j 0} {$j < $numfiles} {incr j}  {
+	sm destroy_file $fid($j)
+    }
+}
+proc test1 {fileType numfiles numobjs }  {
+    global id_width volid buffer fid
+
+    for {set j 0} {$j < $numfiles} {incr j}  {
+	set fid($j) [sm create_file $volid $fileType]
+	for {set i 0} {$i < $numobjs} {incr i}  {
+	    set rid [sm create_rec $fid($j) [format $id_width $i] 1000 $buffer]
+	}
+    }
+    sm force_buffers true
+}
+
+proc test2 {fileType numfiles numobjs }  {
+    global id_width volid buffer fid
+
+    for {set j 0} {$j < $numfiles} {incr j}  {
+	set fid($j) [sm create_file $volid $fileType]
+    }
+    for {set i 0} {$i < $numobjs} {incr i}  {
+	for {set j 0} {$j < $numfiles} {incr j}  {
+	    sm create_rec $fid($j) [format $id_width $i] 1000 $buffer
+	}
+    }
+    sm force_buffers true
+}
+
+# use 100-byte objects
+set buffer ""
+for {set i 0} {$i < 10} {incr i}  {
+    set buffer "123456789 $buffer"
+}
+
+# Nope - use 200-byte objects
+set buffer "$buffer$buffer"
+
+
+source ../scripts/vol.init
+
+echo "********************************"
+echo " fileType: $fileType, logging: $logging"
+echo "********************************"
+
+
+sm begin_xct
+echo testing sequential
+set testTime [time {test1 $fileType $nfiles $nobjeach} 1]
+echo
+echo sequential: write time = $testTime
+set dummy [sm gather_stats reset]
+doscans $nfiles $nobjeach prefetch
+
+set dummy [sm gather_stats reset]
+echo [select_stat $dummy bf_prefetches ]
+echo [select_stat $dummy bf_prefetch_requests ]
+echo [select_stat $dummy page_fix_cnt ]
+sm force_buffers true
+
+doscans $nfiles $nobjeach no
+set dummy [sm gather_stats reset]
+echo [select_stat $dummy bf_prefetches ]
+echo [select_stat $dummy bf_prefetch_requests ]
+echo [select_stat $dummy page_fix_cnt ]
+
+echo destroying files...
+cleanup $nfiles
+sm commit_xct
+
+sm force_buffers true
+
+sm begin_xct
+echo testing round robin...
+set dummy [sm gather_stats reset]
+set testTime [time {test2 $fileType $nfiles $nobjeach} 1 ]
+echo
+echo round robin: write time = $testTime
+
+set dummy [sm gather_stats reset]
+doscans $nfiles $nobjeach prefetch
+set dummy [sm gather_stats reset]
+echo [select_stat $dummy bf_prefetches ]
+echo [select_stat $dummy bf_prefetch_requests ]
+echo [select_stat $dummy page_fix_cnt ]
+sm force_buffers true
+
+doscans $nfiles $nobjeach no
+set dummy [sm gather_stats reset]
+echo [select_stat $dummy bf_prefetches ]
+echo [select_stat $dummy bf_prefetch_requests ]
+echo [select_stat $dummy page_fix_cnt ]
+
+echo destroying files...
+cleanup $nfiles
+sm commit_xct
+
+echo done.
+unset nfiles nobjeach fid

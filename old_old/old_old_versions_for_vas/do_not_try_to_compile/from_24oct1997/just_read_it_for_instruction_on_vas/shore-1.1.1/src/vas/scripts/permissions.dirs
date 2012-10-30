@@ -1,0 +1,20 @@
+source ../scripts/setup.all
+
+cd /small
+begin
+	mkdir zzz 0555
+	expect OS_PermissionDenied from { mkdir zzz/ddd }
+	chmod 0755 zzz
+	mkuserdef zzz/ddd 99:0:10
+	expect OS_NotADirectory from { mkdir zzz/ddd/qqq }
+	expect OS_AlreadyExists from { mkdir zzz/ddd }
+	cd zzz
+	expect OS_InvalidArgument from { rmdir . }
+	chmod 0555 ddd
+	expect OS_PermissionDenied from { append ddd 10 }
+	cd ..
+	expect OS_PermissionDenied from { rm zzz/ddd }
+	chmod 0755 zzz/ddd
+	rm zzz/ddd 
+
+abort

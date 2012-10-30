@@ -1,0 +1,13 @@
+
+This is a contrived example that uses
+features of SDL and demonstrates the 
+language binding and how to use it for
+most features of SDL.
+
+One purpose of this example is to help
+the effort to document the C++ language
+binding and the SDL syntax in the SDL
+reference manual.
+
+It is most explicitly not a goal for this
+example to resemble a useful application.

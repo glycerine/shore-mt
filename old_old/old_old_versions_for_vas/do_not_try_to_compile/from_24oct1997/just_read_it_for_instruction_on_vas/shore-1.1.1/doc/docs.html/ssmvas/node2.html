@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Introduction</TITLE>
+<META NAME="description" CONTENT="Introduction">
+<META NAME="keywords" CONTENT="ssmvas">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmvas.css">
+<LINK REL="next" HREF="node3.html">
+<LINK REL="previous" HREF="node1.html">
+<LINK REL="up" HREF="ssmvas.html">
+<LINK REL="next" HREF="node3.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html156"
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html153"
+ HREF="ssmvas.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html147"
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html155"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html157"
+ HREF="node3.html">Storage Structure Organization</A>
+<B> Up:</B> <A NAME="tex2html154"
+ HREF="ssmvas.html">Writing Value-Added Servers with Manager</A>
+<B> Previous:</B> <A NAME="tex2html148"
+ HREF="node1.html">Contents</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html158"
+ HREF="node2.html#SECTION00021000000000000000000">
+Goals</A>
+<UL>
+<LI><A NAME="tex2html159"
+ HREF="node2.html#SECTION00021100000000000000000">
+What this Tutorial Is</A>
+<LI><A NAME="tex2html160"
+ HREF="node2.html#SECTION00021200000000000000000">
+What this Tutorial Is Not</A>
+</UL>
+<LI><A NAME="tex2html161"
+ HREF="node2.html#SECTION00022000000000000000000">
+The Example System</A>
+<UL>
+<LI><A NAME="tex2html162"
+ HREF="node2.html#SECTION00022100000000000000000">
+What the Grid VAS and Grid Client Do</A>
+<LI><A NAME="tex2html163"
+ HREF="node2.html#SECTION00022200000000000000000">
+What the Grid Example Demonstrates</A>
+<LI><A NAME="tex2html164"
+ HREF="node2.html#SECTION00022300000000000000000">
+What the Grid Example Does Not Demonstrate</A>
+</UL>
+<LI><A NAME="tex2html165"
+ HREF="node2.html#SECTION00023000000000000000000">
+Tutorial Organization</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="ssmvas:intro">&#160;</A><H1><A NAME="SECTION00020000000000000000000">
+Introduction</A>
+</H1>
+<P>
+This tutorial explains, through the use of an example client-server
+system, how to write a value-added server (VAS) and client programs
+using the Shore Storage Manager (SSM) programming interface.
+<P><A NAME="ssmvas:goals">&#160;</A><H2><A NAME="SECTION00021000000000000000000">
+Goals</A>
+</H2>
+<P><A NAME="ssmvas:whatitis">&#160;</A><H3><A NAME="SECTION00021100000000000000000">
+What this Tutorial Is</A>
+</H3>
+<P>
+This tutorial illustrates many aspects of writing a VAS, including
+<UL>
+<LI> using the storage facilities,
+<LI> managing transactions and recovery,
+<LI> using the multi-threading and synchronization facilities,
+<LI> writing a server to support multiple clients using Sun RPC,
+<LI> configuring the SSM using the options package,
+<LI> handling errors, and
+<LI> compiling and running programs.
+</UL><A NAME="ssmvas:whatitisnt">&#160;</A><H3><A NAME="SECTION00021200000000000000000">
+What this Tutorial Is Not</A>
+</H3>
+This tutorial is not intended to be
+<UL>
+<LI> A general introduction to the SSM, its goals, structure or status.
+<P>
+For a general introduction, see
+<A NAME="tex2html2"
+ HREF="../overview/overview.html"><EM>An Overview of Shore</EM></A>
+or
+<A NAME="tex2html3"
+ HREF="../ssmapi/ssmapi.html"><EM>The Shore Storage Manager Programming Interface</EM></A>.
+See
+<A NAME="tex2html4"
+ HREF="../release/release.html"><EM>The Shore Release</EM></A>
+for an index to the rest of the documentation.
+<LI> A demonstration of all the features of the SSM.
+<LI> A general guide to using Sun RPC.
+<P>
+We assume you are already familiar with RPC programming.  If not we
+recommend the book <EM>Power Programming with RPC</EM>, by
+John Bloomer, published by O'Reilly &amp; Associates, Inc.
+<LI> A tutorial on multi-threaded programming in general.
+</UL><A NAME="ssmvas:theexample">&#160;</A><H2><A NAME="SECTION00022000000000000000000">
+The Example System</A>
+</H2>
+<P>
+The example used throughout this tutorial is a client-server system
+called <EM>grid</EM>
+that illustrates many aspects of building a value-added server and
+a corresponding client.
+<P><A NAME="ssmvas:grid">&#160;</A><H3><A NAME="SECTION00022100000000000000000">
+What the Grid VAS and Grid Client Do</A>
+</H3>
+<P>
+The grid example is a simple client-server database system for <EM>items</EM> located on a 2-dimensional grid.  Items have a string name and
+coordinates on the grid.  Multiple items can reside at any location,
+but each item has a unique name.
+<P>
+The server uses the SSM to manage the grid database.  The server
+implements several update and query commands.  Update commands on
+the grid include adding items, removing items and clearing the grid
+(removing all items).  Query commands on the grid including printing the
+entire grid, looking up items by name, and locating all items within a
+rectangular region of the grid.  There are also commands for committing
+and aborting transactions.  The server accepts commands from standard
+input and processes remote procedure calls (RPCs) from multiple clients.
+<P>
+The client accepts commands from standard input and sends them to the
+server with remote procedure calls (RPCs).
+<P><A NAME="ssmvas:griddemo">&#160;</A><H3><A NAME="SECTION00022200000000000000000">
+What the Grid Example Demonstrates</A>
+</H3>
+<P><UL>
+<LI> Storage facilities
+<P>
+The grid data file and indices are stored on a single volume.
+The items are stored, one per record, in an SSM file.
+Each record contains a name and a location.
+A B+-tree index maps item names to the IDs of the
+corresponding item records.  This index is used to lookup items by name.
+An R*-tree index maps location coordinates to item records.  This index
+is used to locate all items within a rectangular region of the grid.
+<LI> Threads
+<P>
+The grid server is a multi-threaded threaded program that manages
+connections from multiple clients and also monitors the terminal
+(standard input) for commands.  The server starts a separate thread
+for each of these tasks to demonstrate how to use
+SSM's thread package.  Shared state among the threads is protected
+using the synchronization mechanisms provided by the thread package.
+<LI> Configuration options
+<P>
+The client and server use the SSM's configuration options package
+to read configuration information from configuration files
+and the program command line arguments.
+</UL><A NAME="ssmvas:gridisnot">&#160;</A><H3><A NAME="SECTION00022300000000000000000">
+What the Grid Example Does Not Demonstrate</A>
+</H3>
+<P>
+This example does not demonstrate all of the features of the
+SSM.  In particular, it does not demonstrate
+<P><UL>
+<LI> appending/truncating records,
+<LI> pinning large records (longer than 8K bytes),
+<LI> gathering statistics,
+<LI> bulk-loading an index,
+<LI> sorting, or
+<LI> using sophisticated logical ID features such as inter-volume references
+</UL>
+<P>
+Most of the unused features are used in the Shore VAS
+(see <TT>src/vas</TT>) and the Paradise database system
+(see <A NAME="tex2html1"
+ HREF="http://www.cs.wisc.edu/paradise/">http://www.cs.wisc.edu/paradise/</A>
+).  Almost every feature is
+also tested by the SSM testing program <TT>ssh</TT>,
+located in <TT>src/sm/ssh</TT>.
+<A NAME="ssmvas:tutorial">&#160;</A><H2><A NAME="SECTION00023000000000000000000">
+Tutorial Organization</A>
+</H2>
+<P>
+This tutorial walks through the example program sources in detail.
+The sources, as well as associated test programs and data, may be
+found in the
+<A HREF="../sourceguide/node7.html#sourceguide:examples"><TT>examples/vas/grid</TT> sub-directory</A>
+of the distribution.
+<P>
+The rest of this tutorial is organized as follows.
+The following two sections present the storage structures and operations on
+them.
+The next two sections discuss how to implement servers and clients.
+The final two sections explain how to compile and run the example.
+An Appendix contains a listing of the code.
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html156"
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html153"
+ HREF="ssmvas.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html147"
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html155"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html157"
+ HREF="node3.html">Storage Structure Organization</A>
+<B> Up:</B> <A NAME="tex2html154"
+ HREF="ssmvas.html">Writing Value-Added Servers with Manager</A>
+<B> Previous:</B> <A NAME="tex2html148"
+ HREF="node1.html">Contents</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

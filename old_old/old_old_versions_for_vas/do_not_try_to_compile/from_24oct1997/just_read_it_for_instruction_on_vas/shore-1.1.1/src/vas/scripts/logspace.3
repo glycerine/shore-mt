@@ -1,0 +1,62 @@
+# Meant to be run as follows:
+# in interactive mode: 
+#		source ../scripts/logspace.3
+#		abort
+#
+set maxnum 4044
+
+proc mkval { i } {
+	set res [_format "%0*s" $i a]
+	return $res
+}
+
+
+begin
+cd /
+# compensating tx
+if [sfile exists pool] {
+	dunlink pool
+}
+set p [mkpool pool]
+# r = anon obj with 1 index
+set r [mkanon pool $maxnum:0:0:1]
+
+cout addmindex $r,0 btree
+addmindex $r,0 btree
+
+proc doit { ind k } {
+	set key $k
+	set value [mkval $k]
+
+	cout INSERT $ind KEY $key VALUE (not printed, length = [string length $value] )
+	permit SVAS_Already from { insert $ind $key $value }
+	return ok
+}
+	# cout SCANINDEX 
+	# cout [scanindex $ind]
+	# cout REMOVE  KEY $key VALUE (not printed)
+	# cout [remove $ind $key $value]
+
+
+# loop forever (until run out of log space
+# Then... after the error occurs, you type "abort"
+# and the abort should work
+#
+
+# trim whitespace from $r first...
+set ind [string trim $r],0 
+
+set total 100000
+set j 0
+while {$j < $total} {
+	set k [random $maxnum]
+	cout iteration $j
+	set res [doit $ind $k]
+	if [expr { [string compare $res "bad"] == 0} ] {
+		cout doit FAILED
+		set j $total
+	}
+	set j [expr $j+1]
+}
+
+cout DONE

@@ -1,0 +1,4 @@
+
+# this is an attempt to get around problem
+# with purify
+ignore dumpthreads sthread.o

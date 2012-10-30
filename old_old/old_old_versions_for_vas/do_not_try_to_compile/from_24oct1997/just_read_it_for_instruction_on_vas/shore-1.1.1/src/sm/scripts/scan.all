@@ -1,0 +1,31 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+# all the scripts that use a scan_file_i
+
+source $script_dir/vol.init
+
+set scripts [list \
+	btree.load \
+	file.2 file.3 file.6 \
+	alloc.1 alloc.2 alloc.3 alloc.4 alloc.5 alloc.6 \
+        tmpfile.2  mpw file.many  \
+	file.activity file.activity2 \
+     ]
+
+echo CLEANUP BEFORE file.all :
+cleanup stdout
+addcleanupvars {script}
+
+foreach script $scripts {
+    echo
+    echo RUNNING: $script 
+    source $script_dir/$script
+    checkstats  $script
+    puts stdout [concat CLEANUP AFTER  $script  : ]
+    cleanup stdout
+}

@@ -1,0 +1,12 @@
+# source ../scripts/mkdir
+source ../scripts/setup.all
+
+cd /small
+
+# compensating tx
+begin
+foreach f { dira/dirb/dirc dira/dirb dira} { 
+	unlink $f
+}
+commit
+

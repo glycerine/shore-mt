@@ -1,0 +1,436 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Appendix B: Grammar in YACC Syntax</TITLE>
+<META NAME="description" CONTENT="Appendix B: Grammar in YACC Syntax">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="previous" HREF="node16.html">
+<LINK REL="up" HREF="sdlman.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif_gr.gif"> 
+<A NAME="tex2html250"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html246"
+ HREF="node16.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html252"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Up:</B> <A NAME="tex2html251"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html247"
+ HREF="node16.html">Appendix A: Collected Grammar</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="sdlman:appendixb">&#160;</A><H1><A NAME="SECTION000170000000000000000000">
+Appendix B:  Grammar in YACC Syntax</A>
+</H1>
+<P>
+This section contains a version of the SDL grammar that is somewhat
+less readable than the version in Appendix A, but which can be directly
+processed by YACC (or Bison).
+It is automatically generated from the version in Appendix A.
+<P><PRE>
+specification: 	module_list
+	;
+module: MODULE ID '{' mod_export_list mod_import_list  
+        module_member_list '}' SEMICOLON_opt  
+        	;
+mod_export: 	EXPORT ID_or_ALL ';'
+	;
+mod_import: 	USE module_name AS_ID_opt ';'
+	| IMPORT module_name ';'
+	;
+module_name: 	STRING_LITERAL
+	;
+module_member: 	const_dcl ';'
+	| type_dcl ';'
+	| interface_dcl ';'
+	;
+scoped_name: 	ID COLON_COLON_ID_list
+	;
+interface_dcl: 	INTERFACE ID interface_body_opt
+	;
+interface_body: 	inheritance_opt '{' interface_dcls '}'
+	;
+inheritance: 	':' parent COMMA_parent_list
+	;
+parent: 	access_spec scoped_name
+	;
+access_spec: 	PRIVATE
+	| PROTECTED
+	| PUBLIC
+	;
+interface_dcls: 	access_spec_COLON_interface_members_list
+	;
+interface_members: 	interface_member_list
+	;
+interface_member: 	const_dcl ';'
+	| type_dcl ';'
+	| attr_dcl ';'
+	| relationship_dcl ';'
+	| op_dcl ';'
+	| override ';'
+	;
+override: 	OVERRIDE scoped_name COMMA_scoped_name_list
+	;
+const_dcl: 	CONST const_type ID '=' const_exp
+	;
+const_type: 	integer_type
+	| boolean_type
+	| floating_pt_type
+	| STRING
+	| type_name
+	;
+integer_type: 	UNSIGNED_opt LONG_or_SHORT
+	;
+boolean_type: 	BOOLEAN
+	;
+floating_pt_type: 	FLOAT
+	| DOUBLE
+	;
+const_exp: 	exp1 BAR_exp1_list
+	;
+exp1: 	exp2 CARET_exp2_list
+	;
+exp2: 	exp3 AND_exp3_list
+	;
+exp3: 	exp4 shift_op_exp4_list
+	;
+exp4: 	exp5 add_op_exp5_list
+	;
+exp5: 	exp6 mul_op_exp6_list
+	;
+exp6: 	unary_op_opt atom
+	;
+atom: 	const_name
+	| literal
+	| '(' const_exp ')'
+	;
+shift_op: 	LESS_LESS
+	| GREATER_GREATER
+	;
+add_op: 	'+'
+	| '-'
+	;
+mul_op: 	'*'
+	| '/'
+	| '%'
+	;
+unary_op: 	'+'
+	| '-'
+	| '~'
+	;
+literal: 	INTEGER_CONSTANT
+	| STRING_LITERAL
+	| CHARACTER_CONSTANT
+	| FLOATING_CONSTANT
+	| TRUE
+	| FALSE
+	;
+const_name: 	scoped_name
+	;
+type_dcl: 	TYPEDEF type_spec declarators
+	| struct_type
+	| union_type
+	| enum_type
+	| external_type
+	;
+type_spec: 	simple_type
+	| constructed_type
+	;
+simple_type: 	atomic_type
+	| string_type
+	| enum_type
+	| ref_type
+	| type_name
+	;
+constructed_type: 	struct_type
+	| union_type
+	| sequence_type
+	;
+atomic_type: 	floating_pt_type
+	| integer_type
+	| char_type
+	| boolean_type
+	| octet_type
+	| any_type
+	;
+type_name: 	scoped_name
+	;
+declarators: 	declarator COMMA_declarator_list
+	;
+declarator: 	ID array_size_opt
+	;
+array_size: 	'[' positive_int_const ']'
+	;
+positive_int_const: 	const_exp
+	;
+octet_type: 	OCTET
+	;
+char_type: 	CHAR
+	;
+any_type: 	ANY
+	;
+struct_type: 	STRUCT ID struct_body_opt
+	;
+struct_body: 	'{' struct_member_list '}'
+	;
+struct_member: 	type_spec declarators ';'
+	;
+union_type: 	UNION ID union_body_opt
+	;
+union_body: 	SWITCH '(' discriminator ')' '{' case_list '}'
+	;
+discriminator: 	scalar_type ID
+	;
+scalar_type: 	integer_type
+	| char_type
+	| boolean_type
+	| enum_type
+	| type_name
+	;
+case: case_label_list1  
+        type_spec_declarators_SEMICOLON_list1  
+        	;
+case_label: 	CASE const_exp ':'
+	| DEFAULT ':'
+	;
+enum_type: 	ENUM ID '{' ID COMMA_ID_list '}'
+	;
+sequence_type: SEQUENCE '&lt;' type_name  
+        COMMA_positive_int_const_opt '&gt;'  
+        	;
+string_type: 	STRING LESS_positive_int_const_GREATER_opt
+	;
+external_type: 	EXTERNAL external_qualifier ID
+	;
+external_qualifier: 	TYPEDEF
+	| CLASS
+	| ENUM
+	| UNION
+	| STRUCT
+	;
+attr_dcl: 	INDEXABLE_opt ATTRIBUTE type_spec declarators
+	;
+type_spec: INDEX '&lt;' simple_type_spec ',' simple_type_spec  
+        '&gt;'  
+        	;
+ref_type: 	local_ref
+	| remote_ref
+	;
+local_ref: 	LREF '&lt;' type_name '&gt;'
+	;
+remote_ref: 	ref_kind '&lt;' type_name '&gt;'
+	;
+ref_kind: 	REF
+	| SET
+	| BAG
+	| LIST
+	;
+relationship_dcl: RELATIONSHIP ref_kind '&lt;' type_name '&gt;'  
+        INVERSE_scoped_name_opt  
+        ORDERED_BY_scoped_name_opt  
+        	;
+op_dcl: 	result_type ID '(' parameters_opt ')' CONST_opt
+	;
+result_type: 	type_spec
+	| VOID
+	;
+parameters: 	parameter COMMA_parameter_list
+	;
+parameter: 	mode type_spec declarator
+	;
+mode: 	IN
+	| OUT
+	| INOUT
+	;
+module_list:
+	module_list module
+	| /* empty */
+	;
+mod_export_list:
+	mod_export_list mod_export
+	| /* empty */
+	;
+mod_import_list:
+	mod_import_list mod_import
+	| /* empty */
+	;
+module_member_list:
+	module_member_list module_member
+	| /* empty */
+	;
+SEMICOLON_opt:
+	';'
+	| /* empty */
+	;
+ID_or_ALL:
+	ID
+	| ALL
+	;
+AS_ID_opt:
+	AS ID
+	| /* empty */
+	;
+COLON_COLON_ID_list:
+	COLON_COLON_ID_list COLON_COLON ID
+	| /* empty */
+	;
+interface_body_opt:
+	interface_body
+	| /* empty */
+	;
+inheritance_opt:
+	inheritance
+	| /* empty */
+	;
+COMMA_parent_list:
+	COMMA_parent_list ',' parent
+	| /* empty */
+	;
+access_spec_COLON_interface_members_list:
+access_spec_COLON_interface_members_list access_spec ':'  
+        interface_members  
+        	| /* empty */
+	;
+interface_member_list:
+	interface_member_list interface_member
+	| /* empty */
+	;
+COMMA_scoped_name_list:
+	COMMA_scoped_name_list ',' scoped_name
+	| /* empty */
+	;
+UNSIGNED_opt:
+	UNSIGNED
+	| /* empty */
+	;
+LONG_or_SHORT:
+	LONG
+	| SHORT
+	;
+BAR_exp1_list:
+	BAR_exp1_list '|' exp1
+	| /* empty */
+	;
+CARET_exp2_list:
+	CARET_exp2_list '^' exp2
+	| /* empty */
+	;
+AND_exp3_list:
+	AND_exp3_list '&amp;' exp3
+	| /* empty */
+	;
+shift_op_exp4_list:
+	shift_op_exp4_list shift_op exp4
+	| /* empty */
+	;
+add_op_exp5_list:
+	add_op_exp5_list add_op exp5
+	| /* empty */
+	;
+mul_op_exp6_list:
+	mul_op_exp6_list mul_op exp6
+	| /* empty */
+	;
+unary_op_opt:
+	unary_op
+	| /* empty */
+	;
+COMMA_declarator_list:
+	COMMA_declarator_list ',' declarator
+	| /* empty */
+	;
+array_size_opt:
+	array_size
+	| /* empty */
+	;
+struct_body_opt:
+	struct_body
+	| /* empty */
+	;
+struct_member_list:
+	struct_member_list struct_member
+	| /* empty */
+	;
+union_body_opt:
+	union_body
+	| /* empty */
+	;
+case_list:
+	case_list case
+	| /* empty */
+	;
+case_label_list1:
+	case_label_list1 case_label
+	| case_label
+	;
+type_spec_declarators_SEMICOLON_list1:
+type_spec_declarators_SEMICOLON_list1 type_spec  
+        declarators ';'  
+        	| type_spec declarators ';'
+	;
+COMMA_ID_list:
+	COMMA_ID_list ',' ID
+	| /* empty */
+	;
+COMMA_positive_int_const_opt:
+	',' positive_int_const
+	| /* empty */
+	;
+LESS_positive_int_const_GREATER_opt:
+	'&lt;' positive_int_const '&gt;'
+	| /* empty */
+	;
+INDEXABLE_opt:
+	INDEXABLE
+	| /* empty */
+	;
+INVERSE_scoped_name_opt:
+	INVERSE scoped_name
+	| /* empty */
+	;
+ORDERED_BY_scoped_name_opt:
+	ORDERED_BY scoped_name
+	| /* empty */
+	;
+parameters_opt:
+	parameters
+	| /* empty */
+	;
+CONST_opt:
+	CONST
+	| /* empty */
+	;
+COMMA_parameter_list:
+	COMMA_parameter_list ',' parameter
+	| /* empty */
+	;
+</PRE>
+<P>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

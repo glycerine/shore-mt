@@ -1,0 +1,26 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#       This will cause an internal error in page_p::remove_compress() 
+#
+source $script_dir/vol.init
+
+verbose VOLID $volid
+
+sm begin_xct
+set f1 [sm create_file $volid]
+verbose f1 $f1
+set r2 [sm create_rec $f1 hdr12345 11 abcdefghijklmnopqrstuvwxyz]
+verbose r2 $r2
+
+sm abort_xct
+
+unset f1
+unset r2
+
+verbose SUCCESS

@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Introduction</TITLE>
+<META NAME="description" CONTENT="Introduction">
+<META NAME="keywords" CONTENT="ssmapi">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmapi.css">
+<LINK REL="next" HREF="node3.html">
+<LINK REL="previous" HREF="node1.html">
+<LINK REL="up" HREF="ssmapi.html">
+<LINK REL="next" HREF="node3.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html136"
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html133"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html127"
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html135"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html137"
+ HREF="node3.html">Initialization and Shutdown</A>
+<B> Up:</B> <A NAME="tex2html134"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html128"
+ HREF="node1.html">Contents</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html138"
+ HREF="node2.html#SECTION00021000000000000000000">
+Conventions</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="ssmapi:intro">&#160;</A><H1><A NAME="SECTION00020000000000000000000">
+Introduction</A>
+</H1>
+<P>
+The Shore Storage Manager (SSM)
+is a package of libraries
+for building object repository servers and their clients.
+The core library in the package,
+<TT>libsm.a</TT>, is a multi-threaded system managing persistent
+storage and caching of un-typed data and indexes.  It provides disk and
+buffer management, transactions, concurrency control and recovery.
+A second library, <TT>libshorecommon.a</TT>, provides many common
+utilities need for implementing both client and servers.
+<P>
+We use the term <EM>value-added-server</EM> (VAS) to refer to systems
+built with the SSM.  A VAS relies on the SSM for the above capabilities
+and extends it to provide more functionality.  One example of a VAS is
+the Shore server, which extends the SSM to provide typed objects with
+permissions and ownership and organizes storage as a tree structured
+name-space.  The overall role of the SSM in Shore is further described
+in <A NAME="tex2html6"
+ HREF="../overview/overview.html">Shoring Up Persistent Applications</A>.
+<P>
+This document provides an overview the SSM facilities and interface.
+Details of the programming interfaces are presented in a set of manual
+pages.  Where each facility is discussed, references are made to the
+appropriate manual pages.  The introductory sections for these manual
+pages are:
+<P><UL>
+<LI>
+<A NAME="tex2html2"
+ HREF="../man/intro.ssm.html">Storage Manager proper</A>
+<LI>
+<A NAME="tex2html3"
+ HREF="../man/intro.sthread.html">Thread package</A>
+<LI>
+<A NAME="tex2html4"
+ HREF="../man/intro.common.html">Common utility classes</A>
+<LI>
+<A NAME="tex2html5"
+ HREF="../man/intro.fc.html">Foundation classes</A>
+</UL>
+<P>
+The tutorial
+<A NAME="tex2html7"
+ HREF="../ssmvas/ssmvas.html">Writing Value-Added Servers with the Shore Storage Manager</A> (&quot;The VAS Tutorial&quot; for short)
+complements this document by explaining how to use
+the SSM to build an example client-server system.
+<P>
+The rest of this document is organized as follows.  The first six
+sections describe the basic facilities provided by the SSM.
+Each sections has pointers to manual pages with details on using
+the facility.  The final section describes how to write and compile
+a VAS and its clients.
+<P><A NAME="ssmapi:conventions">&#160;</A><H2><A NAME="SECTION00021000000000000000000">
+Conventions</A>
+</H2>
+This document follows these notational conventions:
+<UL>
+<LI>
+File and path names are displayed in a <TT>fixed size font</TT>.
+The symbol, <TT>SHROOT</TT>, indicates the root directory of the
+Shore software installation.
+<LI>
+Reference to manual pages take this form:
+<A NAME="tex2html8"
+ HREF="../man/intro.ssm.html">intro(ssm)</A>.
+<LI>
+Name of classes and methods are displayed in a <TT>fixed size font</TT>.
+</UL><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html136"
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html133"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html127"
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html135"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html137"
+ HREF="node3.html">Initialization and Shutdown</A>
+<B> Up:</B> <A NAME="tex2html134"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html128"
+ HREF="node1.html">Contents</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

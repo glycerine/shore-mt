@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>A Directory Scan Example</TITLE>
+<META NAME="description" CONTENT="A Directory Scan Example">
+<META NAME="keywords" CONTENT="dirscan">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="dirscan.css">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="dirscan.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif_gr.gif"> 
+<A NAME="tex2html49"
+ HREF="dirscan.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html45"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html51"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Up:</B> <A NAME="tex2html50"
+ HREF="dirscan.html">Scanning Directories in a Application</A>
+<B> Previous:</B> <A NAME="tex2html46"
+ HREF="node3.html">The DirScan Class</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="dirscan:example">&#160;</A><H1><A NAME="SECTION00040000000000000000000">
+A Directory Scan Example</A>
+</H1>
+<P>
+The following function prints the name and loid of each entry in the
+directory given by the <TT>pathname</TT> argument and returns a count of entries.
+<P><PRE>
+    int print_dir(const char *pathname) {
+        DirEntry entry;
+        int count = 0;
+
+        // Open a scan over the pool given by &quot;pathname.&quot;
+        DirScan scan(pathname);
+
+        // Make sure the scan was successfully opened.
+        if (scan.rc() != RCOK) {
+            cout &lt;&lt; &quot;Error scanning directory &quot; &lt;&lt; pathname &lt;&lt; &quot;: &quot;
+                 &lt;&lt; scan.rc() &lt;&lt; endl;
+            return 0;
+        }
+
+        // Scan until end-of-scan or an error is encountered.
+        for(count = 0; scan.next(&amp;entry) == RCOK; ++count)
+            cout &lt;&lt; entry.name &lt;&lt; '\t' &lt;&lt; entry.loid &lt;&lt; endl;
+
+        cout &lt;&lt; pathname &lt;&lt; &quot; has &quot; &lt;&lt; count &lt;&lt; &quot; objects.&quot; &lt;&lt; endl;
+
+        // Check for errors.
+        if(scan.rc().err_num() != SH_EndOfScan){
+            cout &lt;&lt; &quot;Error scanning directory &quot; &lt;&lt; pathname &lt;&lt; &quot;: &quot;
+                 &lt;&lt; scan.rc() &lt;&lt; endl;
+            return 0;
+        }
+
+        // The destructor will close the scan object.
+        return count;
+    }
+</PRE>
+A complete program using this function may be found in the
+<TT>examples/shls</TT> directory of the documentation release.
+Assuming the shell variable $SHROOT points to the root of a copy
+of the documentation release, you can compile and run the <TT>shls</TT>
+example as follows:
+<PRE>
+    mkdir shls
+    cp $SHROOT/examples/shls/* shls
+    cd shls
+    make shls
+    shls
+</PRE>
+The results will be more interesting if you have something in your
+Shore file system, for example if you did not clean up after running
+the tests described in the tutorial
+<A HREF="../stree/node6.html#stree:application"><EM>Getting Started with Shore</EM> </A>.
+<P>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

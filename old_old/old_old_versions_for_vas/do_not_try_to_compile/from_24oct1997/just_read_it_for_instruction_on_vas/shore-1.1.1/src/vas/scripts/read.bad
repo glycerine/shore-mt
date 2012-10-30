@@ -1,0 +1,10 @@
+source ../scripts/setup.all
+
+cd /
+begin
+# read with bad oid and >0 bytes available for the buffer
+expect SVAS_NotFound from { read 123456789 0 10 }
+
+# read with bad oid and 0 bytes available for the buffer
+expect SVAS_NotFound from { read 123456789 0 0 }
+commit

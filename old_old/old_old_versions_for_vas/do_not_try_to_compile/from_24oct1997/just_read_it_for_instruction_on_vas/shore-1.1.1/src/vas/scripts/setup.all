@@ -1,0 +1,14 @@
+set dir ../scripts
+
+if { [expr {[tstate] != "none"}] } {
+	abort
+}
+
+foreach f {
+	setup.small
+	setup.large
+} {
+	source $dir/$f
+}
+cd /
+return "setup.all done"

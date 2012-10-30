@@ -1,0 +1,26 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * $Header: /p/shore/shore_cvs/src/util/mount/generic/Imakefile,v 1.6 1997/10/13 11:44:46 solomon Exp $
+ */
+
+CPPFLAGS = -Wall -Wtraditional -Wshadow -Wpointer-arith -Wstrict-prototypes
+
+#if !defined(IS_LINUX)
+all_local:: smount sumount
+
+SRC = smount.c sumount.c mount_tab.c
+HDR = platform.h globals.h
+
+%GEN c_program(smount, smount.o mount_tab.o, $(LIB))
+%GEN c_program(sumount, sumount.o mount_tab.o, $(LIB))
+%GEN install(bin, smount sumount mnt)
+
+%GEN tags($(SRC) $(HDR))
+%GEN depend_target($(SRC))
+#endif

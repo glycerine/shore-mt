@@ -1,0 +1,29 @@
+#! /bin/csh -f
+
+# This program changes all CVS/Repository file to point
+#    to /p/shore/shore_cvs instead of /n/speedy/u5/shore/shore_cvs
+
+set program=$0
+
+if ($#argv != 1) then
+    echo usage: $program start_dir
+    exit 1
+endif
+
+set start_dir = $argv[1]
+
+if (! -d $start_dir) then
+    echo Error: $start_dir is not a directory
+    exit 1
+endif
+
+# do this recursively
+foreach f (`find $start_dir -name "CVS" -type d -print`)
+    if (-e $start_dir) then
+	echo changing $f/Repository
+	mv $f/Repository $f/Repository.tmp
+	sed -e "1,1s/n\/speedy\/u5/p/" $f/Repository.tmp > $f/Repository
+	rm $f/Repository.tmp
+    endif
+end
+

@@ -1,0 +1,77 @@
+index_vars_pool created. 
+Scanning empty indexes 
+Scan by name. 
+Scan by age. 
+
+Adding goofy
+Added goofy
+Scan by name. 
+key=goofy person=goofy age 3
+Scan by age. 
+key=3 person=goofy age 3
+
+Adding daffy
+Added daffy
+Scan by name. 
+key=daffy person=daffy age 4
+key=goofy person=goofy age 3
+Scan by age. 
+key=3 person=goofy age 3
+key=4 person=daffy age 4
+
+Adding bugs
+Added bugs
+Scan by name. 
+key=bugs person=bugs age 6
+key=daffy person=daffy age 4
+key=goofy person=goofy age 3
+Scan by age. 
+key=3 person=goofy age 3
+key=4 person=daffy age 4
+key=6 person=bugs age 6
+
+Adding donald
+Added donald
+Scan by name. 
+key=bugs person=bugs age 6
+key=daffy person=daffy age 4
+key=donald person=donald age 1
+key=goofy person=goofy age 3
+Scan by age. 
+key=1 person=donald age 1
+key=3 person=goofy age 3
+key=4 person=daffy age 4
+key=6 person=bugs age 6
+
+persons created and inserted 
+Scan by name. 
+key=bugs person=bugs age 6
+key=daffy person=daffy age 4
+key=donald person=donald age 1
+key=goofy person=goofy age 3
+Scan by age. 
+key=1 person=donald age 1
+key=3 person=goofy age 3
+key=4 person=daffy age 4
+key=6 person=bugs age 6
+Locate by name. 
+key=donald person=donald age 1
+Locate by age. 
+key=4 person=daffy age 4
+Remove daffy. 
+removed 1 instance(s) of daffy from name index
+removed 4 from age index
+Rescan. 
+Scan by name. 
+key=bugs person=bugs age 6
+key=donald person=donald age 1
+key=goofy person=goofy age 3
+Scan by age. 
+key=1 person=donald age 1
+key=3 person=goofy age 3
+key=6 person=bugs age 6
+Partial scan of names: beginning through c. 
+key=bugs person=bugs age 6
+Partial scan of ages: 3 through end. 
+key=3 person=goofy age 3
+key=6 person=bugs age 6

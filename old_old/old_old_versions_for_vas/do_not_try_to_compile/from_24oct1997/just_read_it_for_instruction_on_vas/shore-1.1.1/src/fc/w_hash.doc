@@ -1,0 +1,42 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+Template Class: w_hash_t
+
+w_hash_t implements a hash table with chaining on collisions.  An
+entry (type T) in the table must have a list link for chaining and a
+function that returns the key.  The number of hash "points" is fixed
+when the constructor is called, but any number of entries can be
+inserted into the table.
+
+Construction:
+    A w_hash_t<T, K> is constructed by supplying the following:
+	1. the intended size of the hash table (implicitly 
+	   rounded up to power of 2)
+	2. the offset of the key in T
+	3. the offset of the link (w_link_t class for
+	    collision resolution).
+
+Possible Uses:
+    Anywhere you need a simple hash table in a single threaded
+    situation.  However, the entries of the table must be
+    able to support the requirements below.
+
+Requirements:
+    an == operator must be defined to compare K
+    a uint4 hash(const K&) function must be defined
+
+Restrictions:
+    w_hash_t is not thread safe 
+
+Implementation issues:
+    The implementation is designed to be efficient.  One relatively
+    expensive part is the link (w_link_t) that must be in each entry.
+    This like supports a doubly linked list and requires (3 pointers).
+    The space and time for these pointers is not really needed, but the
+    implementation was simplified since we already had a linked list
+    class.

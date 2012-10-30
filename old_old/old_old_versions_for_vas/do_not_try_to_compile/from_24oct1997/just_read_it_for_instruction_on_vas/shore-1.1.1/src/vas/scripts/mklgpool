@@ -1,0 +1,55 @@
+# source ../scripts/setup.all
+#	source ../scripts/mklgpool
+
+set quiet 1
+
+
+proc lgpool  { dir name nb no nc makeit } {
+	cout "$makeit $dir / $name of $no * $nc = [expr {$no * $nc}] objects of size $nb " 
+	begin
+	cd $dir
+	if {$makeit == "make"} then {
+		if [not [sfile exists $name] ] {
+			mkpool $name
+		}
+	}
+	commit
+	set k 0
+	for {set j 0} {$j < $nc } {incr j} {
+		begin; for {set i 0} {$i < $no} {incr i} {
+			mkanon $name $nb:0:NoText
+		}; commit; cout "commited $j" ;
+	}
+	cout "$name done." 
+}
+
+proc mk007  { } {
+ lgpool /large lgpool1 50 3300 2 "make"
+ lgpool /large lgpool2 50 3300 2 "make"
+ lgpool /large lgpool3 50 3300 2 "make"
+ lgpool /large lgpool4 50 3300 2 "make"
+ lgpool /large lgpool5 50 3300 2 "make"
+ lgpool /large lgpool6 50 3300 2 "make"
+ lgpool /large lgpool7 50 3300 2 "make"
+ lgpool /large lgpool8 50 3300 2 "make"
+ lgpool /large lgpool9 50 3300 2 "make"
+ lgpool /large lgpool0 50 3300 2 "make"
+}
+proc lgpoolscan  { } {
+	scanpool lgpool1 readdata;
+	scanpool lgpool2 readdata;
+	scanpool lgpool3 readdata;
+	scanpool lgpool4 readdata;
+	scanpool lgpool5 readdata;
+	scanpool lgpool6 readdata;
+	scanpool lgpool7 readdata;
+	scanpool lgpool8 readdata;
+	scanpool lgpool9 readdata;
+	scanpool lgpool0 readdata;
+}
+
+	time { mk007 } 1
+ 	time { lgpoolscan } 1
+	time { lgpoolscan } 10
+	time  { scanpool lgpool1 read } 1
+	time  { scanpool lgpool1 read } 10

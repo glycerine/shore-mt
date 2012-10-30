@@ -1,0 +1,239 @@
+
+module oo7
+{
+
+//--------------------------------------------------------------------------
+// Start with some necessary preliminaries
+//--------------------------------------------------------------------------
+const long TypeSize = 10;
+const long TitleSize = 40;
+const long DummySize = 1000;
+
+// const long dFALSE = 0; 
+// const long dTRUE  = 1;
+
+enum AssemblyType {Complex, Base};
+
+enum  BenchmarkOp { Trav1, Trav1WW, Trav2a, Trav2b, Trav2c, Trav3a, Trav3b, 
+	Trav3c, Trav4, Trav5do, Trav5undo, Trav6, Trav7, Trav8, Trav9,
+	Trav10, Query1, Query2, Query3, Query4, Query5, Query6, Query7, Query8, 
+        Insert, Delete, Reorg1, Reorg2, WarmUpdate, MultiTrav1, MultiTrav2,
+        MultiTrav3, MultiTrav4, MultiTrav5, MultiTrav6 
+      };
+
+enum  UpdateType{UpdateOne, UpdateAll, UpdateRepeat};
+enum  UpdateDirectionType{UpdateDirectionDo, UpdateDirectionUndo};
+
+//--------------------------------------------------------------------------
+// AtomicPart objects are the primitives for building up designs
+//	- modeled after the Sun/OO1 benchmark's parts
+//--------------------------------------------------------------------------
+// PartIdSet is an arg to some methods, but really a C++ class;
+// let's see if we can get away with just a forward decl.
+// interface PartIdSet;
+// the new (ugly) syntax for this is:
+struct  PartIdSet;
+
+interface CompositePart; // forward dcl.
+interface Connection;	// forward dcl
+interface Document;	// forward dcl
+interface Module;	// forward dcl
+interface Assembly;
+interface ComplexAssembly;	// forward dcl
+
+
+
+
+interface AtomicPart {
+public:
+    attribute long	    id;
+    attribute char	    type[TypeSize];
+    attribute long	    buildDate;
+    attribute long	    x, y;
+    attribute long             docId;
+    relationship bag<Connection>    to inverse from;    // to connection objects
+    relationship  bag<Connection>    from inverse to;  // back pointers
+    attribute ref<CompositePart>  partOf;  // up pointer
+
+    void swapXY();
+    void toggleDate();
+    void DoNothing() const;
+
+    long traverse(in BenchmarkOp op, inout PartIdSet visitedIds) const;
+    void init(in long ptId, in ref<CompositePart> cp);
+    void Delete();
+};
+
+
+//--------------------------------------------------------------------------
+// Connection objects are used to wire AtomicParts together
+//	- similarly, modeled after Sun/OO1 connections
+//--------------------------------------------------------------------------
+
+interface Connection {
+public:
+    attribute char		type[TypeSize];
+    attribute long		length;
+    // attribute ref<AtomicPart>	from;
+    relationship ref<AtomicPart>        from inverse to;
+    // attribute ref<AtomicPart>	to;
+    relationship ref<AtomicPart>	to inverse from;
+    void init(in ref<AtomicPart> fromPart, in ref<AtomicPart> toPart);
+
+};
+
+
+//--------------------------------------------------------------------------
+// CompositeParts are parts constructed from AtomicParts
+//	- entry in a library of reusesable components
+//	- implementation is a graph of atomic parts
+//	- provides unit of significant access locality
+//	- each has an associated (unique) document object
+//--------------------------------------------------------------------------
+
+interface CompositePart {
+public:
+    attribute long		id;
+    attribute char		type[TypeSize];
+    attribute long		buildDate;
+    attribute ref<Document>	documentation;
+    attribute bag<AtomicPart>	parts;
+    attribute ref<AtomicPart>	rootPart;
+    // list of assemblies in which part is used as a private component
+    attribute bag<BaseAssembly>		usedInPriv;
+    // list of assemblies in which part is used as a shared component
+    attribute bag<BaseAssembly>		usedInShar;
+
+    long traverse(in BenchmarkOp op) const;
+    long traverse7() const;
+    long reorg1() const;
+    long reorg2() const;
+    void init(in long cpId);
+    void Delete();
+};
+
+
+
+//--------------------------------------------------------------------------
+// Document objects are used to hold a description of some particular
+// CompositePart object
+//--------------------------------------------------------------------------
+
+interface Document {
+public:
+    attribute char			title[TitleSize];
+    attribute long                       id;
+    attribute string		Text;
+    attribute long			textLen; // actual size of text area
+    attribute ref<CompositePart>	part;
+
+    long searchText(in char c) const;
+    long replaceText(in lref<char> oldString, in lref<char> newString);
+    void init(in long cpId, in ref<CompositePart> cref);
+    void Delete();
+};
+
+
+//--------------------------------------------------------------------------
+// Manual objects are used to hold a description of some particular
+// module --- essentially just large documents.
+//--------------------------------------------------------------------------
+
+interface Manual {
+public:
+    attribute char			title[TitleSize];
+    attribute long                       id;
+    attribute string		Text;
+    attribute long			textLen;  // amount actually being used
+    attribute ref<Module>	        mod;
+
+    long searchText(in char c) const;
+    long replaceText(in lref<char> oldString, in lref<char> newString);
+    long firstLast() const;
+    void init(in long modId, in ref<Module> myMod);
+    void Delete();
+};
+
+//--------------------------------------------------------------------------
+// Assembly objects are design instances built up recursively from
+// from other Assembly objects and (at the leaves only) CompositeParts
+//	- hierarchical (tree) structure for designs
+//	- may share composite parts with other assemblies
+//	- nonleaf and leaf assembly subtypes
+//--------------------------------------------------------------------------
+
+interface Assembly {
+public:
+    attribute long			id;
+    attribute char			type[TypeSize];
+    attribute long			buildDate;
+    attribute	AssemblyType		assmType;
+    attribute ref<ComplexAssembly>	superAssembly;
+    attribute ref<Module>		oModule;
+    long traverse(in BenchmarkOp op) const;
+    long traverse7(inout PartIdSet visitedComplexIds) const;
+    AssemblyType mytype() const;
+    void DoNothing() const;
+};
+
+
+interface ComplexAssembly: public Assembly {
+public:
+    attribute bag<Assembly>	subAssemblies;  // list of composite subassemblies
+
+    override  traverse,traverse7;
+	override mytype;
+    void init(in long asId, in ref<Module> mod, in ref<ComplexAssembly> parentAssembly, in long levelNo);
+};
+
+
+interface BaseAssembly: public Assembly {
+public:
+     attribute bag<CompositePart>	componentsPriv; // list of private composite parts
+     attribute bag<CompositePart>	componentsShar; // list of shared composite parts
+
+    override  traverse,traverse7;
+	override mytype;
+    void init(in long asId, in ref<Module> mod, in ref<ComplexAssembly> parentAssembly);
+};
+
+
+//--------------------------------------------------------------------------
+// Modules are the designs resulting from Assembly composition
+//	- unit of scaleup for the benchmark database
+//	- may share composite parts with other modules
+//--------------------------------------------------------------------------
+
+interface Module {
+public:
+    attribute long			id;
+    attribute char			type[TypeSize];
+    attribute long			buildDate;
+    attribute ref<Manual>	        man;  // manual object
+    attribute ref<ComplexAssembly>	designRoot;
+    attribute bag<BaseAssembly>	allBases;
+    long traverse(in BenchmarkOp op) const;
+    long scanManual() const;
+    long firstLast() const;
+    void init(in long modId);
+    void Delete();
+};
+
+
+
+// class containing all indices used in oo7
+interface oo7Indices {
+public:
+	attribute index<long,AtomicPart>  AtomicPartIdx ;
+	attribute index<long,CompositePart>  CompPartIdx ;
+	attribute index<string,Document>  DocumentIdx ;
+	attribute index<long,Document>  DocumentIdIdx ;
+	attribute index<long,BaseAssembly>  BaseAssemblyIdx ;
+	attribute index<string,Module>  ModuleIdx ;
+	attribute index<long,AtomicPart> BuildDateIndex;
+	attribute set<Module> AllModules;
+	void init();
+};
+
+}
+

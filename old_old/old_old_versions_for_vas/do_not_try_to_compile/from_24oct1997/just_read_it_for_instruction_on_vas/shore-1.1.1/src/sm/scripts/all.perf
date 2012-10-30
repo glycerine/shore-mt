@@ -1,0 +1,32 @@
+#   Time creation, updating, random updating, destroy of records 
+#
+# 
+
+source $script_dir/vol.init
+set fid (1.4)
+
+echo RUNNING file.perf
+source $script_dir/file.perf
+
+echo RUNNING write.perf
+source $script_dir/write.perf
+
+echo RUNNING random.perf
+source $script_dir/random.perf
+
+echo RUNNING destroy.perf
+source $script_dir/destroy.perf
+
+echo RUNNING create.perf
+source $script_dir/create.perf
+
+echo RUNNING lid.perf
+source $script_dir/lid.perf
+
+echo RUNNING lock.perf
+source $script_dir/lock.perf
+
+echo RUNNING loadrec.perf
+source $script_dir/loadrec.perf
+
+echo DONE

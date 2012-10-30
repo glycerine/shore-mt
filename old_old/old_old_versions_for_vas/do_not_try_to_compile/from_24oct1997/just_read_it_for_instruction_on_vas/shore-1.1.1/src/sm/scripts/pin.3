@@ -1,0 +1,102 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test pin latch deadlock
+#
+source $script_dir/vol.init
+
+set update_ops {update_rec update_rec_hdr append_rec truncate_rec}
+
+sm begin_xct
+set f1 [sm create_file $volid]
+verbose f1 = $f1
+
+for {set i 0} {$i < [llength $update_ops]} {incr i} {
+    set rec($i) [sm create_rec $f1 rec$i 11 rec$i]
+    verbose rec $i = $rec($i)
+}
+sm commit_xct
+
+
+proc pin_test {rid op} {
+    sm begin_xct
+    verbose pinning $rid
+    set pin [sm pin_create]
+    sm pin_pin $pin $rid SH
+    sync
+ 
+    #sm pin_unpin $pin
+
+    verbose updating $rid ...
+    set err 0
+    switch $op {
+	update_rec	{catch {sm pin_update_rec $pin 1 "X"} err}
+	update_rec_hdr	{catch {sm pin_update_rec_hdr $pin 1 "X"} err}
+	append_rec	{catch {sm pin_append_rec $pin "X"} err}
+	truncate_rec	{catch {sm pin_truncate_rec $pin 1} err}
+	default {assert {0}}
+    }
+    if { $err != 0 } {
+	if {[error_is $err E_DEADLOCK] == 1} {
+	    echo Unnecessary DEADLOCK
+	}
+    }
+    verbose finished updating $rid
+    sm pin_destroy $pin
+    sync
+    verbose committing
+    sm commit_xct
+}
+
+set update_ops {update_rec update_rec_hdr append_rec truncate_rec}
+
+foreach op $update_ops {
+    verbose Testing $op
+    verbose forking 1
+    set t1 [ fork_thread pin_test $rec(0) $op]
+    verbose forking 2
+    set t2 [ fork_thread pin_test $rec(1) $op]
+
+    sync_thread $t1
+    sync_thread $t2
+
+    verbose joining threads -- order is important here
+    sync_thread $t2
+    sync_thread $t1
+    join_thread $t1 $t2
+}
+
+set thr_cnt 0
+foreach op $update_ops {
+    verbose forking $op
+    set thr($thr_cnt) [ fork_thread pin_test $rec($thr_cnt) $op]
+    incr thr_cnt
+}
+
+for {set i 0} { $i < $thr_cnt} {incr i} {
+    verbose syncing $i
+    sync_thread $thr($i)
+}
+for {set i [expr $thr_cnt-1]} { $i >= 0} {incr i -1} {
+    verbose syncing $i
+    sync_thread $thr($i)
+}
+
+for {set i 0} { $i < $thr_cnt} {incr i} {
+    verbose joining $i
+    join_thread $thr($i)
+}
+
+
+sm begin_xct
+sm destroy_file $f1
+sm commit_xct
+
+verbose done
+unset rec update_ops t1 t2 op thr thr_cnt i f1
+

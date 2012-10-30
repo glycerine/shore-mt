@@ -1,0 +1,27 @@
+####  global variabls  ####
+
+# pagesize = 1024
+# lgdatasize = 960
+# smdatasize = 936
+
+####  main  ####
+
+set verbose 0
+
+begin
+cd ned
+mkpool p
+for { set core 1 } { $core <= $pagesize } { incr core 101 } {
+    for { set heap 1 } { $heap <= $pagesize } { incr heap 101 } {
+	puts stdout "$core $heap " nonewline
+	set oid [mkanon p ${core}:${heap}:0]
+	puts stdout "$oid" 
+    }
+}
+commit
+
+puts stdout "Verify begins"
+verify
+puts stdout "Verify ends"
+
+# printovt commit

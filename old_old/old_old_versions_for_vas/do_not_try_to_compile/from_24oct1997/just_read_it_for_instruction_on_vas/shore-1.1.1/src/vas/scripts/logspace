@@ -1,0 +1,23 @@
+# Meant to be run as follows:
+# in interactive mode: 
+#		source ../scripts/logspace
+#		abort
+#
+begin
+cd /
+if [sfile exists pool] {
+	dunlink pool
+}
+set p [mkpool pool]
+set r [mkanon pool 30000:0:0]
+
+# loop forever (until run out of log space
+# Then... after the error occurs, you type "abort"
+# and the abort should work
+#
+set j 1
+while {$j > 0} {
+	write $r 0 30000
+	set j [expr $j+1]
+}
+# abort

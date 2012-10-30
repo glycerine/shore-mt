@@ -1,0 +1,47 @@
+source ../scripts/setup.all
+
+#
+# a bunch of tests of permissions checks
+#
+
+set puerr $printusererrors
+set printusererrors 0
+
+#
+# read a directory (PermissionDenied/IsADirectory)
+#
+begin
+	cd /large
+	stat /large
+	set xoid [sfile oid x]
+
+	# try to read a directory by absolute path
+	expect OS_IsADirectory from { read /large/x } 
+
+	# try to read a directory by relative path
+	expect OS_IsADirectory from { read x } 
+
+	# try to read a directory by oid
+	expect OS_IsADirectory from { read $xoid } 
+abort
+
+begin
+	# check mode bits - read-only
+	mkuserdef ro.temp 10 0444
+	expect OS_PermissionDenied from { append ro.temp 10 } 
+
+	# writeable
+	mkuserdef w.temp 10 0777
+	append w.temp 10 
+
+	# directory read-only -- try to create something in the dir
+	mkdir readonlydir 0444
+	expect OS_PermissionDenied from { cd readonlydir }
+	chmod 0555 readonlydir
+	cd readonlydir
+	expect OS_PermissionDenied from { 
+		mkuserdef ro.temp 10 0444 } 
+abort
+
+set printusererrors $puerr
+return "perm done."

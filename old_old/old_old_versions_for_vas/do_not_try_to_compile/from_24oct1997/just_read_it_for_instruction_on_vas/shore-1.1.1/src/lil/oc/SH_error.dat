@@ -1,0 +1,45 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# SHerror.dat
+#
+# $Header: /p/shore/shore_cvs/src/lil/oc/SH_error.dat,v 1.5 1995/07/14 23:05:42 nhall Exp $
+#
+
+SH = 0x11110000 "Shore object cache" {
+
+_AlreadyInitialized	Object cache already initialized
+_NotInitialized		Object cache not initialized
+_OptionsNotInitialized	Process_options or default_options not called yet
+_BadObject		Invalid object
+_ReadOnly		Object not writable
+_BadWRef		Cannot perform update() on object
+_BadAssignment		Cannot perform assignment
+_BadVolume		Invalid volume
+_BadPool		Invalid pool
+_BadType		Invalid type
+_BadLockMode		Invalid lock mode
+_NotAPool		Object is not a pool
+_NotADir		Object is not a directory
+_ScanAlreadyOpen	Scan is already open
+_ScanNotOpen		Scan is not open
+_EndOfScan		Reached EOF in scan
+_ScanBufTooSmall		Buffer provided by user is too small
+_OutOfMemory		Out of memory
+_TxNotAllowed		This operation cannot be performed in a transaction
+_TxRequired		This operation must be performed in a transaction
+_TxAborted		The transaction was aborted
+_NotFound		The object or index key was not found
+_Already		The requested operation was already performed
+_ROFailure	    Remote operation failed
+_Internal		Object cache internal error
+_NoIndex         Index operation attempted on object with no indexes
+_NoSuchIndex     Index operation attempted on non-index
+_DuplicateEntry  Operation on unique index would cause duplicate entries 
+
+}

@@ -1,0 +1,72 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+svas = 0x01100000 {
+
+NotImplemented		Feature is not implemented
+ABORTED			Transaction was aborted
+WARNING			Warning
+FAILURE			Shore request failed
+TxNotAllowed		This request cannot be made in a transaction
+TxRequired		This request must be made in a transaction
+Already			Object already exists, or request was already performed
+CantFormat		Shore server cannot format the volume
+SmFailure			Shore Storage Manager failure
+RpcFailure		Error in Remote Procedure Call
+WrongObjectType	The object is not the type you expected it to be
+NotFound			The requested object was not found
+BadParam1			The first argument to this request was bad
+BadParam2			The second argument to this request was bad
+BadParam3			The third argument to this request was bad
+BadParam4			The fourth argument to this request was bad
+BadParam5			The fifth argument to this request was bad
+BadParam6			The sixth argument to this request was bad
+BadParam7			The seventh argument to this request was bad
+BadParam8			The eighth argument to this request was bad
+BadParam9			The ninth argument to this request was bad
+TxNotActive		No transaction is running
+MallocFailure		Space could not be allocated
+BadRange	The range of bytes given does not make sense for the given object
+IntegrityBreach	 Filesystem integrity would be damaged by this operation
+IndexScanIsOpen	 You have a scan of an index in progress
+PoolScanIsOpen	You have a scan of a pool in progress
+CantChangeCoreSize You cannot truncate or extend an object's core
+NotAPool			 The given object is not a pool
+BadPathSyntax		 The syntax of the given path is bad
+BadFileNameSyntax	 The syntax of the given filename is bad
+ScanNotInProgress  A scan is not in progress; the request requires one
+IsAnonymous 	You tried an operator for registered objects on an anonymous object
+VolumesDontMatch 	The request involves two objects or OIDs, and they must be on the same volume, but they are not.
+NotEnoughShm  	The amount of shared memory allocated to this client is insufficient for this request.
+XdrError  		An error was encountered while byte-swapping some data
+ShmError  		An error was encountered while allocating shared memory
+InternalError  	Internal error
+BadType  		The OID you gave for a type object is not the OID of a type
+AuthenticationFailure		The Shore server could not authenticate the client
+UnixFailure		A Unix library function or system call returned an error
+BadSerial		The serial number is senseless
+UserAbort		You aborted this transaction
+NotMounted		The requested volume is not mounted
+}
+
+os = 0x01110000 {
+InvalidArgument	Unix:EINVAL
+NotADirectory		Unix:ENOTDIR
+IsADirectory		Unix:EISDIR
+NotEmpty			Unix:ENOTEMPTY
+Missing			Unix:ENOENT
+NotOwner			Unix:EPERM
+PermissionDenied	Unix:EACCES
+InUse				Unix:EBUSY
+ReadOnlyFS		Unix:EROFS
+TooManySymlinks	Unix:ELOOP
+TooManyLinks		Unix:EMLINK
+PathTooLong		Unix:ENAMETOOLONG
+CrossDeviceRef	Unix:EXDEV
+AlreadyExists		Unix:EEXIST
+BadAddress		Unix:EFAULT
+}

@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Storage Structure Organization</TITLE>
+<META NAME="description" CONTENT="Storage Structure Organization">
+<META NAME="keywords" CONTENT="ssmvas">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmvas.css">
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="up" HREF="ssmvas.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html175"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html172"
+ HREF="ssmvas.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html166"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html174"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html176"
+ HREF="node4.html">Operations on Storage Structures</A>
+<B> Up:</B> <A NAME="tex2html173"
+ HREF="ssmvas.html">Writing Value-Added Servers with Manager</A>
+<B> Previous:</B> <A NAME="tex2html167"
+ HREF="node2.html">Introduction</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html177"
+ HREF="node3.html#SECTION00031000000000000000000">
+Implemented Design</A>
+<LI><A NAME="tex2html178"
+ HREF="node3.html#SECTION00032000000000000000000">
+Alternative Designs </A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="ssmvas:stgstruct">&#160;</A><H1><A NAME="SECTION00030000000000000000000">
+Storage Structure Organization</A>
+</H1>
+<P>
+One of the first decisions in designing a server is what
+persistent storage structures to use.
+This section discusses how we organized storage structures
+for the grid example.  There are numerous ways to organize storage.
+The primary decision is where to store the information about each item
+on the grid.  We first discuss the implemented design and then present
+a couple of alternatives.
+<P><A NAME="ssmvas:chosen">&#160;</A><H2><A NAME="SECTION00031000000000000000000">
+Implemented Design</A>
+</H2>
+<P>
+We chose a relational database approach to organizing the data.  Recall
+from the introduction that each item has a short string name and a
+coordinates on the grid.  Each item is stored in a record.  All item
+records are stored in a single file.  Items can be retrieved using
+their record ID or by scanning the file.
+<P>
+To improve performance of lookups, we use two indices.
+To support name lookups, we use a B+-tree index mapping
+item names to record IDs.  To support lookups on location,
+we use an R*-tree mapping an item's coordinates to its record ID.
+<P>
+All files and indices must be located on a volume.  For the grid
+example, only one volume is used.  This volume is located on
+a device whose name is specified with a configuration option.
+When the server starts, it must locate the file and indices for the
+grid, so we store the IDs of the file and indices
+in the root index of the volume.
+<P>
+This design has three desirable properties:
+<UL>
+<LI>
+Storage requirements are based on the number of items in the grid,
+not the size of the grid.
+<LI> Since each item is stored as a separate record we can
+take advantage
+of the fine-granularity (record-level) locking provided by the SSM.
+<LI> Adding new indices is easy.
+</UL><A NAME="ssmvas:alternative">&#160;</A><H2><A NAME="SECTION00032000000000000000000">
+Alternative Designs </A>
+</H2>
+<P>
+One alternative design is to store items directly in a
+B+-tree index, with the item name as the key and coordinates as the
+data associated with it.
+<P>
+This design has some problems.
+First, unlike records, entries in a B+-tree index do not have IDs, so the
+the R*-tree index would then map to names, making spatial lookups awkward.
+Second, if items are enlarged to hold more data, they may
+no longer fit within the size limitation (1-page) of index entries.
+Third, indices do not support updating of individual entries, so
+changing the location of an item would require removing it from
+the index and reinserting it.
+<P>
+Another alternative design is to treat the grid as a 2-D array of items
+and store the entire grid in one large record.  This representation would be
+efficient for densely populated grids, but is wasteful for sparse ones.
+It would also not support multiple items per location.  Worse yet,
+the granularity of locking would be the entire grid.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html175"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html172"
+ HREF="ssmvas.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html166"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html174"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html176"
+ HREF="node4.html">Operations on Storage Structures</A>
+<B> Up:</B> <A NAME="tex2html173"
+ HREF="ssmvas.html">Writing Value-Added Servers with Manager</A>
+<B> Previous:</B> <A NAME="tex2html167"
+ HREF="node2.html">Introduction</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

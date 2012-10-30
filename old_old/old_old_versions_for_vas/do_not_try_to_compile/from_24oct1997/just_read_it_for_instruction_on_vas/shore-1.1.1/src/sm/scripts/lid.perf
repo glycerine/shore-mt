@@ -1,0 +1,70 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Time logical ID cache operations
+#
+source $script_dir/vol.init
+
+proc lid_stats {} {
+    set stats [sm gather_stats]
+    set req_i [expr [lsearch $stats lid_lookups] + 1]
+    set acq_i [expr [lsearch $stats lid_remote_lookups] + 1]
+    set hit_i [expr [lsearch $stats lid_cache_hits] + 1]
+    set result [list "l=" [lindex $stats $req_i] "r=" [lindex $stats $acq_i] "h=" [lindex $stats $hit_i]]
+    return $result
+}
+
+set config [sm config_info]
+echo config $config
+
+set num_add 4000
+
+sm begin_xct
+
+set fid [sm create_file $volid]
+
+set dummy [sm gather_stats reset]
+sm set_lid_cache_enable enable
+set lid_time [ time {
+    sm test_lid_cache $volid $num_add
+} 1 ]
+echo
+echo cached=[sm lid_cache_enabled]
+echo "\t" $lid_time , [lid_stats]
+
+set dummy [sm gather_stats reset]
+sm set_lid_cache_enable disable
+set lid_time [ time {
+    sm test_lid_cache $volid $num_add
+} 1 ]
+echo
+echo cached=[sm lid_cache_enabled]
+echo "\t" $lid_time , [lid_stats]
+
+echo Now timeing test_lid_cache 1 followed by serial_to_stid
+set dummy [sm gather_stats reset]
+sm set_lid_cache_enable enable
+set lid_time [ time {
+    sm test_lid_cache $volid 1
+    sm serial_to_stid $fid
+} $num_add ]
+echo
+echo cached=[sm lid_cache_enabled]
+echo "\t" $lid_time , [lid_stats]
+
+set dummy [sm gather_stats reset]
+sm set_lid_cache_enable disable
+set lid_time [ time {
+    sm test_lid_cache $volid 1
+    sm serial_to_stid $fid
+} $num_add ]
+echo
+echo cached=[sm lid_cache_enabled]
+echo "\t" $lid_time , [lid_stats]
+
+sm commit_xct

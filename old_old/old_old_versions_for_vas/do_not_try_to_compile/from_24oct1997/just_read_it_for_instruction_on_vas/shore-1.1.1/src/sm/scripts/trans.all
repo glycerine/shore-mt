@@ -1,0 +1,41 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+source $script_dir/vol.init
+set do_file_create 1
+addcleanupvars {do_file_create}
+# source $script_dir/trans.lib
+
+set scripts [list trans.1 trans.2 trans.4]
+
+echo CLEANUP BEFORE trans.all :
+cleanup stdout
+addcleanupvars {script}
+
+set docheckpoint 0
+addcleanupvars {docheckpoint}
+
+foreach script $scripts {
+    echo
+    echo RUNNING: $script (no checkpoint)
+    source $script_dir/$script
+    checkstats  $script
+    puts stdout [concat CLEANUP AFTER  $script  : ]
+    cleanup stdout
+}
+
+set docheckpoint 1
+foreach script $scripts {
+    echo
+    echo RUNNING: $script (with checkpoint)
+    source $script_dir/$script
+    checkstats  $script
+    puts stdout [concat CLEANUP AFTER  $script  : ]
+    cleanup stdout
+}
+unset do_file_create
+deletecleanupvars {do_file_create}

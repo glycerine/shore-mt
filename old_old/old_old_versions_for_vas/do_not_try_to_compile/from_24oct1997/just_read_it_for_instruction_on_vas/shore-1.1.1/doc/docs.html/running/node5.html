@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>NFS-Mounting Your File System</TITLE>
+<META NAME="description" CONTENT="NFS-Mounting Your File System">
+<META NAME="keywords" CONTENT="running">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="running.css">
+<LINK REL="next" HREF="node6.html">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="running.html">
+<LINK REL="next" HREF="node6.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html92"
+ HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html89"
+ HREF="running.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html83"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html91"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html93"
+ HREF="node6.html">References</A>
+<B> Up:</B> <A NAME="tex2html90"
+ HREF="running.html">Configuring and Running the Server</A>
+<B> Previous:</B> <A NAME="tex2html84"
+ HREF="node4.html">Running a Shore Server</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html94"
+ HREF="node5.html#SECTION00051000000000000000000">
+Instructions for Linux Users</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="running:nfs">&#160;</A><H1><A NAME="SECTION00050000000000000000000">
+NFS-Mounting Your File System</A>
+</H1>
+<P>
+The Shore Value-Added Server is, among
+other things, an NFS daemon and a Mount daemon&nbsp;[<A
+ HREF="node6.html#sgkwl:des">SGK+85</A>].
+If you configure and run
+the server as it is distributed,
+the NFS and Mount services will be available.
+If you want to use them, you have to mount the
+Shore file system as an NFS file system on one or
+more of your workstations.
+<P>
+Take the following steps on each workstation
+from which you want to access to the Shore file system using NFS.
+<P><DL COMPACT>
+<DT>1.
+<DD>Become super-user by typing &quot;<TT>su</TT>.&quot;
+Most versions of Unix do not allow anybody but the super-user to issue
+the <TT>mount</TT> command.
+<DT>2.
+<DD>Identify or create a Unix mount point, which is
+an empty Unix directory on your workstation.
+<P><DT>3.
+<DD>The installed <TT>$SHORE/bin</TT> directory must be in your (super-user's) path.
+<P><DT>4.
+<DD>Run the script <TT>mnt</TT>, which
+takes 2 arguments: the name of a host, and the
+pathname for the mount point you have chosen.
+It calls the program <TT>smount</TT> (also in the installed <TT>bin</TT> directory)
+with a string of arguments, the last two of which are constructed
+from the host name and the mount point.
+<P>
+You can
+use the script <TT>mnt</TT> as it is, or you
+can edit it if you want to use different arguments
+to <TT>smount</TT>.
+You can also just use <TT>smount</TT> directly.
+See the manual page
+<A NAME="tex2html7"
+ HREF="../man/smount.shore.html">smount(SHORE)</A> for assistance.
+<P><DT>5.
+<DD>Check the mount.
+You don't have to be super-user to do this.
+Type
+<TT>mount</TT>
+or
+<TT>smount</TT>
+and see if your mount point shows up in the mount table.
+</DL><A NAME="running:nfslinux">&#160;</A><H2><A NAME="SECTION00051000000000000000000">
+Instructions for Linux Users</A>
+</H2>
+<P>
+The mount program that comes with Linux already has the features
+that Shore needs and therefore there is no need for the
+<TT>smount</TT> program.
+In the above instructions, replace
+<TT>smount</TT> with <TT>mount</TT> and <TT>mnt</TT> with <TT>mnt.linux</TT>.
+See your Linux <TT>mount</TT> manual page for more information.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html92"
+ HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html89"
+ HREF="running.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html83"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html91"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html93"
+ HREF="node6.html">References</A>
+<B> Up:</B> <A NAME="tex2html90"
+ HREF="running.html">Configuring and Running the Server</A>
+<B> Previous:</B> <A NAME="tex2html84"
+ HREF="node4.html">Running a Shore Server</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

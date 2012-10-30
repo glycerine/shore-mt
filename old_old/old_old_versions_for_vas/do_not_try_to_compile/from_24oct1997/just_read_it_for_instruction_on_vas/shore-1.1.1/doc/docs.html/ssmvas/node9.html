@@ -1,0 +1,3241 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Appendix: Program Sources</TITLE>
+<META NAME="description" CONTENT="Appendix: Program Sources">
+<META NAME="keywords" CONTENT="ssmvas">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmvas.css">
+<LINK REL="previous" HREF="node8.html">
+<LINK REL="up" HREF="ssmvas.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif_gr.gif"> 
+<A NAME="tex2html261"
+ HREF="ssmvas.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html259"
+ HREF="node8.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html263"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Up:</B> <A NAME="tex2html262"
+ HREF="ssmvas.html">Writing Value-Added Servers with Manager</A>
+<B> Previous:</B> <A NAME="tex2html260"
+ HREF="node8.html">Running the Example</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html264"
+ HREF="node9.html#SECTION00091000000000000000000">
+Code Shared by Client and Server</A>
+<UL>
+<LI><A NAME="tex2html265"
+ HREF="node9.html#SECTION00091100000000000000000">
+Makefile: Makefile.template</A>
+<LI><A NAME="tex2html266"
+ HREF="node9.html#SECTION00091200000000000000000">
+RPC Declarations: msg.x</A>
+<LI><A NAME="tex2html267"
+ HREF="node9.html#SECTION00091300000000000000000">
+grid_basics.h</A>
+<LI><A NAME="tex2html268"
+ HREF="node9.html#SECTION00091400000000000000000">
+grid_basics.C</A>
+<LI><A NAME="tex2html269"
+ HREF="node9.html#SECTION00091500000000000000000">
+command.h</A>
+<LI><A NAME="tex2html270"
+ HREF="node9.html#SECTION00091600000000000000000">
+command.C</A>
+<LI><A NAME="tex2html271"
+ HREF="node9.html#SECTION00091700000000000000000">
+Configuration Options: options.C</A>
+</UL>
+<LI><A NAME="tex2html272"
+ HREF="node9.html#SECTION00092000000000000000000">
+Server Code</A>
+<UL>
+<LI><A NAME="tex2html273"
+ HREF="node9.html#SECTION00092100000000000000000">
+Main: server.C</A>
+<LI><A NAME="tex2html274"
+ HREF="node9.html#SECTION00092200000000000000000">
+command_server.h</A>
+<LI><A NAME="tex2html275"
+ HREF="node9.html#SECTION00092300000000000000000">
+command_server.C</A>
+<LI><A NAME="tex2html276"
+ HREF="node9.html#SECTION00092400000000000000000">
+server_stubs.C</A>
+<LI><A NAME="tex2html277"
+ HREF="node9.html#SECTION00092500000000000000000">
+grid.h</A>
+<LI><A NAME="tex2html278"
+ HREF="node9.html#SECTION00092600000000000000000">
+grid.C</A>
+<LI><A NAME="tex2html279"
+ HREF="node9.html#SECTION00092700000000000000000">
+rpc_thread.h</A>
+<LI><A NAME="tex2html280"
+ HREF="node9.html#SECTION00092800000000000000000">
+rpc_thread.C</A>
+</UL>
+<LI><A NAME="tex2html281"
+ HREF="node9.html#SECTION00093000000000000000000">
+Client Code</A>
+<UL>
+<LI><A NAME="tex2html282"
+ HREF="node9.html#SECTION00093100000000000000000">
+Main: client.C</A>
+<LI><A NAME="tex2html283"
+ HREF="node9.html#SECTION00093200000000000000000">
+command_client.h</A>
+<LI><A NAME="tex2html284"
+ HREF="node9.html#SECTION00093300000000000000000">
+command_client.C</A>
+</UL></UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="ssmvas:apx">&#160;</A><H1><A NAME="SECTION00090000000000000000000">
+Appendix:  Program Sources</A>
+</H1>
+<P><A NAME="ssmvas:sharedcode">&#160;</A><H2><A NAME="SECTION00091000000000000000000">
+Code Shared by Client and Server</A>
+</H2>
+<A NAME="ssmvas:makefile">&#160;</A><H3><A NAME="SECTION00091100000000000000000">
+Makefile: Makefile.template</A>
+</H3>
+<PRE>
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+# $Header: /p/shore/shore_cvs/src/examples/vas/grid/Makefile.template,v 1.23 1997/10/24 14:49:00 solomon Exp $
+
+#
+# Makefile for vas/grid program
+#
+
+# Modify the following line as appropriate to point to the place where
+# Shore is installed
+ifndef SHORE
+SHORE = /usr/local/shore
+endif
+DISKRW = $(SHORE)/bin/diskrw
+
+# Modify the following as desired to control compilation options
+# NOTE:  -lnsl is only required for Solaris
+CXX         = g++
+CC          = gcc
+CXXFLAGS    = -g -I$(SHORE)/include
+# The version of RPCGEN we are using generates old-fashioned C
+CFLAGS      = -g -traditional -I$(SHORE)/include
+LIBSM       = $(SHORE)/lib/libsm.a
+LIBCOMMON   = $(SHORE)/lib/libshorecommon.a -lnsl
+# use the following for non-Solaris systems
+#LIBCOMMON   = $(SHORE)/lib/librpclib.a $(SHORE)/lib/libshorecommon.a
+
+# This is set to use the modified RPC shipped with Shore
+RPCGEN = $(SHORE)/bin/rpcgen
+
+EXECS = server client
+SERVER_SRCS = grid.C rpc_thread.C server.C command_server.C server_stubs.C
+CLIENT_SRCS = client.C command_client.C
+COMMON_SRCS = options.C command.C grid_basics.C
+
+SERVER_OBJS = $(SERVER_SRCS:.C=.o)
+CLIENT_OBJS = $(CLIENT_SRCS:.C=.o)
+COMMON_OBJS = $(COMMON_SRCS:.C=.o)
+OBJ = $(SERVER_OBJS) $(CLIENT_OBJS) $(COMMON_OBJS)
+RPC_FILES = msg.h msg_clnt.c msg_svc.c msg_xdr.c
+SRCS = $(SERVER_SRCS) $(CLIENT_SRCS) $(COMMON_SRCS) $(RPC_FILES)
+
+default: $(EXECS)
+
+all:: $(EXECS) config log.grid
+
+# NB: THIS IS IMPORTANT: we include &quot;ShoreConfig.h&quot; because
+# we *NEED* the system-dependent definition of a jmp_buf
+# in order to see that the thread data structures that
+# that we build here are consistent with those in the library.
+# If we don't get the right #defines for the configuration, we
+# run the risk of building .o files here with the wrong idea
+# about the size of sthread_t (the root of the class hierarchy
+# for our threads).
+
+$(RPC_FILES): msg.x
+    cp $(SHORE)/include/ShoreConfig.h .
+    $(RPCGEN) msg.x
+    rm -f msg_svc.c
+    $(RPCGEN) -m -o msg_svc.c msg.x
+
+server: $(SERVER_OBJS) $(COMMON_OBJS) msg_xdr.o msg_svc.o $(LIBSM) $(LIBCOMMON)
+    $(LINK.cc) -o $@ msg_svc.o $(SERVER_OBJS) $(COMMON_OBJS) msg_xdr.o \
+            $(LIBSM) $(LIBCOMMON)
+
+client: $(CLIENT_OBJS) $(COMMON_OBJS) $(LIBCOMMON) msg_clnt.o msg_xdr.o
+    $(LINK.cc) -o $@ $(CLIENT_OBJS) $(COMMON_OBJS) msg_clnt.o msg_xdr.o \
+            $(LIBCOMMON)
+
+$(OBJ): msg.h
+
+tags:: $(SRCS)
+    ctags -wt $(SRCS) $(SHORE)/include/*/*.h $(SHORE)/include/*.h
+
+$(DISKRW):
+    @echo 'Please set environment variable SHORE to the location of the'
+    @echo '     installed Shore binaries'
+    @echo 'The directories $$SHORE/lib and $$SHORE/include'
+    @echo '     and the executable file $$SHORE/bin/disrw should exist'
+    @exit 1
+
+log.grid:
+    mkdir $@
+
+config: $(DISKRW) exampleconfig
+    sed -e &quot;s,DISKRW,$(DISKRW),&quot; exampleconfig &gt; config
+
+clean::
+    $(RM) -f $(EXECS) $(RPC_FILES) a.out *.o core tags 
+
+distclean:: clean
+    $(RM) -f $(EXECS) config device.grid ssh.log
+    $(RM) -rf log.grid
+</PRE>
+<A NAME="ssmvas:msgx">&#160;</A><H3><A NAME="SECTION00091200000000000000000">
+RPC Declarations: msg.x</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+%#ifndef GRID_BASICS_H
+#include &quot;grid_basics.h&quot;
+%#endif /* !GRID_BASICS_H */
+
+/* const MAXNAMELEN = MAX_NAME_LEN;*/
+typedef char name_type_t[MAX_NAME_LEN];
+
+typedef char error_msg_t[MAX_ERR_MSG_LEN];
+
+struct error_reply {
+    error_msg_t         error_msg;
+};
+
+struct print_grid_reply {
+    grid_display_t      display;
+    error_msg_t     error_msg;
+};
+
+struct add_item_arg {
+    name_type_t     name;
+    int         x;
+    int         y;
+};
+
+struct remove_item_arg {
+    name_type_t     name;
+};
+
+struct location_arg {
+    name_type_t     name;
+};
+
+struct location_reply {
+    int         x;
+    int         y;
+    error_msg_t     error_msg;
+};
+
+struct spatial_arg {
+    int         x_low;
+    int         y_low;
+    int         x_hi;
+    int         y_hi;
+};
+
+struct spatial_reply {
+    spatial_result_t    result;
+    error_msg_t     error_msg;
+};
+
+program GRID {
+    version GRIDVERS {
+    void    ping_rpc(void)                  = 0;
+    error_reply commit_transaction_rpc(void)        = 101;
+    error_reply abort_transaction_rpc(void)         = 102;
+    error_reply clear_grid_rpc(void)            = 103;
+    print_grid_reply print_grid_rpc(void)           = 104;
+    error_reply add_item_rpc(add_item_arg)      = 105;
+    error_reply remove_item_rpc(remove_item_arg)    = 106;
+    error_reply move_item_rpc(add_item_arg)     = 107;
+    location_reply  location_of_rpc(location_arg)       = 108;
+    spatial_reply   spatial_rpc(spatial_arg)        = 109;
+    } = 1;
+} = 0x20000100;
+
+
+#ifdef RPC_HDR
+
+%#define MSG_H
+
+
+%#ifdef RPC_SVC
+%#ifdef __cplusplus
+
+%/*
+% * Maximum size of all replys
+% * Used to create a sufficiently large a reply buffer in a thread.
+% */
+% const size_t thread_reply_buf_size = MAX(sizeof(error_reply),
+%                 MAX(sizeof(print_grid_reply),
+%             MAX(sizeof(location_reply),
+%             sizeof(spatial_reply))));
+
+%/* server dispatch function */
+%extern &quot;C&quot; void grid_1(struct svc_req*, register SVCXPRT*);
+
+%/* Server side of RPCs */
+%extern &quot;C&quot; void*       ping_rpc_1(void*, svc_req*);
+%extern &quot;C&quot; error_reply*    commit_transaction_rpc_1(void*, svc_req*);
+%extern &quot;C&quot; error_reply*    abort_transaction_rpc_1(void*, svc_req*);
+%extern &quot;C&quot; error_reply*    clear_grid_rpc_1(void*, svc_req*);
+%extern &quot;C&quot; print_grid_reply*   print_grid_rpc_1(void*, svc_req*);
+%extern &quot;C&quot; error_reply*    add_item_rpc_1(add_item_arg*, svc_req*);
+%extern &quot;C&quot; error_reply*    remove_item_rpc_1(remove_item_arg*, svc_req*);
+%extern &quot;C&quot; error_reply*    move_item_rpc_1(add_item_arg*, svc_req*);
+%extern &quot;C&quot; location_reply* location_of_rpc_1(location_arg*, svc_req*);
+%extern &quot;C&quot; spatial_reply*  spatial_rpc_1(spatial_arg*, svc_req*);
+%#endif /*__cplusplus*/
+%#endif /*RPC_SVC*/
+
+%#ifdef RPC_CLNT
+%#ifdef __cplusplus
+%extern &quot;C&quot; void* ping_rpc_1(void*, CLIENT*);
+%extern &quot;C&quot; error_reply*    commit_transaction_rpc_1(void*, CLIENT*);
+%extern &quot;C&quot; error_reply*    abort_transaction_rpc_1(void*, CLIENT*);
+%extern &quot;C&quot; error_reply*    clear_grid_rpc_1(void*, CLIENT*);
+%extern &quot;C&quot; print_grid_reply*   print_grid_rpc_1(void*, CLIENT*);
+%extern &quot;C&quot; error_reply*    add_item_rpc_1(add_item_arg*, CLIENT*);
+%extern &quot;C&quot; error_reply*    remove_item_rpc_1(remove_item_arg*, CLIENT*);
+%extern &quot;C&quot; error_reply*    move_item_rpc_1(add_item_arg*, CLIENT*);
+%extern &quot;C&quot; location_reply* location_of_rpc_1(location_arg*, CLIENT*);
+%extern &quot;C&quot; spatial_reply*  spatial_rpc_1(spatial_arg*, CLIENT*);
+%#endif /*__cplusplus*/
+%#endif /*RPC_CLNT*/
+
+#endif /*RPC_HDR*/
+</PRE>
+<A NAME="ssmvas:gridbasicsh">&#160;</A><H3><A NAME="SECTION00091300000000000000000">
+grid_basics.h</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+#ifndef GRID_BASICS_H
+#define GRID_BASICS_H
+
+#include &quot;ShoreConfig.h&quot;
+
+/* 
+ * This defines a bunch of commonly used constants for the grid
+ * program.  
+ *
+ * Note: #define is since this file must be run through rpcgen.
+ */
+
+/*
+ * Maximun length of an item name
+ */
+#define MAX_NAME_LEN 21
+
+/*
+ * Max error message length
+ */
+#define MAX_ERR_MSG_LEN 80
+
+/*
+ * Maximum size of grid
+ */
+#define MAX_GRID_X  40
+#define MAX_GRID_Y  15
+
+
+/*
+ * Maximum # of items returns from a spatial query
+ */
+#define MAX_SPATIAL_RESULT 10
+
+/*
+ * Items on the grid
+ * Note: #ifdef __cplusplus is to avoid sending c++ code
+ *       through rpcgen (since it can't handle it)
+ */
+struct item_t {
+#ifdef __cplusplus
+                item_t();
+                item_t(const char* _name, int _x, int _y);
+    void        init(const char* _name, int _x, int _y);
+#endif
+    /* location on grid */
+    int         x;
+    int     y;
+    /* name of the item */
+    char        name[MAX_NAME_LEN]; 
+};
+
+/*
+ */
+
+/*
+ * Query Result Structures
+ */
+
+typedef char grid_display_row_t[MAX_GRID_X];
+
+struct grid_display_t {
+    grid_display_row_t  rows[MAX_GRID_Y];
+};
+
+/* results for spatial queries */
+struct spatial_result_t {
+    int         found_cnt;      /* number of items found    */
+    item_t      items[MAX_SPATIAL_RESULT]; /* some of the items found */
+};
+
+
+
+/* sunos 4.1.3 does not declare these */
+#if defined(SUNOS41) &amp;&amp; defined(__cplusplus)
+extern &quot;C&quot; {
+    void bzero(char*, int);
+    int socket(int, int, int);
+    int bind(int, const void *, int);
+}
+#endif
+
+#endif /* GRID_BASIC_H */
+</PRE>
+<A NAME="ssmvas:gridbasicsC">&#160;</A><H3><A NAME="SECTION00091400000000000000000">
+grid_basics.C</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+#define GRID_BASICS_C
+
+#include &quot;ShoreConfig.h&quot;
+#include &quot;string.h&quot;
+#include &quot;grid_basics.h&quot;
+
+item_t::item_t()
+    : x(0), y(0)
+{
+    memset(name, 0, MAX_NAME_LEN);
+}
+
+item_t::item_t(const char* _name, int _x, int _y)
+    : x(_x), y(_y)
+{
+    strncpy(name, _name, MAX_NAME_LEN);
+    name[MAX_NAME_LEN] = 0;  // make sure string ends in zero
+}
+</PRE>
+<A NAME="ssmvas:commandh">&#160;</A><H3><A NAME="SECTION00091500000000000000000">
+command.h</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+#ifndef COMMAND_H
+#define COMMAND_H
+
+typedef char*   cmd_err_t;
+
+/*
+ * Command processing class
+ */
+class command_base_t {
+public:
+
+            command_base_t() {};
+    virtual     ~command_base_t() {};
+
+    // Commands that get converted to an RPC 
+    // All return an error message string that is NULL if success.
+    virtual cmd_err_t   commit_transaction() = 0;
+    virtual cmd_err_t   abort_transaction() = 0;
+    virtual cmd_err_t   clear_grid() = 0;
+    virtual cmd_err_t   print_grid(grid_display_t&amp; rows) = 0;
+    virtual cmd_err_t   add_item(const char* name, int x, int y) = 0;
+    virtual cmd_err_t   remove_item(const char* name) = 0;
+    virtual cmd_err_t   move_item(const char* name, int x, int y) = 0;
+    virtual cmd_err_t   location_of(const char* name, int&amp; x, int&amp; y) = 0;
+    virtual cmd_err_t   spatial_query(const nbox_t&amp; box, spatial_result_t&amp; result) = 0;
+
+    // Command Parsing
+    // Print errors to stderr
+    // Sets &quot;quit&quot; to true if quit command was found
+    void        parse_command(char* line, bool&amp; quit);
+};
+
+
+#endif /* COMMAND_H */
+</PRE>
+<A NAME="ssmvas:commandC">&#160;</A><H3><A NAME="SECTION00091600000000000000000">
+command.C</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * This file implements the main() code for the grid client program
+ */
+
+#include &quot;ShoreConfig.h&quot;
+#include &lt;stream.h&gt;
+#include &lt;string.h&gt;
+#include &lt;strstream.h&gt;
+#include &lt;ctype.h&gt;
+#include &lt;rpc/rpc.h&gt;
+// include stuff needed for SM applications (clients)
+// use this rather than sm_vas.h since it's small and all that
+// is necessary for this file
+#include &quot;grid_basics.h&quot;
+#include &quot;sm_app.h&quot;
+#include &quot;nbox.h&quot;
+#include &quot;grid.h&quot;
+#include &quot;command.h&quot;
+
+enum command_token_t {
+    commit_cmd,
+    abort_cmd,
+    clear_cmd,
+    print_cmd,
+    add_cmd,
+    remove_cmd,
+    move_cmd,
+    locate_cmd,
+    spatial_cmd,
+    quit_cmd,
+    help_cmd
+};
+
+struct command_description_t {
+    command_token_t token;
+    int         param_cnt;  // number of parameters
+    char*       name;       // string name of command
+    char*       parameters; // parameter list
+    char*       description;    // command description
+};
+
+static command_description_t descriptions[] = {
+    {commit_cmd, 0, &quot;commit&quot;, &quot;&quot;,   &quot;commit transaction and start another one&quot;},
+    {abort_cmd,  0, &quot;abort&quot;,  &quot;&quot;,   &quot;abort transaction and start another one&quot;},
+    {clear_cmd,  0, &quot;clear&quot;,  &quot;&quot;,   &quot;clear grid&quot;},
+    {print_cmd,  0, &quot;print&quot;,  &quot;&quot;,   &quot;print grid&quot;},
+    {add_cmd,    3, &quot;add&quot;,    &quot;name x y&quot;, &quot;add new item &lt;name&gt; at &lt;x,y&gt;&quot;},
+    {remove_cmd, 1, &quot;remove&quot;, &quot;name&quot;,   &quot;remove item &lt;name&gt;&quot;},
+    {move_cmd, 3, &quot;move&quot;, &quot;name x y&quot;,   &quot;move item &lt;name&gt; to location &lt;x,y&gt;&quot;},
+    {locate_cmd, 1, &quot;locate&quot;, &quot;name&quot;,   &quot;print location of item &lt;name&gt;&quot;},
+    {spatial_cmd, 4, &quot;spatial&quot;, &quot;x_lo y_lo x_hi y_hi&quot;,  &quot;print count of items in rectangle and list first few items&quot;},
+    {quit_cmd,   0, &quot;quit&quot;,   &quot;&quot;,   &quot;quit and exit program (aborts current transaction)&quot;},
+    {help_cmd,   0, &quot;help&quot;,   &quot;&quot;,   &quot;prints this message&quot;}
+};
+
+// number of commands
+static command_cnt = sizeof(descriptions)/sizeof(command_description_t);
+
+static void
+print_commands() 
+{
+    cerr &lt;&lt; &quot;Valid commands are: \n&quot;&lt;&lt; endl;
+    const command_description_t* cmd;
+    for (cmd = descriptions; cmd != descriptions+command_cnt; cmd++) {
+    cerr &lt;&lt; &quot;    &quot; &lt;&lt; cmd-&gt;name &lt;&lt; &quot; &quot; &lt;&lt; cmd-&gt;parameters &lt;&lt; endl;
+    cerr &lt;&lt; &quot;        &quot; &lt;&lt; cmd-&gt;description &lt;&lt; endl;
+    }
+    cerr &lt;&lt; &quot;\n    Comments begin with a '#' and continue until the end of the line.&quot; &lt;&lt; endl;
+}
+
+static void
+print_usage(const command_description_t* cmd) 
+{
+    cerr &lt;&lt; &quot;Usage: &quot;&lt;&lt; cmd-&gt;name &lt;&lt; &quot; &quot; &lt;&lt; cmd-&gt;parameters &lt;&lt; endl;
+}
+
+void
+command_base_t::parse_command(char* line, bool&amp; quit)
+{
+    istrstream  s(line);
+
+    const   max_params = 5;
+    char*   params[max_params];
+    int     param_cnt = 0;
+    int     i;
+
+    // find all parameters in the line (parameters begin
+    // with non-white space) and end each parameter with \0
+    bool in_param = false;  // not current in a parameter
+    for (i = 0; line[i] != '\0'; i++) {
+    if (in_param) {
+        if (isspace(line[i])) {
+        // end of parameter
+        line[i] = '\0';
+        in_param = false;
+        }
+    } else {
+        if (line[i] == '#') {
+        // rest of line is comment
+        break;
+        }
+
+        if (!isspace(line[i])) {
+        // beginning of parameter
+        if (param_cnt == max_params) {
+            cerr &lt;&lt; &quot;Error: too many parameters.&quot; &lt;&lt; endl;
+            return;
+        }
+        params[param_cnt] = line+i;
+        param_cnt++;
+        in_param = true;
+        }
+    }
+    }
+
+    if (param_cnt == 0) {
+    // blank line
+    return;
+    }
+
+    // Search for command in command list
+    command_description_t* cmd;
+    for (cmd = descriptions; cmd != descriptions+command_cnt; cmd++) {
+    // command is recognized with just first 2 characters
+    if (strncmp(params[0], cmd-&gt;name, 2) == 0) {
+        break;
+    }
+    }
+    if (cmd == descriptions+command_cnt) {
+    // command not found
+    cerr &lt;&lt; &quot;Error: unkown command &quot; &lt;&lt; params[0] &lt;&lt; endl;
+    print_commands();
+    } else if (cmd-&gt;param_cnt != param_cnt-1) {
+    // wrong number of parameters
+    cerr &lt;&lt; &quot;Error: wrong number of parameters for &quot; &lt;&lt; cmd-&gt;name &lt;&lt; endl;
+    print_usage(cmd);
+    } else {
+
+    // call proper RPC for the command
+
+    int     x;
+    int     y;
+    char*   name;
+    quit = false;
+
+    cmd_err_t err = 0;
+    switch(cmd-&gt;token) {
+    case commit_cmd:
+        err = commit_transaction();
+        if (!err) {
+        cout &lt;&lt; &quot;transaction is committed -- new one started&quot; &lt;&lt; endl;
+        }
+        break;
+    case abort_cmd:
+        err = abort_transaction();
+        if (!err) {
+        cout &lt;&lt; &quot;transaction is rolled back -- new one started&quot; &lt;&lt; endl;
+        }
+        break;
+    case clear_cmd:
+        err = clear_grid();
+        if (!err) {
+        cout &lt;&lt; &quot;grid has been cleared&quot; &lt;&lt; endl;
+        }
+        break;
+    case print_cmd:
+        grid_display_t display;
+        err = print_grid(display);
+        if (err) break;
+
+        // print header line
+        cout &lt;&lt; &quot;\n    &quot;;
+        for (int col = 0; col &lt; MAX_GRID_X; col++) {
+        if (col%10 == 0) {
+            cout &lt;&lt; '.';
+        } else {
+            cout &lt;&lt; col%10;
+        }
+        } 
+        cout &lt;&lt; endl;
+        // print rows
+        for (int row = 0; row &lt; MAX_GRID_Y; row++) {
+        cout &lt;&lt; form(&quot;%.3i&quot;, row) &lt;&lt; &quot; &quot; ;
+        for (int col = 0; col &lt; MAX_GRID_X; col++) {
+            cout &lt;&lt; display.rows[row][col];
+        }
+        cout &lt;&lt; endl;
+        }
+        break;
+    case add_cmd:
+        name = params[1];
+        x = strtol(params[2], 0, 0);
+        y = strtol(params[3], 0, 0);
+        if (x &lt; 0 || x &gt;= MAX_GRID_X) {
+        cerr &lt;&lt; &quot;Error: x parameter must be &gt;=0 and &lt; &quot; &lt;&lt; MAX_GRID_X &lt;&lt; endl;
+        break;
+            }
+        if (y &lt; 0 || y &gt;= MAX_GRID_Y) {
+        cerr &lt;&lt; &quot;Error: y parameter must be &gt;=0 and &lt; &quot; &lt;&lt; MAX_GRID_Y &lt;&lt; endl;
+        break;
+            }
+        err = add_item(name, x, y);
+        if (!err) {
+        cout &lt;&lt; &quot;new item &quot; &lt;&lt; name &lt;&lt; &quot; has been added&quot; &lt;&lt; endl;
+        }
+        break;
+    case remove_cmd:
+        name = params[1];
+        err = remove_item(name);
+        if (!err) {
+        cout &lt;&lt; &quot;item &quot; &lt;&lt; name &lt;&lt; &quot; has been removed&quot; &lt;&lt; endl;
+        }
+        break;
+    case move_cmd:
+        name = params[1];
+        x = strtol(params[2], 0, 0);
+        y = strtol(params[3], 0, 0);
+        if (x &lt; 0 || x &gt;= MAX_GRID_X) {
+        cerr &lt;&lt; &quot;Error: x parameter must be &gt;=0 and &lt; &quot; &lt;&lt; MAX_GRID_X &lt;&lt; endl;
+        break;
+            }
+        if (y &lt; 0 || y &gt;= MAX_GRID_Y) {
+        cerr &lt;&lt; &quot;Error: y parameter must be &gt;=0 and &lt; &quot; &lt;&lt; MAX_GRID_Y &lt;&lt; endl;
+        break;
+            }
+        err = move_item(name, x, y);
+        if (!err) {
+        cout &lt;&lt; &quot;item &quot; &lt;&lt; name &lt;&lt; &quot; has been moved&quot; &lt;&lt; endl;
+        }
+        break;
+    case locate_cmd:
+        name = params[1];
+        err = location_of(name, x, y);
+        if (!err) {
+        cout &lt;&lt; &quot;item &quot; &lt;&lt; name &lt;&lt; &quot; is located at: &quot;
+             &lt;&lt; x &lt;&lt; &quot;,&quot; &lt;&lt; y &lt;&lt; endl;
+        }
+        break;
+    case spatial_cmd: {
+        // generate nbox from last 4 parameters
+        const coord_cnt = 4;
+        int coord[coord_cnt];
+        int i;
+        for (i = 0; i &lt; coord_cnt; i++ ) {
+        coord[i] = strtol(params[i+1], 0, 0);
+        }
+        {
+        nbox_t box(2, coord);
+        spatial_result_t result;
+        err = spatial_query(box, result);
+        if (!err) {
+            cout &lt;&lt; &quot;In box [&quot; &lt;&lt; coord[0] &lt;&lt; &quot;,&quot; &lt;&lt; coord[1]
+             &lt;&lt; &quot; &quot; &lt;&lt; coord[2] &lt;&lt; &quot;,&quot; &lt;&lt; coord[3] &lt;&lt; &quot;]&quot;
+             &lt;&lt; &quot; there are &quot; &lt;&lt; result.found_cnt &lt;&lt; &quot; items.&quot;
+             &lt;&lt; endl;
+            if (result.found_cnt &gt; 0) {
+            int print_cnt = MIN(MAX_SPATIAL_RESULT, result.found_cnt);
+            cout &lt;&lt; &quot;The first &quot; &lt;&lt; print_cnt 
+                 &lt;&lt; &quot; items found are:&quot; &lt;&lt; endl;
+            item_t* it; // item iterator
+            for (i = 0, it = result.items;
+                 i &lt; print_cnt; i++, it++) {
+                cout &lt;&lt; it-&gt;name &lt;&lt; &quot; &quot; &lt;&lt; it-&gt;x &lt;&lt; &quot;,&quot; &lt;&lt; it-&gt;y &lt;&lt; endl;
+            }
+            }
+        }
+        }
+        }
+        break;
+        case quit_cmd:
+        quit = true;
+        break;
+        case help_cmd:
+        print_commands();
+        break;
+    default:
+        cerr &lt;&lt; &quot;Internal Error at: &quot; &lt;&lt; __FILE__ &lt;&lt; &quot;:&quot; &lt;&lt; __LINE__ &lt;&lt; endl;
+        exit(1);
+    }
+    if (err) {
+        //cerr &lt;&lt; &quot;Error: &quot; &lt;&lt; err &lt;&lt; endl;
+        cerr &lt;&lt; err &lt;&lt; endl;
+        cerr &lt;&lt; &quot;Error: &quot; &lt;&lt; cmd-&gt;name &lt;&lt; &quot; command failed.&quot; &lt;&lt; endl;
+    }
+    }
+}
+</PRE>
+<A NAME="ssmvas:optionsC">&#160;</A><H3><A NAME="SECTION00091700000000000000000">
+Configuration Options: options.C</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * This file implements configuration option processing for
+ * both the client and the server.
+ */
+
+#include &lt;stream.h&gt;
+#include &lt;string.h&gt;
+
+// since this file only deals with the SSM option package,
+// rather than including sm_vas.h, just include what's needed for
+// options:
+#include &quot;w.h&quot;
+#include &quot;option.h&quot;
+
+const char* opt_file = &quot;./config&quot;;  // option config file
+
+/*
+ * init_config_options intialized configuration options for
+ * both the client and server programs in the Grid example.
+ *
+ * The options parameter is the option group holding all the options.
+ * It is assumed that all SSM options have been added if called
+ * by the server.
+ *
+ * The prog_type parameter is should be either &quot;client&quot; or &quot;server&quot;.
+ *
+ * The argc and argv parameters should be argc and argv from main().
+ * Recognized options will be located in argv and removed.  argc
+ * is changed to reflect the removal.
+ *
+ */
+
+w_rc_t
+init_config_options(option_group_t&amp; options,
+            const char* prog_type,
+            int&amp; argc, char** argv)
+{
+
+    w_rc_t rc;  // return code
+
+    // set prog_name to the file name of the program without the path
+    char* prog_name = strrchr(argv[0], '/');
+    if (prog_name == NULL) {
+    prog_name = argv[0];
+    } else {
+    prog_name += 1; /* skip the '/' */
+    if (prog_name[0] == '\0')  {
+        prog_name = argv[0];
+    }
+    }
+ 
+    W_DO(options.add_class_level(&quot;grid&quot;));  // for all grid examples
+    W_DO(options.add_class_level(prog_type));   // server or client
+    W_DO(options.add_class_level(prog_name));   // program name
+
+    // read the .examplerc file to set options
+    {
+    ostrstream      err_stream;
+    option_file_scan_t opt_scan(opt_file, &amp;options);
+
+    // scan the file and override any current option settings
+    // options names must be spelled correctly
+    rc = opt_scan.scan(true /*override*/, err_stream, true);
+    if (rc) {
+        char* errmsg = err_stream.str();
+        cerr &lt;&lt; &quot;Error in reading option file: &quot; &lt;&lt; opt_file &lt;&lt; endl;
+        cerr &lt;&lt; &quot;\t&quot; &lt;&lt; errmsg &lt;&lt; endl;
+        if (errmsg) delete errmsg;
+        return rc;
+    }
+    }
+
+    // parce argv for options
+    if (!rc) {
+        // parse command line
+        ostrstream      err_stream;
+        rc = options.parse_command_line(argv, argc, 2, &amp;err_stream);
+        err_stream &lt;&lt; ends;
+        char* errmsg = err_stream.str();
+        if (rc) {
+            cerr &lt;&lt; &quot;Error on Command line &quot; &lt;&lt; endl;
+            cerr &lt;&lt; &quot;\t&quot; &lt;&lt; w_error_t::error_string(rc.err_num()) &lt;&lt; endl;
+            cerr &lt;&lt; &quot;\t&quot; &lt;&lt; errmsg &lt;&lt; endl;
+        return rc;
+        }
+        if (errmsg) delete errmsg;
+    }
+ 
+    // check required options
+    {
+    ostrstream      err_stream;
+    rc = options.check_required(&amp;err_stream);
+        if (rc) {
+        char* errmsg = err_stream.str();
+            cerr &lt;&lt; &quot;These required options are not set:&quot; &lt;&lt; endl;
+            cerr &lt;&lt; errmsg &lt;&lt; endl;
+        if (errmsg) delete errmsg;
+        return rc;
+        }
+    } 
+
+    return RCOK;
+}
+</PRE>
+<P><A NAME="ssmvas:servercode">&#160;</A><H2><A NAME="SECTION00092000000000000000000">
+Server Code</A>
+</H2>
+<P><A NAME="ssmvas:serverC">&#160;</A><H3><A NAME="SECTION00092100000000000000000">
+Main: server.C</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * This file implements the main() code for the grid server program
+ */
+
+#include &quot;ShoreConfig.h&quot;
+#include &lt;stream.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;rpc/rpc.h&gt;
+#ifdef SOLARIS2
+#include &lt;rpc/svc_soc.h&gt;
+#endif
+
+// This include brings in all header files needed for writing a VAs 
+#include &quot;sm_vas.h&quot;
+
+#include &quot;grid_basics.h&quot;
+#define RPC_SVC
+#include &quot;msg.h&quot;
+#include &quot;grid.h&quot;
+#include &quot;command.h&quot;
+#include &quot;command_server.h&quot;
+#include &quot;rpc_thread.h&quot;
+
+ss_m* ssm = 0;
+
+// shorten error code type name
+typedef w_rc_t rc_t;
+
+// this is implemented in options.C
+w_rc_t init_config_options(option_group_t&amp; options,
+            const char* prog_type,
+            int&amp; argc, char** argv);
+
+// pointer to RPC service this server provides
+SVCXPRT* svcxprt = 0;
+
+
+/*
+ * This function either formats a new device and creates a
+ * volume on it, or mounts an already existing device and
+ * returns the ID of the volume on it.
+ */
+rc_t
+setup_device_and_volume(const char* device_name, bool init_device,
+            smksize_t quota, lvid_t&amp; lvid)
+{
+    devid_t devid;
+    u_int   vol_cnt;
+    rc_t    rc;
+
+    if (init_device) {
+    cout &lt;&lt; &quot;Formatting and mounting device: &quot; &lt;&lt; device_name 
+         &lt;&lt; &quot; with a &quot; &lt;&lt; quota &lt;&lt; &quot;KB quota ...&quot; &lt;&lt; endl;
+    W_DO(ssm-&gt;format_dev(device_name, quota, true));
+
+    // mount the new device
+    W_DO(ssm-&gt;mount_dev(device_name, vol_cnt, devid));
+
+    // generate a volume ID for the new volume we are about to
+    // create on the device
+    W_DO(ssm-&gt;generate_new_lvid(lvid));
+
+    // create the new volume 
+    cout &lt;&lt; &quot;Creating a new volume on the device&quot; &lt;&lt; endl;
+    cout &lt;&lt; &quot;    with a &quot; &lt;&lt; quota &lt;&lt; &quot;KB quota ...&quot; &lt;&lt; endl;
+    W_DO(ssm-&gt;create_vol(device_name, lvid, quota));
+
+    // create the logical ID index on the volume, reserving no IDs
+    W_DO(ssm-&gt;add_logical_id_index(lvid, 0, 0));
+
+    } else {
+    cout &lt;&lt; &quot;Using already existing device: &quot; &lt;&lt; device_name &lt;&lt; endl;
+    // mount already existing device
+    rc = ssm-&gt;mount_dev(device_name, vol_cnt, devid);
+    if (rc) {
+        cerr &lt;&lt; &quot;Error: could not mount device: &quot; &lt;&lt; device_name &lt;&lt; endl;
+        cerr &lt;&lt; &quot;   Did you forget to run the server with -i the first time?&quot; &lt;&lt; endl;
+        return rc;
+    }
+    
+    // find ID of the volume on the device
+    lvid_t* lvid_list;
+    u_int   lvid_cnt;
+    W_DO(ssm-&gt;list_volumes(device_name, lvid_list, lvid_cnt));
+    if (lvid_cnt == 0) {
+        cerr &lt;&lt; &quot;Grid program error, device has no volumes&quot; &lt;&lt; endl;
+        ::exit(1);
+    }
+    lvid = lvid_list[0];
+    delete [] lvid_list;
+    }
+    return RCOK;
+}
+
+
+/*
+ * This function starts the RPC service by allocating a connection
+ * socket (and binding it to conn_port) and calling RPC initialization
+ * functions.
+ */
+rc_t
+start_tcp_rpc(int conn_port, int&amp; conn_sock)
+{
+    struct sockaddr_in addr;
+
+    cerr &lt;&lt; &quot;allocating a tcp socket for listening for connections ...&quot; &lt;&lt; endl;
+#ifdef SOLARIS2
+    conn_sock = t_open(&quot;/dev/tcp&quot;, O_RDWR, 0);
+#else
+    conn_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+#endif
+    if (conn_sock &lt; 0) {
+        perror(&quot;socket&quot;);
+        return RC(fcOS);    // indicate an OS error occurred
+    }
+
+    cerr &lt;&lt; &quot;binding to port &quot; &lt;&lt; conn_port &lt;&lt; endl; 
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_port = htons(conn_port);
+#ifdef SOLARIS2
+    // TODO: what is the tli counterpart of SO_REUSEADDR?
+    struct t_bind tb_args;
+    tb_args.addr.maxlen = tb_args.addr.len = sizeof addr;
+    tb_args.addr.buf = (char *)&amp;addr;
+    tb_args.qlen = 5;       // Arbitrary value
+    if (t_bind(conn_sock, &amp;tb_args, 0) &lt; 0) {
+    // TODO: what is the tli counterpart of SO_REUSEADDR?
+    // TODO: deal with Address-in-use error
+    perror(&quot;t_bind&quot;);
+    return 0;
+    }
+#else
+    if (bind(conn_sock, (struct sockaddr *)&amp;addr, sizeof (addr)) &lt; 0) {
+    perror(&quot;bind&quot;);
+    return RC(fcOS);
+    }
+#endif
+
+    cerr &lt;&lt; &quot;creating tcp service&quot; &lt;&lt; endl;
+    int buf_size = 0; // use default send/receive buffer size
+    errno = 0;
+
+    svcxprt =  svctcp_create(conn_sock, buf_size, buf_size);
+
+    if(svcxprt == 0) {
+    cerr &lt;&lt; &quot;Error: svctcp_create returned NULL&quot; &lt;&lt; endl;
+    if (errno) return RC(fcOS);
+    else       return RC(fcINTERNAL);
+    }
+
+    cerr &lt;&lt; &quot;registering rpc service&quot; &lt;&lt; endl;
+    // pass 0 for the protocol parameter so that the portmapper is not
+    // used.
+    if (!svc_register(svcxprt, GRID, GRIDVERS, grid_1, 0/*protocol*/)) {
+    // registration failed
+    cerr &lt;&lt; &quot;Error: rpc registration failed&quot; &lt;&lt; endl;
+    ::exit(1);
+    // Note: if we were registering with the portmapper
+    //       we could call svc_unregister and then
+    //   try again.
+    }
+
+    return RCOK;
+}
+
+
+/*
+ * This function ends the RPC service by calling RPC shutdown functions.
+ */
+rc_t
+stop_tcp_rpc()
+{
+    assert(svcxprt);
+    cerr &lt;&lt; &quot;unregister rpc service&quot; &lt;&lt; endl;
+    svc_unregister(GRID, GRIDVERS);
+    cerr &lt;&lt; &quot;destroy rpc service&quot; &lt;&lt; endl;
+    svc_destroy(svcxprt);
+    svcxprt = 0;
+    return RCOK;
+}
+
+void
+usage(option_group_t&amp; options)
+{
+    cerr &lt;&lt; &quot;Usage: server [-i] [options]&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;       -i will re-initialize the device/volume for the DB&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;Valid options are: &quot; &lt;&lt; endl;
+    options.print_usage(TRUE, cerr);
+}
+
+class startup_smthread_t : public smthread_t
+{
+private:
+    option_t* opt_connect_port,
+        * opt_device_name,
+            * opt_device_quota;
+    bool    init_device;
+
+public:
+        startup_smthread_t(option_t *, option_t *, option_t *, bool);
+        ~startup_smthread_t() {}
+        void run();
+};
+
+startup_smthread_t::startup_smthread_t(
+    option_t * _opt_connect_port,
+    option_t * _opt_device_name,
+    option_t * _opt_device_quota,
+    bool       _init_device
+)
+: 
+    opt_connect_port(_opt_connect_port),
+    opt_device_name(_opt_device_name),
+    opt_device_quota(_opt_device_quota),
+    init_device(_init_device),
+    smthread_t(t_regular)
+{
+}
+
+
+int
+main(int argc, char* argv[])
+{
+    option_t* opt_connect_port = 0;
+    option_t* opt_device_name = 0;
+    option_t* opt_device_quota = 0;
+
+    // pointers to options we will create for the grid server program
+
+    cout &lt;&lt; &quot;processing configuration options ...&quot; &lt;&lt; endl;
+    const option_level_cnt = 3; 
+    option_group_t options(option_level_cnt);
+
+    W_COERCE(options.add_option(&quot;connect_port&quot;, &quot;1024 &lt; integer &lt; 65535&quot;,
+             &quot;1234&quot;, &quot;port for connecting to grid server&quot;,
+             false, option_t::set_value_long,
+             opt_connect_port));
+
+    W_COERCE(options.add_option(&quot;device_name&quot;, &quot;device/file name&quot;,
+             NULL, &quot;device containg volume to use for grid program&quot;,
+             true, option_t::set_value_charstr,
+             opt_device_name));
+
+    W_COERCE(options.add_option(&quot;device_quota&quot;, &quot;# &gt; 1000&quot;,
+             &quot;2000&quot;, &quot;quota for device containing grid volume&quot;,
+             false, option_t::set_value_long,
+             opt_device_quota));
+
+    // have the SSM add its options to the group
+    W_COERCE(ss_m::setup_options(&amp;options));
+
+    if (init_config_options(options, &quot;server&quot;, argc, argv)) {
+    usage(options);
+    ::exit(1);
+    }
+
+
+    // process command line: looking for the &quot;-i&quot; flag
+    bool init_device = false;
+    if (argc &gt; 2) {
+    usage(options);
+    ::exit(1);
+    } else if (argc == 2) {
+    if (strcmp(argv[1], &quot;-i&quot;) == 0) {
+        cout &lt;&lt; &quot;Do you really want to initialize the Grid database? &quot;;
+        char answer;
+        cin &gt;&gt; answer;
+        if (answer == 'y' || answer == 'Y') {
+        init_device = true;
+        } else {
+        cerr &lt;&lt; &quot;Please try again without the -i option&quot; &lt;&lt; endl;
+        ::exit(0);
+        }
+    } else {
+        usage(options);
+        ::exit(1);
+    }
+    }
+
+    startup_smthread_t *doit = new startup_smthread_t( opt_connect_port,
+    opt_device_name, opt_device_quota, init_device);
+
+    if(!doit) {
+    W_FATAL(fcOUTOFMEMORY);
+    }
+    W_COERCE(doit-&gt;fork());
+    W_COERCE(doit-&gt;wait());
+    delete doit;
+}
+
+void
+startup_smthread_t::run()
+{
+    rc_t rc;
+    cout &lt;&lt; &quot;Starting SSM and performing recovery ...&quot; &lt;&lt; endl;
+    ssm = new ss_m();
+    if (!ssm) {
+    cerr &lt;&lt; &quot;Error: Out of memory for ss_m&quot; &lt;&lt; endl;
+    ::exit(1);
+    }
+
+    lvid_t lvid;  // ID of volume for storing grid
+    smksize_t quota = strtol(opt_device_quota-&gt;value(), 0, 0);
+    rc = setup_device_and_volume(opt_device_name-&gt;value(), init_device, quota, lvid);
+    if (rc) {
+    cerr &lt;&lt; &quot;could not setup device/volume due to: &quot; &lt;&lt; endl;
+    cerr &lt;&lt; rc &lt;&lt; endl;
+    delete ssm;
+    rc = RCOK;   // force deletion of w_error_t info hanging off rc
+                 // otherwise a leak for w_error_t will be reported
+    ::exit(1);
+    }
+
+    // tell the command server what volume to use for the grid
+    command_server_t::lvid = lvid;
+
+    // start the RPC service listening on the connection port
+    // specified by the connect_port option
+    int connect_port = strtol(opt_connect_port-&gt;value(), 0, 0);
+    cerr &lt;&lt; &quot;starting up, listening on port &quot; &lt;&lt; connect_port &lt;&lt;endl;
+    int connect_socket;
+    W_COERCE(start_tcp_rpc(connect_port, connect_socket));
+
+    listener_t* listen_thread = new listener_t(connect_socket);
+    W_COERCE(listen_thread-&gt;fork());
+
+    // start thread to process commands on stdin
+    cout &lt;&lt; &quot;main starting stdin thread&quot; &lt;&lt; endl;
+    stdin_thread_t* stdin_thread = new stdin_thread_t;
+
+    W_COERCE(stdin_thread-&gt;fork());
+
+    // wait for the stdin thread to finish
+    W_COERCE(stdin_thread-&gt;wait());
+    cout &lt;&lt; &quot;Stdin thread is done&quot; &lt;&lt; endl;
+
+    // shutdown the RPC listener thread and wait for it to end
+    listen_thread-&gt;shutdown();
+    W_COERCE(listen_thread-&gt;wait());
+   
+    delete listen_thread;
+    delete stdin_thread;
+
+    W_COERCE(stop_tcp_rpc());
+
+    cout &lt;&lt; &quot;\nShutting down SSM ...&quot; &lt;&lt; endl;
+    delete ssm;
+
+    cout &lt;&lt; &quot;Finished!&quot; &lt;&lt; endl;
+}
+</PRE>
+<A NAME="ssmvas:commandserverh">&#160;</A><H3><A NAME="SECTION00092200000000000000000">
+command_server.h</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+#ifndef COMMAND_SERVER_H
+#define COMMAND_SERVER_H
+
+/*
+ * Server command processing class
+ */
+class command_server_t : public command_base_t {
+public:
+            command_server_t();
+            ~command_server_t();
+   
+    // RPC methods
+    virtual cmd_err_t   commit_transaction();
+    virtual cmd_err_t   abort_transaction();
+    virtual cmd_err_t   clear_grid();
+    virtual cmd_err_t   print_grid(grid_display_t&amp; rows);
+    virtual cmd_err_t   add_item(const char* name, int x, int y);
+    virtual cmd_err_t   remove_item(const char* name);
+    virtual cmd_err_t   move_item(const char* name, int x, int y);
+    virtual cmd_err_t   location_of(const char* name, int&amp; x, int&amp; y);
+    virtual cmd_err_t   spatial_query(const nbox_t&amp; box, spatial_result_t&amp; result);
+
+    static lvid_t   lvid;       // volume containing grid
+private:
+    static const char*  grid_name;  // root name of grid 
+
+    rc_t        init();
+
+    grid_t      grid;       // grid to serve requests for
+
+    // These are used to generate error replies
+    ostrstream      err_strstream;  
+    char        _err_space[MAX_ERR_MSG_LEN];
+};
+
+#endif /* COMMAND_SERVER_H */
+</PRE>
+<A NAME="ssmvas:commandserverC">&#160;</A><H3><A NAME="SECTION00092300000000000000000">
+command_server.C</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * This file implements the server side of the RPCs
+ *
+ * It is organized as a mix of RPC stub and corresponding
+ * command_server_t method for the stub.
+ */
+
+#include &quot;ShoreConfig.h&quot;
+#include &lt;stream.h&gt;
+#include &lt;string.h&gt;
+#include &lt;rpc/rpc.h&gt;
+// include stuff needed for SM applications (clients)
+#include &quot;sm_vas.h&quot;
+#include &quot;grid_basics.h&quot;
+#define RPC_SVC  /* so rpc prototypes are included */
+#include &quot;msg.h&quot;
+#include &quot;grid.h&quot;
+#include &quot;command.h&quot;
+#include &quot;command_server.h&quot;
+#include &quot;rpc_thread.h&quot;
+
+lvid_t command_server_t::lvid = lvid_t::null;
+const char* command_server_t::grid_name = &quot;Grid_Name&quot;;
+
+/*
+ * This is an error handling macro that calls &quot;method&quot;.
+ * If &quot;method&quot; returns an error, a message is written to the
+ * command_server_t err_strstream and the string message is returned.
+ */
+#define SSMDO(method)                   \
+{                           \
+    w_rc_t __e = method;                \
+    if (__e) {                      \
+    cerr &lt;&lt; __e &lt;&lt; endl;                \
+    err_strstream.seekp(0, ios::beg);       \
+    err_strstream &lt;&lt; &quot;Error from SSM: &quot;         \
+              &lt;&lt; __e-&gt;error_string(__e.err_num()) &lt;&lt; ends;  \
+    return err_strstream.str();         \
+    }                           \
+}                           
+
+/********************************************************************
+  Command_server_t Methods
+ *******************************************************************/
+
+command_server_t::command_server_t()
+    : err_strstream(_err_space, sizeof(_err_space))
+{
+    W_COERCE(ss_m::begin_xct());
+
+    rc_t rc = init();
+    if (rc) {
+    cerr &lt;&lt; &quot;Error: could not start command server due to:&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;    &quot; &lt;&lt; rc &lt;&lt; endl;
+    W_COERCE(ss_m::abort_xct());
+    exit(1);
+    }
+
+    W_COERCE(ss_m::commit_xct());  // commit the board initialization
+
+    // start the first transaction for this client
+    W_COERCE(ss_m::begin_xct());
+}
+
+command_server_t::~command_server_t()
+{
+    // connection is shutting down, so
+    // abort the currently running transaction
+    W_COERCE(ss_m::abort_xct());
+}
+
+
+/*
+ * This functions initialized a command_server_t, including
+ * creating the grid database structures if they do not yet exist.
+ * 
+ * First, it sees if there is a grid on the volume by
+ * looking up the special string, Grid_Name, in
+ * the volume root index.
+ *
+ * If no grid already exists, we create one.  And store info
+ * about it in the root index.
+ */
+rc_t
+command_server_t::init()
+{
+    serial_t root_iid;  // root index ID
+    W_DO(ss_m::vol_root_index(lvid, root_iid));
+    grid_t::grid_info_t info;
+    smsize_t    info_len = sizeof(info);
+    bool    found;
+    W_DO(ss_m::find_assoc(lvid, root_iid,
+                  vec_t(grid_name, strlen(grid_name)),
+                  &amp;info, info_len, found));
+    if (found) {
+    assert(info_len == sizeof(info));
+    cout &lt;&lt; &quot;Using already existing grid&quot; &lt;&lt; endl;
+    } else {
+    cout &lt;&lt; &quot;Creating a new Grid&quot; &lt;&lt; endl;
+
+    // create the item file
+    W_DO(ss_m::create_file(lvid, info.item_file, ss_m::t_regular));
+
+    // create the btree index on item name
+    // the &quot;b*1000&quot; indicates the key type is a variable
+    // length byte string with maximum length of 1000
+    W_DO(ss_m::create_index(lvid, ss_m::t_uni_btree, ss_m::t_regular,
+                &quot;b*1000&quot;, 0, info.name_index));
+
+    // create the R*tree index on item location
+    W_DO(ss_m::create_md_index(lvid, ss_m::t_rtree, ss_m::t_regular, info.spatial_index));
+
+    // store the grid info in the root index
+    W_DO(ss_m::create_assoc(lvid, root_iid,
+                vec_t(grid_name, strlen(grid_name)),
+                vec_t(&amp;info, sizeof(info))));
+    }
+
+    grid.init(lvid, info);    
+    return RCOK;
+}
+
+
+/********************************************************************
+  The following command_server_t methods correspond to RPCs
+ *******************************************************************/
+
+cmd_err_t
+command_server_t::commit_transaction()
+{
+    SSMDO(ss_m::commit_xct());
+    SSMDO(ss_m::begin_xct());
+    return 0; /* success */
+}
+
+cmd_err_t
+command_server_t::abort_transaction()
+{
+    SSMDO(ss_m::abort_xct());
+    SSMDO(ss_m::begin_xct());
+    return 0; /* success */
+}
+
+cmd_err_t
+command_server_t::clear_grid()
+{
+    SSMDO(grid.clear());
+    return 0; /* success */
+}
+
+cmd_err_t
+command_server_t::print_grid(grid_display_t&amp; rows)
+{
+    SSMDO(grid.generate_display(rows));
+    return 0; /* success */
+}
+
+cmd_err_t
+command_server_t::add_item(const char* name, int x, int y)
+{
+    SSMDO(grid.add_item(name, x, y));
+    return 0; /* success */
+}
+
+cmd_err_t
+command_server_t::remove_item(const char* name)
+{
+    bool found;
+    SSMDO(grid.remove_item(name, found));
+    if (!found) {
+    err_strstream.seekp(0, ios::beg);
+    err_strstream &lt;&lt; &quot;Error: item was not found&quot; &lt;&lt; endl;
+    return err_strstream.str();
+    }
+    return 0; /* success */
+}
+
+
+cmd_err_t
+command_server_t::move_item(const char* name, int x, int y)
+{
+    bool found;
+    SSMDO(grid.move_item(name, x, y, found));
+    if (!found) {
+    err_strstream.seekp(0, ios::beg);
+    err_strstream &lt;&lt; &quot;Error: item was not found&quot; &lt;&lt; endl;
+    return err_strstream.str();
+    }
+    return 0; /* success */
+}
+
+
+cmd_err_t
+command_server_t::location_of(const char* name, int&amp; x, int&amp; y)
+{
+    bool found;
+    SSMDO(grid.location_of(name, x, y, found));
+    if (!found) {
+    err_strstream.seekp(0, ios::beg);
+    err_strstream &lt;&lt; &quot;Error: item was not found&quot; &lt;&lt; endl;
+    return err_strstream.str();
+    }
+    return 0; /* success */
+}
+
+
+cmd_err_t
+command_server_t::spatial_query(const nbox_t&amp; box, spatial_result_t&amp; result)
+{
+    SSMDO(grid.spatial_query(box, result));
+    return 0; /* success */
+}
+</PRE>
+<A NAME="ssmvas:serverstubsC">&#160;</A><H3><A NAME="SECTION00092400000000000000000">
+server_stubs.C</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * This file implements the server side of the RPCs
+ *
+ * It is organized as a mix of RPC stub and corresponding
+ * command_server_t method for the stub.
+ */
+
+#include &quot;ShoreConfig.h&quot;
+/* 
+ * NB: THIS IS IMPORTANT: we include &quot;ShoreConfig.h&quot; because
+ * we *NEED* the system-dependent definition of a jmp_buf
+ * in order to see that the thread data structures that
+ * that we build here are consistent with those in the library.
+ * If we don't get the right #defines for the configuration, we
+ * run the risk of building .o files here with the wrong idea
+ * about the size of sthread_t (the root of the class hierarchy
+ * for our threads).
+ */
+
+#include &lt;stream.h&gt;
+#include &lt;string.h&gt;
+#include &lt;rpc/rpc.h&gt;
+// include stuff needed for SM applications (clients)
+#include &quot;sm_vas.h&quot;
+#include &quot;grid_basics.h&quot;
+#define RPC_SVC  /* so rpc prototypes are included */
+#include &quot;msg.h&quot;
+#include &quot;grid.h&quot;
+#include &quot;command.h&quot;
+#include &quot;command_server.h&quot;
+#include &quot;rpc_thread.h&quot;
+
+/********************************************************************
+   RPC Stubs that call command_server_t methods for processing
+ *******************************************************************/
+
+// there is no command_server_t method for ping
+void *
+ping_rpc_1(void* , svc_req* )
+{
+    return (void *)client_t::me()-&gt;reply_buf;
+}
+
+error_reply *
+commit_transaction_rpc_1(void* , svc_req* )
+{
+    client_t* Me = client_t::me();
+
+    error_reply&amp; reply = *(error_reply*)Me-&gt;reply_buf;
+
+    cmd_err_t err = Me-&gt;command_server-&gt;commit_transaction();
+    if (err) {
+    strncpy(reply.error_msg, err, MAX_ERR_MSG_LEN);
+    reply.error_msg[MAX_ERR_MSG_LEN-1] = '\0';
+    } else {
+    // no error message
+    reply.error_msg[0] = '\0';
+    }
+    return &amp;reply;
+}
+
+error_reply *
+abort_transaction_rpc_1(void* , svc_req* )
+{
+    client_t* Me = client_t::me();
+
+    error_reply&amp; reply = *(error_reply*)Me-&gt;reply_buf;
+
+    cmd_err_t err = Me-&gt;command_server-&gt;abort_transaction();
+    if (err) {
+    strncpy(reply.error_msg, err, MAX_ERR_MSG_LEN);
+    reply.error_msg[MAX_ERR_MSG_LEN-1] = '\0';
+    } else {
+    // no error message
+    reply.error_msg[0] = '\0';
+    }
+    return &amp;reply;
+}
+
+
+error_reply *
+clear_grid_rpc_1(void* , svc_req* )
+{
+    client_t* Me = client_t::me();
+    error_reply&amp; reply = *(error_reply*)Me-&gt;reply_buf;
+
+    cmd_err_t err = Me-&gt;command_server-&gt;clear_grid();
+
+    if (err) {
+    strncpy(reply.error_msg, err, MAX_ERR_MSG_LEN);
+    reply.error_msg[MAX_ERR_MSG_LEN-1] = '\0';
+    } else {
+    // no error message
+    reply.error_msg[0] = '\0';
+    }
+    return &amp;reply;
+}
+
+
+print_grid_reply *
+print_grid_rpc_1(void* , svc_req* )
+{
+    client_t* Me = client_t::me();
+
+    print_grid_reply&amp; reply = *(print_grid_reply*)Me-&gt;reply_buf;
+
+    cmd_err_t err = Me-&gt;command_server-&gt;print_grid(reply.display);
+    if (err) {
+    strncpy(reply.error_msg, err, MAX_ERR_MSG_LEN);
+    reply.error_msg[MAX_ERR_MSG_LEN-1] = '\0';
+    } else {
+    // no error message
+    reply.error_msg[0] = '\0';
+    }
+    return &amp;reply;
+}
+
+
+error_reply *
+add_item_rpc_1(add_item_arg* argp, svc_req* )
+{
+    client_t* Me = client_t::me();
+
+    error_reply&amp; reply = *(error_reply*)Me-&gt;reply_buf;
+
+    cmd_err_t err = Me-&gt;command_server-&gt;add_item(argp-&gt;name, argp-&gt;x, argp-&gt;y);
+    if (err) {
+    strncpy(reply.error_msg, err, MAX_ERR_MSG_LEN);
+    reply.error_msg[MAX_ERR_MSG_LEN-1] = '\0';
+    } else {
+    // no error message
+    reply.error_msg[0] = '\0';
+    }
+    return &amp;reply;
+}
+
+
+error_reply *
+remove_item_rpc_1(remove_item_arg* argp, svc_req* )
+{
+    client_t* Me = client_t::me();
+
+    error_reply&amp; reply = *(error_reply*)Me-&gt;reply_buf;
+
+    cmd_err_t err = Me-&gt;command_server-&gt;remove_item(argp-&gt;name);
+    if (err) {
+    strncpy(reply.error_msg, err, MAX_ERR_MSG_LEN);
+    reply.error_msg[MAX_ERR_MSG_LEN-1] = '\0';
+    } else {
+    // no error message
+    reply.error_msg[0] = '\0';
+    }
+    return &amp;reply;
+}
+
+
+error_reply *
+move_item_rpc_1(add_item_arg* argp, svc_req* )
+{
+    client_t* Me = client_t::me();
+
+    error_reply&amp; reply = *(error_reply*)Me-&gt;reply_buf;
+
+    cmd_err_t err = Me-&gt;command_server-&gt;move_item(argp-&gt;name, argp-&gt;x, argp-&gt;y);
+    if (err) {
+    strncpy(reply.error_msg, err, MAX_ERR_MSG_LEN);
+    reply.error_msg[MAX_ERR_MSG_LEN-1] = '\0';
+    } else {
+    // no error message
+    reply.error_msg[0] = '\0';
+    }
+    return &amp;reply;
+}
+
+
+location_reply *
+location_of_rpc_1(location_arg* argp, svc_req* )
+{
+    client_t* Me = client_t::me();
+
+    location_reply&amp; reply = *(location_reply*)Me-&gt;reply_buf;
+
+    cmd_err_t err = Me-&gt;command_server-&gt;location_of(argp-&gt;name, reply.x, reply.y);
+    if (err) {
+    strncpy(reply.error_msg, err, MAX_ERR_MSG_LEN);
+    reply.error_msg[MAX_ERR_MSG_LEN-1] = '\0';
+    } else {
+    // no error message
+    reply.error_msg[0] = '\0';
+    }
+    return &amp;reply;
+}
+
+
+spatial_reply *
+spatial_rpc_1(spatial_arg* argp, svc_req* )
+{
+    client_t* Me = client_t::me();
+
+    spatial_reply&amp; reply = *(spatial_reply*)Me-&gt;reply_buf;
+
+    // the spatial_arg is really an array of integers in the format
+    // for an nbox_t
+    nbox_t box(2, (int*)(&amp;argp-&gt;x_low));
+
+    cmd_err_t err = Me-&gt;command_server-&gt;spatial_query(box, reply.result);
+    if (err) {
+    strncpy(reply.error_msg, err, MAX_ERR_MSG_LEN);
+    reply.error_msg[MAX_ERR_MSG_LEN-1] = '\0';
+    } else {
+    // no error message
+    reply.error_msg[0] = '\0';
+    }
+    return &amp;reply;
+}
+</PRE>
+<A NAME="ssmvas:gridh">&#160;</A><H3><A NAME="SECTION00092500000000000000000">
+grid.h</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+#ifndef GRID_H
+#define GRID_H
+
+/*
+ * Class managing grid and items on the grid 
+ */
+class grid_t {
+public:
+    struct grid_info_t {
+    serial_t item_file; // ID of file of item records
+    serial_t name_index;    // B+tree mapping names to item records
+    serial_t spatial_index; // R*tree mapping points to items
+    };
+
+            grid_t();
+
+            ~grid_t();
+        // Access an already created grid
+    void    init(const lvid_t&amp; lvid, const grid_info_t&amp; info);
+    rc_t    add_item(const char* name, int x, int y);
+    rc_t    remove_item(const char* name, bool&amp; found);
+    rc_t    move_item(const char* name, int x, int y, bool&amp; found);
+    rc_t    location_of(const char* name, int&amp; x, int&amp; y, bool&amp; found);
+    rc_t    generate_display(grid_display_t&amp; display);
+    rc_t    spatial_query(const nbox_t&amp; box, spatial_result_t&amp; result);
+    rc_t    clear();    // remove all items from grid
+
+    bool    is_initialized() const {return lvid != lvid_t::null;}
+private:
+    lvid_t  lvid;       // ID of volume containing grid;
+    grid_info_t info;
+
+    // get the ID of the item &quot;name&quot;, return serial_t::null if
+    // not found.
+    rc_t    get_id(const char* name, serial_t&amp; id);
+
+};
+
+#endif /* GRID_H */
+</PRE>
+<A NAME="ssmvas:gridC">&#160;</A><H3><A NAME="SECTION00092600000000000000000">
+grid.C</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+#define GRID_C
+
+#include &quot;ShoreConfig.h&quot;
+#include &lt;assert.h&gt;
+#include &quot;sm_vas.h&quot;
+#include &quot;grid_basics.h&quot;
+#include &quot;grid.h&quot;
+
+// storage manger to use for all operations
+extern ss_m* ssm;
+
+
+/*
+ * Prepare to create a new grid
+ */
+grid_t::grid_t()
+{
+}
+
+grid_t::~grid_t()
+{
+    // make sure we can't reuse this space
+    lvid = lvid_t::null;
+}
+
+/*
+ * Access an already created grid
+ */
+void
+grid_t::init(const lvid_t&amp; _lvid, const grid_info_t&amp; _info)
+{
+    lvid = _lvid;
+    info = _info;
+}
+
+rc_t
+grid_t::add_item(const char* name, int x, int y)
+{
+    assert(is_initialized());
+    assert(strlen(name) &lt;= MAX_NAME_LEN);
+    rc_t rc;
+
+    // create a savepoint, so that if any operation fails
+    // we can roll back to this point;
+    sm_save_point_t save_point;
+    W_DO(ss_m::save_work(save_point));
+
+    // create record for item
+    item_t item(name, x, y);
+    serial_t item_id;
+    do {
+    // create the item record
+    //
+    // note: the use of anonymous vectors since none of the data
+    //       to store is scattered in memory
+    // note: the ugly parameter comments are used because of a gcc bug
+    rc = ssm-&gt;create_rec(lvid, info.item_file,  
+             vec_t(),   /* empty record header  */
+             sizeof(item),  /* length hint      */
+             vec_t(&amp;item, sizeof(item)), /* body    */
+             item_id);  /* new rec id       */
+    if (rc) break;
+
+    // add item to index on name
+    rc = ssm-&gt;create_assoc(lvid, info.name_index,       
+            vec_t(item.name, strlen(item.name)), /* key */
+            vec_t(&amp;item_id, sizeof(item_id)));   /* element */
+
+    if (rc) break;
+
+    // 
+    // add item to Rtree (spatial) index
+    // 
+    // coord holds the coordinates of the &quot;rectangle&quot; (actually a 
+    // point) containing the item
+    //
+    int coord[4];
+    coord[0] = coord[2] = x;
+    coord[1] = coord[3] = y;
+    nbox_t box(2, coord);
+    rc = ssm-&gt;create_md_assoc(lvid, info.spatial_index, box,
+            vec_t(&amp;item_id, sizeof(item_id)));  // element
+
+    } while (0);
+
+    if (rc) {
+    // an error occurred, so rollback to the savepoint
+    W_DO(ss_m::rollback_work(save_point));
+    return rc;
+    }
+    return RCOK;
+}
+
+rc_t
+grid_t::remove_item(const char* name, bool&amp; found)
+{
+    assert(is_initialized());
+
+    serial_t    id;         // ID of item to remove
+    W_DO(get_id(name, id));
+
+    if (id == serial_t::null) {
+    found = false;
+    return RCOK;
+    }
+
+    // create a savepoint, so that if any operation fails
+    // we can roll back to this point;
+    sm_save_point_t save_point;
+    W_DO(ss_m::save_work(save_point));
+
+    rc_t rc;
+    do {
+
+    // remove item from index on name
+    rc = ssm-&gt;destroy_assoc(lvid, info.name_index,
+                vec_t(name, strlen(name)),
+                vec_t(&amp;id, sizeof(id)));
+    if (rc) break;
+
+    //
+    // remove from spatial index (first must pin to find coordinates)
+    //
+    int coord[4];
+    {
+        pin_i handle;
+        rc = handle.pin(lvid, id, 0);
+        if (rc) break;
+        const item_t* item = (const item_t*) handle.body();
+        coord[0] = coord[2] = item-&gt;x;
+        coord[1] = coord[3] = item-&gt;y;
+    }
+    nbox_t box(2, coord);
+    rc = ssm-&gt;destroy_md_assoc(lvid, info.spatial_index, box,
+                vec_t(&amp;id, sizeof(id)));    /* element */
+    if (rc) break;
+
+    // destroy the item
+    rc = ssm-&gt;destroy_rec(lvid, id);
+    if (rc) break;
+
+    } while (0);
+
+    if (rc) {
+    // an error occurred, so rollback to the savepoint
+    W_DO(ss_m::rollback_work(save_point));
+    return rc;
+    }
+
+    found = true;
+    return RCOK;
+}
+
+rc_t
+grid_t::move_item(const char* name, int x, int y, bool&amp; found)
+{
+    assert(is_initialized());
+
+    serial_t    id;         // ID of item to move
+    W_DO(get_id(name, id));
+
+    if (id == serial_t::null) {
+    found = false;
+    return RCOK;
+    }
+
+    // pin the item record
+    pin_i handle;
+    W_DO(handle.pin(lvid, id, 0));
+    const item_t&amp; item = *(const item_t*)handle.body();
+    assert(strcmp(item.name, name) == 0);
+
+    // 
+    // Now we remove the item from the R*tree, update the
+    // x,y coordinates, and re-insert it
+    //
+    // In general, the only way to &quot;update&quot; and index entry
+    // is to remove it and re-insert the changed entry.
+    //
+
+    // We create a savepoint, so that if any operation fails
+    // we can roll back to this point;
+    sm_save_point_t save_point;
+    W_DO(ss_m::save_work(save_point));
+
+    rc_t rc;
+    do {
+
+    //
+    // remove from spatial index (first must pin to find coordinates)
+    //
+    int coord[4];
+    coord[0] = coord[2] = item.x;
+    coord[1] = coord[3] = item.y;
+    nbox_t box(2, coord);
+    rc = ssm-&gt;destroy_md_assoc(lvid, info.spatial_index, box,
+                vec_t(&amp;id, sizeof(id)));    /* element */
+    if (rc) break;
+  
+    //
+    // Now we need to update the item.  Note that it is illegal
+    // to &quot;update-in-place&quot;, so we create a new item and
+    // use the update_rec method
+    //
+
+    // init a new item at the new location
+    item_t new_item(&quot;&quot;, x, y);
+
+    // update x,y in the pinned item 
+    vec_t new_data(&amp;new_item.x, sizeof(new_item.x) + sizeof(new_item.y));
+    rc = handle.update_rec((smsize_t) offsetof(item_t, x), new_data);
+    if (rc) break;
+
+    //
+    // add item back into the R*tree at new location
+    //
+    coord[0] = coord[2] = x;
+    coord[1] = coord[3] = y;
+    rc = ssm-&gt;create_md_assoc(lvid, info.spatial_index, nbox_t(2, coord),
+                vec_t(&amp;id, sizeof(id)));    /* element */
+
+    if (rc) break;
+
+    } while (0);
+
+    if (rc) {
+    // an error occurred, so rollback to the savepoint
+    W_DO(ss_m::rollback_work(save_point));
+    return rc;
+    }
+
+    found = true;
+    return RCOK;
+}
+
+rc_t
+grid_t::location_of(const char* name, int&amp; x, int&amp; y, bool&amp; found)
+{
+    assert(is_initialized());
+
+    serial_t    id;         // ID of item to remove
+    W_DO(get_id(name, id));
+
+    if (id == serial_t::null) {
+    found = false;
+    return RCOK;
+    }
+
+    // pin the item record to get x,y
+    pin_i handle;
+    W_DO(handle.pin(lvid, id, 0));
+
+    const item_t&amp; item = *(const item_t*)handle.body();
+    assert(strcmp(item.name, name) == 0);
+
+    x = item.x;
+    y = item.y;
+
+    found = true;
+    return RCOK;
+}
+
+
+rc_t
+grid_t::generate_display(grid_display_t&amp; display)
+{
+    for (int row = 0; row &lt; MAX_GRID_Y; row++) {
+    for (int col = 0; col &lt; MAX_GRID_X; col++) {
+        display.rows[row][col] = '+';
+    }
+    }
+
+    // add first character of each item item name the display
+    scan_file_i scan(lvid, info.item_file);
+    pin_i*  handle; // handle on current record
+    bool    eof = false;
+    const item_t* item;
+
+    // scan item file and remove all items
+    W_DO(scan.next(handle, 0, eof));
+    while (!eof)  {
+    item = (const item_t*)handle-&gt;body();
+    display.rows[item-&gt;y][item-&gt;x] = item-&gt;name[0];
+    W_DO(scan.next(handle, 0, eof));
+    }
+
+    return RCOK;
+}
+
+
+/*
+ * This method removes all items and their associated index entries
+ */
+rc_t
+grid_t::clear()
+{
+    // since we will eventually lock every item, we first obtain
+    // an exclusive lock on the file and indexes so that finer
+    // granularity locks are not obtained -- thus improving
+    // the performance of this method
+    W_DO(ss_m::lock(lvid, info.item_file, EX));
+    W_DO(ss_m::lock(lvid, info.name_index, EX));
+    W_DO(ss_m::lock(lvid, info.spatial_index, EX));
+
+    scan_file_i scan(lvid, info.item_file);
+    pin_i*  handle; // handle on current record
+    bool    eof = false;
+    const item_t*   item;
+    rc_t    rc;
+
+    // create a savepoint, so that if any operation fails
+    // we can roll back to this point;
+    sm_save_point_t save_point;
+    W_DO(ss_m::save_work(save_point));
+
+    // scan item file and remove all items
+    rc = scan.next(handle, 0, eof);
+    while (!eof &amp;&amp; !rc) {
+    item = (const item_t*)handle-&gt;body();
+    const serial_t&amp; id = handle-&gt;serial_no();
+
+    // remove from name index (key==name, element==serial# of item) 
+    rc = ss_m::destroy_assoc(lvid, info.name_index,
+                vec_t(item-&gt;name, strlen(item-&gt;name)),
+                vec_t(&amp;id, sizeof(serial_t)));
+    if (rc) break;
+    
+    // remove from spatial index
+    int coord[4];
+    coord[0] = coord[2] = item-&gt;x;
+    coord[1] = coord[3] = item-&gt;y;
+    nbox_t box(2, coord);
+    rc = ssm-&gt;destroy_md_assoc(lvid, info.spatial_index, box,
+                vec_t(&amp;id, sizeof(serial_t)));
+    if (rc) break;
+
+    // remove item itself
+    rc = ss_m::destroy_rec(lvid, id);
+    if (rc) break;
+
+    rc = scan.next(handle, 0, eof);
+    }
+    if (rc) {
+    // an error occurred, so rollback to the savepoint
+    W_DO(ss_m::rollback_work(save_point));
+    return rc;
+    }
+
+    return RCOK;
+}
+
+
+rc_t
+grid_t::spatial_query(const nbox_t&amp; box, spatial_result_t&amp; result)
+{
+    assert(is_initialized());
+
+    result.found_cnt = 0;
+
+    serial_t    id;
+    smsize_t    id_len = sizeof(id);
+    nbox_t  key;
+    bool    eof;
+    pin_i   handle;
+
+    scan_rt_i scan(lvid, info.spatial_index, nbox_t::t_overlap, box);
+    W_DO(scan.next(key, &amp;id, id_len, eof));
+    while (!eof) {
+    assert(id_len == sizeof(id));
+    if (result.found_cnt &lt; MAX_SPATIAL_RESULT) {
+        // pin the item record to get x,y
+        W_DO(handle.pin(lvid, id, 0));
+
+        const item_t&amp; item = *(const item_t*)handle.body();
+        strcpy(result.items[result.found_cnt].name, item.name);
+        result.items[result.found_cnt].x = item.x;
+        result.items[result.found_cnt].y = item.y;
+        assert(item.x == key.bound(0));
+        assert(item.y == key.bound(1));
+    }
+
+    result.found_cnt++;
+    W_DO(scan.next(key, &amp;id, id_len, eof));
+    }
+    return RCOK;
+}
+
+
+
+rc_t
+grid_t::get_id(const char* name, serial_t&amp; id)
+{
+    bool found;
+
+    // find ID (serial#) of item
+    // find_assoc will fill &amp;id with the ID.  For safety, we
+    // set id_len to sizeof(id) so that no bytes beyond id will
+    // be written in case we accidentally put something to large in
+    // the index.
+    smsize_t    id_len = sizeof(id);  
+    W_DO(ssm-&gt;find_assoc(lvid, info.name_index,
+            vec_t(name, strlen(name)),
+            &amp;id, id_len, found));
+
+    if (!found) {
+    id = serial_t::null;
+    }
+    assert(id_len == sizeof(id)); 
+    return RCOK;
+}
+</PRE>
+<A NAME="ssmvas:rpcthreadh">&#160;</A><H3><A NAME="SECTION00092700000000000000000">
+rpc_thread.h</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+#include &quot;ShoreConfig.h&quot;
+
+#ifndef RPC_THREAD_H
+#define RPC_THREAD_H
+
+class client_t;
+
+/*
+ * Listener_t: Thread that listens for RPC connections from clients
+ * Cleaner_t: Thread that deletes defunct client threads
+ */
+
+class listener_t; // forward
+
+class cleaner_t: public smthread_t {
+private: 
+        bool        _quit;
+        listener_t *    _listener;
+public:
+        cleaner_t(listener_t *);
+        ~cleaner_t() {}
+    
+    void    kick();
+    void    run();
+    void    destroy();
+};
+
+class listener_t: public smthread_t {
+    friend class cleaner_t;
+public:
+            listener_t(int fd /*socket*/);
+            ~listener_t();
+    void    shutdown();
+
+    // called by client_t thread to indicate it is starting/done
+    void    child_is_done(w_link_t&amp; child_link);
+private:
+
+    void        run();
+
+    int                 _fd;    // socket to listen on
+    sfile_read_hdl_t*   _ready; // read handler for the socket
+
+    smutex_t        _clients_mutex; // syncronizes access to _clients
+    w_list_t&lt;client_t&gt;  _clients;   // list of client_t
+    scond_t     _clients_empty; // condition variable
+    cleaner_t       *_cleaner_thread;
+};
+
+
+/*
+ * Thread that manages a client connection and processes RPCs
+ */
+class client_t: public smthread_t {
+    friend class cleaner_t;
+    
+public:
+                client_t(int fd /*socket*/, listener_t* parent);
+                ~client_t();
+    void        run();
+
+    // return the current running thread.
+    static client_t*    me() { return (client_t*) smthread_t::me(); }
+
+    // put reply messages here
+    char        reply_buf[thread_reply_buf_size];
+
+    // the command_server implements RPCs
+    command_server_t*   command_server;
+
+    // this function returns the offset of _link for so that
+    // listener_t can create a list of client_t objects
+    static size_t   link_offset() {return offsetof(client_t, _link);}
+private:
+    int                 _fd;    // socket for incoming RPCs
+    sfile_read_hdl_t*   _ready; // read handler for the socket
+    listener_t*     _parent;// for notify parent thread when finished
+    w_link_t        _link;  // for listener_t list of clients
+};
+
+
+/*
+ * Thread that monitors stdin (or some file descriptor) for commands
+ */
+class stdin_thread_t: public smthread_t {
+public:
+                stdin_thread_t();
+                ~stdin_thread_t();
+    void        run();
+
+    // put reply messages here
+    char        reply_buf[thread_reply_buf_size];
+
+private:
+    sfile_read_hdl_t*   _ready; // read handler for stdin
+};
+
+#endif /* RPC_THREAD_H */
+</PRE>
+<A NAME="ssmvas:rpcthreadC">&#160;</A><H3><A NAME="SECTION00092800000000000000000">
+rpc_thread.C</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+#define RPC_THREAD_C
+
+#include &quot;ShoreConfig.h&quot;
+#include &lt;unistd.h&gt;
+#include &lt;rpc/rpc.h&gt;
+#include &quot;sm_vas.h&quot;
+#include &quot;grid_basics.h&quot;
+#define RPC_SVC
+#include &quot;msg.h&quot;
+#include &quot;grid.h&quot;
+#include &quot;command.h&quot;
+#include &quot;command_server.h&quot;
+#include &quot;rpc_thread.h&quot;
+
+#ifdef __GNUG__
+// This file uses the following templates.  For GCC we must
+// explicitly instantiate them.
+template class w_list_t&lt;client_t&gt;;
+template class w_list_i&lt;client_t&gt;;
+#endif
+
+scond_t cleanup(&quot;cleanup.s&quot;);
+smutex_t cleanup_mutex(&quot;cleanup.m&quot;);
+
+listener_t::listener_t(int fd) :
+    smthread_t(t_regular,   /* regular priority */
+         false,     /* will run ASAP    */
+         false,     /* will not delete itself when done */
+         &quot;listener&quot;),   /* thread name */
+    _fd(fd),
+    _clients(client_t::link_offset()),
+    _cleaner_thread(0)
+{
+    _cleaner_thread = new cleaner_t(this);
+    if(!_cleaner_thread) {
+    cerr &lt;&lt; &quot;cannot fork cleaner thread&quot; &lt;&lt;endl;
+    ::exit(1);
+    }
+    W_COERCE(_cleaner_thread-&gt;fork());
+}
+
+listener_t::~listener_t()
+{
+    /* by the time we get here, client threads
+    * should have been destroyed
+    */
+    W_COERCE(_clients_mutex.acquire(WAIT_FOREVER));
+    assert(_clients.is_empty());
+    _clients_mutex.release();
+
+    cout &lt;&lt; &quot;listener exiting&quot; &lt;&lt; endl;
+    _cleaner_thread-&gt;destroy();
+    W_COERCE(_cleaner_thread-&gt;wait());
+    delete _cleaner_thread;
+    _cleaner_thread = 0;
+}
+
+void
+listener_t::shutdown()
+{
+    // deactivate the file handler
+    // prevents future connect requests from being accepted
+    _ready-&gt;shutdown();
+}
+
+/*
+ * The real work of the listener thread is done here.
+ * This method loops waiting for connections and fork a thread
+ * for each connection (keeping a list of the threads).
+ * After shutdown() is called no more connections are accepted and
+ * and the code waits for all clients to end
+ */
+void
+listener_t::run()
+{
+    rc_t rc;
+
+    cerr &lt;&lt; &quot;creating file handler for listener socket&quot; &lt;&lt; endl;
+    _ready = new sfile_read_hdl_t(_fd);
+    if(!_ready) {
+    cerr &lt;&lt; &quot;Error: Out of Memory&quot; &lt;&lt; endl;
+    ::exit(1);
+    }
+
+    while (1) {
+        fd_set fds;
+        FD_ZERO(&amp;fds);
+        FD_SET(_fd, &amp;fds);
+
+    // wait for a connect request 
+        rc = _ready-&gt;wait(WAIT_FOREVER);
+
+        if (!rc) {
+        cerr &lt;&lt; &quot;listener detects connection&quot; &lt;&lt; endl;
+            // have the rpc library do the accept.
+            // it doesn't process any msgs.
+            assert(FD_ISSET(_fd, &amp;svc_fdset));
+            svc_getreqset(&amp;fds);  // get the connect request and
+                  // call its handler
+
+            if (! (FD_ISSET(_fd, &amp;svc_fdset)))  {
+        // The socket we're listening on was closed!!
+        // This is an error case.
+                cerr &lt;&lt; &quot;listener: RPC removed fd &quot; 
+                    &lt;&lt; _fd &lt;&lt; &quot; from the set&quot; &lt;&lt; endl;
+                break;
+            }
+        } else {
+            // someone did a _ready-&gt;shutdown()
+        // server must be shutting down, so exit.
+        
+            break;
+        }
+
+    /*
+     * At this point, RPC has accepted a new connection
+     * from a client.  We need to find out the socket being
+     * used to that we can fork a thread to service it.
+     */
+        assert(FD_ISSET(_fd, &amp;svc_fdset));
+        int client_sock = -1;
+        {
+        int i;
+        // loop over all file descriptors
+        const max_open_fds = sysconf(_SC_OPEN_MAX);
+            for (i = 0; i &lt; max_open_fds; i++) {
+        /*
+         * If this file descriptor is serviced by RPC
+         * AND there is no active file descriptor handler
+         * for it, then this must be the new connection
+         */
+                if (FD_ISSET(i, &amp;svc_fdset) &amp;&amp;
+            !sfile_hdl_base_t::is_active(i)) {
+                    client_sock = i;
+                    break; // the for loop
+                }
+            }
+        }
+    // we must have found the connection
+        assert(client_sock&gt;0);
+
+    /*
+     * Fork a thread to process requests from the new client
+     */
+        {
+            // fork a thread to get requests off the socket
+        client_t* c;
+            c = new client_t(client_sock, this);
+            if(!c ) {
+                cerr &lt;&lt; &quot;Error: could not fork client thread.&quot; &lt;&lt;endl;
+        ::exit(1);
+            }
+
+        W_COERCE(c-&gt;fork());
+
+        cerr &lt;&lt; &quot;Forked thread to handle client&quot; &lt;&lt; endl;
+
+        // put new thread on list of clients
+        W_COERCE(_clients_mutex.acquire(WAIT_FOREVER));
+        _clients.append(c);
+        _clients_mutex.release();
+        }
+    }
+
+    _cleaner_thread-&gt;kick();
+
+    /*
+     * Wait for all client threads to end
+     */
+    cout &lt;&lt; &quot;listener waiting for all clients to end ...&quot; &lt;&lt; endl;
+    // must get mutex on the list before checking it
+    W_COERCE(_clients_mutex.acquire(WAIT_FOREVER));
+    while(!_clients.is_empty()) {
+    // this code waits free's the mutex protecting the list
+    // and waits for _clients_empty to be signaled
+    W_COERCE(_clients_empty.wait(_clients_mutex));
+    }
+    _clients_mutex.release();
+
+    cout &lt;&lt; &quot;listener exiting&quot; &lt;&lt; endl;
+    delete _ready;
+}
+
+/*
+ * This is a &quot;call-back&quot; function called by children (client_t)
+ * of listener.
+ */
+void
+listener_t::child_is_done(w_link_t&amp; 
+#ifdef OLDWAY
+    child
+#endif
+)
+{
+    // new way: just let child go to defunct state
+    // and let cleaner_t remove the defunct threads and delete them
+    _cleaner_thread-&gt;kick();
+
+#ifdef OLDWAY
+    // must get mutex on the list before changing it
+    W_COERCE(_clients_mutex.acquire(WAIT_FOREVER));
+    // remove the child from the list
+    child.detach();
+    if (_clients.is_empty()) {
+    // tell the listener thread that there are no more children
+    _clients_empty.signal();
+    }
+    _clients_mutex.release();
+#endif
+}
+
+
+/********************************************************************
+   Implementation of client_t:
+    a thread class that manages a client connection and
+    processes RPCs 
+********************************************************************/
+
+
+client_t::client_t(int fd, listener_t* parent)
+    : smthread_t(t_regular, /* regular priority */
+         false,     /* will run ASAP    */
+         false,     /* will not delete itself when done */
+         &quot;client&quot;), /* thread name */
+      _fd(fd), _parent(parent)
+{
+}
+
+client_t::~client_t()
+{
+}
+
+void
+client_t::run()
+{
+    cerr &lt;&lt; &quot;New client thread &quot;
+    &lt;&lt; smthread_t::me()-&gt;id
+    &lt;&lt; &quot; is running&quot; &lt;&lt; endl;
+
+    _ready = new sfile_read_hdl_t(_fd);
+    if (!_ready) {
+    cerr &lt;&lt; &quot;Error: Out of Memory&quot; &lt;&lt; endl;
+    ::exit(1);
+    }
+    cerr &lt;&lt; &quot;client thread &quot;
+    &lt;&lt; smthread_t::me()-&gt;id
+    &lt;&lt; &quot; has read handler for fd &quot;
+    &lt;&lt; _fd &lt;&lt; endl;
+
+    // start up C++ side of RPCs processing
+    command_server = new command_server_t;
+    if (command_server == 0) {
+    cerr &lt;&lt; &quot;Error: Out of memory&quot; &lt;&lt; endl;
+    ::exit(1);
+    }
+    cerr &lt;&lt; &quot;client thread &quot;
+    &lt;&lt; smthread_t::me()-&gt;id
+    &lt;&lt; &quot; has command server&quot; &lt;&lt; endl;
+
+    fd_set fds;
+    FD_ZERO(&amp;fds);
+    FD_SET(_fd, &amp;fds);
+    rc_t    rc;
+
+    while(1) {
+        rc = _ready-&gt;wait(WAIT_FOREVER);
+        if (!rc) {
+
+        /**********************************************************
+         * The essence of RPC handling is in svc_getreqset, which
+         * calls the right RPC stub.  The RPC stub will then
+         * call the corresponding command_server_t method
+         **********************************************************/
+            svc_getreqset(&amp;fds);  // get the request and call its handler
+            if (! (FD_ISSET(_fd, &amp;svc_fdset)))  {
+                    cerr &lt;&lt; &quot; client on fd &quot; 
+                    &lt;&lt; _fd &lt;&lt; &quot; hung up&quot; &lt;&lt; endl;
+                break;
+            }
+        } else {
+            // someone called _ready-&gt;shutdown().
+        cerr &lt;&lt; &quot;exiting client thread for fd: &quot; &lt;&lt; _fd &lt;&lt; endl;
+            break;
+        }
+    }
+    assert(sfile_read_hdl_t::is_active(_fd));
+    delete _ready;
+    cerr &lt;&lt; &quot;Thread &quot;
+    &lt;&lt; smthread_t::me()-&gt;id
+    &lt;&lt; &quot; deleted read file handler &quot; &lt;&lt;endl;
+
+    _ready = 0;
+    assert(!sfile_read_hdl_t::is_active(_fd));
+
+    cerr &lt;&lt; &quot;Thread &quot;
+    &lt;&lt; smthread_t::me()-&gt;id
+    &lt;&lt; &quot; deleted server &quot; &lt;&lt;endl;
+
+    delete command_server;
+    command_server = 0;
+
+    // tell the listener thread we are done
+    _parent-&gt;child_is_done(_link);
+}
+
+
+/********************************************************************
+   Implementation of stdin_thread_t:
+    a thread class that manages input from the terminal
+********************************************************************/
+
+stdin_thread_t::stdin_thread_t() : 
+    smthread_t(t_regular,   /* regular priority */
+           false,       /* will run ASAP    */
+           false,       /* will not delete itself when done */
+           &quot;stdin&quot;)     /* thread name */
+{
+}
+
+stdin_thread_t::~stdin_thread_t()
+{
+}
+
+void
+stdin_thread_t::run()
+{
+    cerr &lt;&lt; &quot;Command thread is running&quot; &lt;&lt; endl;
+
+    char    line_buf[256];
+    char*   line;
+    bool    quit = false;
+    rc_t    rc;
+
+    // start a command server
+    command_server_t cmd_server;
+
+    _ready = new sfile_read_hdl_t(0);   // handle stdin
+    if (!_ready) {
+    cerr &lt;&lt; &quot;Error: Out of Memory&quot; &lt;&lt; endl;
+    ::exit(1);
+    }
+
+    while (1) {
+    cout &lt;&lt; &quot;Server&gt; &quot; ; cout.flush();
+        rc = _ready-&gt;wait(WAIT_FOREVER);
+        if(!rc) {
+        //cerr &lt;&lt; &quot;stdin ready&quot; &lt;&lt; endl;
+        line = fgets(line_buf, sizeof(line_buf)-1, stdin);
+        if (line == 0) {
+        // end-of-file
+        break;
+        }
+        cmd_server.parse_command(line_buf, quit);
+        if (quit) {
+        // quit command was entered
+        break; 
+        }
+        } else {
+            // someone called _ready-&gt;shutdown().
+        cerr &lt;&lt; &quot;exiting command thread &quot; &lt;&lt;  endl;
+            break;
+        }
+    }
+    assert(sfile_read_hdl_t::is_active(0));
+    delete _ready;
+    _ready = 0;
+    assert(!sfile_read_hdl_t::is_active(0));
+
+    cout &lt;&lt; &quot;Shutting down command thread&quot; &lt;&lt; endl;
+}
+
+
+cleaner_t::cleaner_t(listener_t *_l)
+ : smthread_t( smthread_t::t_regular, // priority
+                false, // block_immediate
+                false, // auto_delete
+                &quot;cleaner_t&quot;,     //thread name
+                WAIT_FOREVER // don't block on locks
+        )
+{
+    _quit = false;
+    _listener = _l;
+}
+
+void
+cleaner_t::kick()
+{
+    cleanup.broadcast();
+}
+
+void
+cleaner_t::destroy()
+{
+    _quit = true;
+    cleanup.broadcast();
+}
+
+void
+cleaner_t::run()
+{
+    while(1) {
+        if(_quit) {
+            return;
+        }
+
+        // wait on condition
+        w_rc_t e;
+        W_COERCE(cleanup_mutex.acquire(WAIT_FOREVER));
+        if(e=cleanup.wait(cleanup_mutex)) {
+            cerr &lt;&lt; e &lt;&lt; endl; assert(0);
+        }
+        cleanup_mutex.release();
+
+    W_COERCE(_listener-&gt;_clients_mutex.acquire(WAIT_FOREVER));
+    {
+        // iterate over list of client_t
+        w_list_i&lt;client_t&gt;  i(_listener-&gt;_clients); 
+        client_t*       c;
+
+
+        while( (c=i.next()) ) {
+        if(c-&gt;status() == t_defunct)  {
+            c-&gt;_link.detach();
+        }
+        }
+    }
+    if (_listener-&gt;_clients.is_empty()) {
+        // tell the listener thread that there are no more children
+        _listener-&gt;_clients_empty.signal();
+    }
+    _listener-&gt;_clients_mutex.release();
+    }
+}
+</PRE>
+<P><A NAME="ssmvas:clientcode">&#160;</A><H2><A NAME="SECTION00093000000000000000000">
+Client Code</A>
+</H2>
+<P><A NAME="ssmvas:clientC">&#160;</A><H3><A NAME="SECTION00093100000000000000000">
+Main: client.C</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * This file implements the main() code for the grid client program
+ */
+
+#include &quot;ShoreConfig.h&quot;
+#include &lt;stream.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;netdb.h&gt;
+#include &lt;rpc/rpc.h&gt;
+#ifdef SOLARIS2
+#include &lt;rpc/clnt_soc.h&gt;
+#endif
+#include &lt;memory.h&gt;
+
+// The client program does not need all of the SSM stuff, so
+// instead of sm_vas.h, only sm_app.h is included
+#include &quot;sm_app.h&quot;
+#include &quot;nbox.h&quot;
+
+#include &quot;grid_basics.h&quot;
+#define RPC_CLNT  /* so rpc prototypes are included */
+#include &quot;msg.h&quot;
+#include &quot;grid.h&quot;
+#include &quot;command.h&quot;
+#include &quot;command_client.h&quot;
+
+// shorten error code type name
+typedef w_rc_t rc_t;
+
+// this is implemented in options.C
+w_rc_t init_config_options(option_group_t&amp; options,
+                        const char* prog_type,
+                        int&amp; argc, char** argv);
+
+// pointer to RPC service this client uses
+CLIENT* client = 0;
+
+/*
+ * connect_to_server connects to the server on machine
+ * &quot;hostname&quot; at port &quot;port&quot;.  If connection succeeds, 
+ * true is returned.  Otherwise a message is printed to
+ * cerr and false is returned.
+ */
+bool
+connect_to_server(const char* hostname, int port)
+{
+    /*
+     * If the server was registered with the port mapper,
+     * then this function would just call the RPC function
+     * clnt_create().  Since the server is not, but is instead
+     * listening on &quot;port&quot; then we need to use the RPC
+     * function clnttcp_create().
+     *
+     * The RPC package shipped with Shore has a clnt_create_port
+     * function that allows the port to be specified, eliminating
+     * the need for most of the code below.
+     */
+
+    struct sockaddr_in  saddr;  // server is located at this address
+    struct hostent*     h;  // server host information
+
+    int         sock;   // socket for connection
+
+
+    h = gethostbyname(hostname);
+    if (h == NULL) {
+    cerr &lt;&lt; &quot;Error: machine: &quot; &lt;&lt; hostname &lt;&lt; &quot; is unkown&quot; &lt;&lt; endl;
+    return false;
+    }
+    if (h-&gt;h_addrtype != AF_INET) {
+    cerr &lt;&lt; &quot;Error: machine &quot; &lt;&lt; hostname &lt;&lt; &quot; does not have an internet address&quot; &lt;&lt; endl;
+    return false;
+    }
+
+    // fill the socket address with host address information
+    // see inet(4) for more information
+    saddr.sin_family = h-&gt;h_addrtype;
+    memset(saddr.sin_zero, 0, sizeof(saddr.sin_zero));
+    memcpy( (char*)&amp;saddr.sin_addr, h-&gt;h_addr, h-&gt;h_length);
+
+    // set the port to connect to (using 0 would use the portmapper)
+    saddr.sin_port = htons(port);
+
+    // connect with the server
+    cerr &lt;&lt; &quot;attempting server connection&quot; &lt;&lt; endl;
+    sock = RPC_ANYSOCK; // connect using a new socket
+    client = clnttcp_create(&amp;saddr, GRID, GRIDVERS, &amp;sock, 0, 0);
+    if (client == 0) {
+    cerr &lt;&lt; &quot;Error: clnttcp_create() could not connect to server&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;       server may not be running&quot; &lt;&lt; endl;
+    // print RCP error message
+    clnt_pcreateerror(hostname);
+    return false;
+    }
+
+    /*
+     * Set timeout if rpc's do not return in 30 seconds.
+     * Rpc's may block at the server while waiting for
+     * locks, so this may need to be increased.
+     *
+     * Note RPC library shipped with Shore allows the
+     * use of CLRMV_TIMEOUT to completely remove the timeout.
+     */
+    struct timeval tv;
+    tv.tv_sec = 30;
+    tv.tv_usec = 0;
+    if (!clnt_control(client, CLSET_TIMEOUT, (char *) &amp;tv)) {
+    cerr &lt;&lt; &quot;Error: could not set client timeout&quot; &lt;&lt; endl;
+    return false;
+    }
+
+    return true;
+}
+
+void
+disconnect_from_server()
+{
+    if (client) clnt_destroy(client);
+}
+
+void
+process_user_commands()
+{
+    command_client_t cmd_client(client);
+
+    char        line_buf[256];
+    char*       line;
+    bool    quit = false;
+
+    cout &lt;&lt; &quot;Client ready.&quot; &lt;&lt; endl;
+    while(!quit) {
+    cout &lt;&lt; &quot;client&gt; &quot; &lt;&lt; flush;
+    line = fgets(line_buf, sizeof(line_buf)-1, stdin);
+    if (line == 0) {
+        // end of file
+        break;
+    }
+    cmd_client.parse_command(line_buf, quit);
+    }
+}
+
+
+void
+usage(option_group_t&amp; options)
+{
+    cerr &lt;&lt; &quot;Usage: client [options]&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;Valid options are: &quot; &lt;&lt; endl;
+    options.print_usage(TRUE, cerr);
+}
+
+
+int
+main(int argc, char* argv[])
+{
+    cout &lt;&lt; &quot;processing configuration options ...&quot; &lt;&lt; endl;
+
+    // pointers to options we will create for the grid server program
+    option_t* opt_server_host = 0;
+    option_t* opt_connect_port = 0;
+
+    const option_level_cnt = 3; 
+    option_group_t options(option_level_cnt);
+
+    W_COERCE(options.add_option(&quot;connect_port&quot;, &quot;1024 &lt; integer &lt; 65535&quot;,
+             &quot;1234&quot;, &quot;port for connecting to grid server&quot;,
+             false, option_t::set_value_long,
+             opt_connect_port));
+
+    W_COERCE(options.add_option(&quot;server_host&quot;, &quot;host address&quot;,
+             &quot;localhost&quot;, &quot;address of host running server&quot;,
+             false, option_t::set_value_charstr,
+             opt_server_host));
+
+    if (init_config_options(options, &quot;client&quot;, argc, argv)) {
+    usage(options);
+    exit(1);
+    }
+
+    // there should not be any other command line arguments
+    if (argc &gt; 1) {
+    usage(options);
+    exit(1);
+    }
+
+    int port = strtol(opt_connect_port-&gt;value(), 0, 0);
+    cout &lt;&lt; &quot;trying to connect to server at port &quot; &lt;&lt; port&lt;&lt; endl;
+    if (!connect_to_server(opt_server_host-&gt;value(), port)) {
+    cerr &lt;&lt; &quot;Shutting down due to connection failure&quot; &lt;&lt; endl;
+    exit(1);
+    }
+
+    process_user_commands();
+
+    disconnect_from_server();
+
+    cout &lt;&lt; &quot;Finished!&quot; &lt;&lt; endl;
+    return 0;
+}
+</PRE>
+<A NAME="ssmvas:commandclienth">&#160;</A><H3><A NAME="SECTION00093200000000000000000">
+command_client.h</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+#ifndef COMMAND_CLIENT_H
+#define COMMAND_CLIENT_H
+
+/*
+ * Client command processing class
+ */
+class command_client_t : public command_base_t {
+public:
+            command_client_t(CLIENT*);
+    
+    virtual cmd_err_t   commit_transaction();
+    virtual cmd_err_t   abort_transaction();
+    virtual cmd_err_t   clear_grid();
+    virtual cmd_err_t   print_grid(grid_display_t&amp; rows);
+    virtual cmd_err_t   add_item(const char* name, int x, int y);
+    virtual cmd_err_t   remove_item(const char* name);
+    virtual cmd_err_t   move_item(const char* name, int x, int y);
+    virtual cmd_err_t   location_of(const char* name, int&amp; x, int&amp; y);
+    virtual cmd_err_t   spatial_query(const nbox_t&amp; box, spatial_result_t&amp; result);
+
+private:
+    CLIENT*     cl;
+};
+
+#endif /* COMMAND_CLIENT_H */
+</PRE>
+<A NAME="ssmvas:commandclientC">&#160;</A><H3><A NAME="SECTION00093300000000000000000">
+command_client.C</A>
+</H3>
+<PRE>
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * This file implements the main() code for the grid client program
+ */
+
+#include &quot;ShoreConfig.h&quot;
+#include &lt;stream.h&gt;
+#include &lt;string.h&gt;
+#include &lt;rpc/rpc.h&gt;
+// include stuff needed for SM applications (clients)
+#include &quot;sm_app.h&quot;
+#include &quot;nbox.h&quot;
+#include &quot;grid_basics.h&quot;
+#define RPC_CLNT  /* so rpc prototypes are included */
+#include &quot;msg.h&quot;
+#include &quot;grid.h&quot;
+#include &quot;command.h&quot;
+#include &quot;command_client.h&quot;
+
+#define DO_RPC(rpc, reply) \
+    reply = rpc;                    \
+    if (reply == 0) {                   \
+    return clnt_sperror(cl, &quot;&quot;);            \
+    } else if (reply-&gt;error_msg[0] != 0) {      \
+    return reply-&gt;error_msg;            \
+    }
+
+
+command_client_t::command_client_t(CLIENT* client)
+    : cl(client)
+{
+}
+
+cmd_err_t
+command_client_t::commit_transaction()
+{
+    error_reply* reply;
+    DO_RPC(commit_transaction_rpc_1(0, cl), reply);
+    return 0; /* success */
+}
+
+cmd_err_t
+command_client_t::abort_transaction()
+{
+    error_reply* reply;
+    DO_RPC(abort_transaction_rpc_1(0, cl), reply);
+    return 0; /* success */
+}
+
+cmd_err_t
+command_client_t::clear_grid()
+{
+    error_reply* reply;
+    DO_RPC(clear_grid_rpc_1(0, cl), reply);
+    return 0; /* success */
+}
+
+cmd_err_t
+command_client_t::print_grid(grid_display_t&amp; display)
+{
+    print_grid_reply* reply;
+    DO_RPC(print_grid_rpc_1(0, cl), reply);
+    display = reply-&gt;display;
+    return 0; /* success */
+}
+
+cmd_err_t
+command_client_t::add_item(const char* name, int x, int y)
+{
+    error_reply* reply;
+    add_item_arg arg;
+
+    strncpy(arg.name, name, sizeof(arg.name)-1);
+    arg.x = x; 
+    arg.y = y; 
+    
+    DO_RPC(add_item_rpc_1(&amp;arg, cl), reply);
+    return 0; /* success */
+}
+
+cmd_err_t
+command_client_t::remove_item(const char* name)
+{
+    error_reply* reply;
+    remove_item_arg arg;
+
+    strncpy(arg.name, name, sizeof(arg.name)-1);
+    
+    DO_RPC(remove_item_rpc_1(&amp;arg, cl), reply);
+    return 0; /* success */
+}
+
+
+cmd_err_t
+command_client_t::move_item(const char* name, int x, int y)
+{
+    error_reply* reply;
+    add_item_arg arg;
+    arg.x = x; 
+    arg.y = y; 
+
+    strncpy(arg.name, name, sizeof(arg.name)-1);
+    
+    DO_RPC(move_item_rpc_1(&amp;arg, cl), reply);
+    return 0; /* success */
+}
+
+
+cmd_err_t
+command_client_t::location_of(const char* name, int&amp; x, int&amp; y)
+{
+    location_reply* reply;
+    location_arg arg;
+
+    strncpy(arg.name, name, sizeof(arg.name)-1);
+    
+    DO_RPC(location_of_rpc_1(&amp;arg, cl), reply);
+    x = reply-&gt;x;
+    y = reply-&gt;y;
+    return 0; /* success */
+}
+
+
+cmd_err_t
+command_client_t::spatial_query(const nbox_t&amp; box, spatial_result_t&amp; result)
+{
+    spatial_reply* reply;
+    spatial_arg arg;
+
+    arg.x_low = box.bound(0);
+    arg.y_low = box.bound(1);
+    arg.x_hi = box.bound(0+box.dimension());
+    arg.y_hi = box.bound(1+box.dimension());
+
+    DO_RPC(spatial_rpc_1(&amp;arg, cl), reply);
+    result = reply-&gt;result;
+    return 0; /* success */
+}
+</PRE>
+<P>
+<BR><HR>
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

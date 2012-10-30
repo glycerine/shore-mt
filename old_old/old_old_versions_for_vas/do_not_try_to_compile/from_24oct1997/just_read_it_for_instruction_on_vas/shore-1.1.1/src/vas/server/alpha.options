@@ -1,0 +1,133 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# $Header: /p/shore/shore_cvs/src/vas/server/alpha.options,v 1.6 1995/04/24 19:46:30 zwilling Exp $
+#
+# Example .rc file for shore value-added server, svas tester, 
+# and example applications.
+#
+# Edit a copy of this as you see fit, and save it as
+# ~/.shoreconfig or ./.shoreconfig.
+# Alternatively, you can store is somewhere else and
+# set your environment variable SHORE_RC to the name 
+# of the edited file, so that the Shore server can find it.
+#
+
+# Options have the form:
+#		type.class.progname.option
+#
+# type = general type of program (usually shore, but application
+#		can override that)
+# class = class of program within type (server or client or whatever
+#		application chooses)
+# progname = program executable name (don't use a.out)
+# option = specific name of option
+#
+# e.g., shore.oo7.bench.op  
+#		shore.server.shutdown.svas_host
+#
+
+#******************************************* SHORE SERVER
+#
+# STORAGE MANAGER OPTIONS
+#
+
+# Specify the log directory for all ssh programs
+shore.server.*.sm_logging: yes
+
+#
+# if you want your log to be on a different device,
+# change sm_logdir or make log a link somewhere into
+# the desired device
+#
+shore.server.*.sm_logdir: ./log
+shore.server.*.sm_logsize: 10000
+shore.server.*.sm_multiserver: no
+
+# Specify the sm buffer pool size for any program
+shore.server.*.sm_bufpoolsize: 320
+shore.server.*.sm_diskrw: PUT-YOUR-INSTALLED-DIR-HERE/bin/diskrw
+
+
+# 
+# SVAS options
+#
+shore.server.*.svas_nfsd_port: 2999
+shore.server.*.svas_nfsd_log: -
+
+shore.server.*.svas_mountd_port: 2998
+shore.server.*.svas_mountd_log: -
+
+shore.server.*.svas_client_port: 2999
+shore.server.*.svas_client_log: -
+
+shore.server.?.svas_remote_port: 2998
+shore.server.*.svas_remote_log: -
+
+shore.server.*.svas_tclshell: yes
+
+#
+# if you want your data volumes to be anywhere other
+# than on ./volumes, do this:
+# 	make a copy of the shore.rc file 
+# 	make svas_shellrc point to your copy,
+#   edit your shore.rc to change the location of your volumes
+#   change svas_root to point to your new root volume
+#
+shore.server.*.svas_root: ./volumes/miniroot 10
+
+#
+# Specify the location of shore.rc (the script of Tcl commands
+# that sets up the Shore filesystem on svas_root.)
+#
+shore.server.*.svas_shellrc: ~/shore.rc
+
+#
+# more svas options...
+#
+shore.server.shore.svas_noshm: no
+shore.server.shore.svas_rpc_unregister: yes
+shore.server.shore.svas_print_user_errors: yes
+shore.server.shore.svas_print_user_stats: no
+shore.server.shore.svas_clear_user_stats: no
+shore.server.shore.svas_sysp_cache_size: 1
+shore.server.?.svas_remote_pmap: no
+shore.server.shore.svas_client_pmap: no
+
+#******************************************* SSHUTDOWN 
+#
+# options for the SVAS shutdown program,
+# which also uses the above svas-remote* options
+#
+shore.server.shutdown.svas_host: localhost
+
+#******************************************* EXAMPLE APPLICATION
+#
+#
+shore.client.?.svas_host: localhost
+shore.client.?.svas_port: 2999
+shore.client.?.svas_shm_small_obj: 32
+shore.client.?.svas_shm_large_obj: 128
+
+#******************************************* OO7
+#
+# these are for oo7
+#
+shore.oo7.*.configfile: oo7.config.small
+shore.oo7.bench.op: t1
+shore.oo7.bench.count: 10
+shore.oo7.bench.many_xact: no
+shore.oo7.bench.svas_print_user_errors: no
+shore.oo7.?.svas_use_pmap: no
+shore.oo7.?.svas_audit: no
+shore.oo7.?.svas_host: localhost
+shore.oo7.?.svas_port: 2999
+shore.oo7.?.svas_print_user_errors: yes
+shore.oo7.?.svas_shm_small_obj: 32
+shore.oo7.?.svas_shm_large_obj: 128
+

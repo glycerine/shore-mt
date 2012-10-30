@@ -1,0 +1,79 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# start up
+#
+source $script_dir/vol.init
+
+if { $logging == 0 } {
+    echo "No logging: script not run."
+} else {
+
+set nrec 150
+set u "2.-1500.-1500.1500.1500"
+
+#
+# create rtree 
+#
+sm begin_xct
+set ndx [sm create_md_index $volid 2 rtree]
+verbose created rtree $ndx
+sm commit_xct
+
+#
+# load and abort 
+#
+sm begin_xct
+for {set i 1} {$i <= $nrec} {incr i} {
+    set box($i) [sm next_box $u]
+#    verbose inserting $box($i) $i
+    sm create_md_assoc $ndx $box($i) $i
+}
+verbose inserted $nrec entries
+sm rtree_stats $ndx
+#sm draw_rtree $ndx
+#sm print_md_index $ndx
+sm abort_xct
+
+#
+# reload
+#
+sm begin_xct
+for {set i 1} {$i <= $nrec} {incr i} {
+#    verbose inserting $box($i) $i
+    sm create_md_assoc $ndx $box($i) $i
+}
+verbose inserted $nrec entries
+#sm draw_rtree $ndx
+#sm print_md_index $ndx
+sm commit_xct
+
+sm begin_xct
+verbose probe:
+for {set i 1} {$i <= $nrec} {incr i} {
+#    verbose $i $box($i)
+    set el [sm find_md_assoc $ndx $box($i)]
+    assert {expr $i == $el}
+}
+verbose "---- successful"
+
+sm commit_xct
+
+sm begin_xct
+
+set q "2.-500.-500.500.500"
+#set q "2.-1500.-1500.1500.1500"
+
+sm rtree_query $ndx / $q
+sm rtree_query $ndx || $q
+sm rtree_query $ndx << $q
+
+sm commit_xct
+
+unset nrec ndx box q u el i
+}

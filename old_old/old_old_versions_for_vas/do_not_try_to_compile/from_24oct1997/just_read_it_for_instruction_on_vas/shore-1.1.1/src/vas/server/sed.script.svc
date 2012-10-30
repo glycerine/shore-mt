@@ -1,0 +1,12 @@
+1i\
+#define RPC_SVC\
+#ifdef SOLARIS2 \
+#define ARGUMENT_T (char *)\
+#else \
+#define ARGUMENT_T\
+#endif /* SOLARIS2 */
+1,$s=xdr_argument\,=(xdrproc_t)xdr_argument\, ARGUMENT_T=
+1,$s=svc_freeargs(transp, xdr_result=svc_freeargs(transp,(xdrproc_t)xdr_result=
+1,$s=svc_freeargs(transp, xdr_argument=svc_freeargs(transp,(xdrproc_t)xdr_argument=
+1,$s=fprintf(stderr,=catastrophic(=
+1,$s=exit(.);==

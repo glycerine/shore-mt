@@ -1,0 +1,76 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+%#>>>>>>>>>>>> $Header: /p/shore/shore_cvs/config/Imake.targets,v 1.5 1997/09/19 11:38:25 solomon Exp $
+
+#ifndef Subdirs
+#define Subdirs /* empty */
+#endif
+
+#ifndef Tests
+#define Tests /* empty */
+#endif
+
+make:
+	Perl $(TOP)/tools/makemake -r
+
+make_local:
+	Perl $(TOP)/tools/makemake
+
+%# Null rules in case no rules for these targets have been generated earlier
+all_local::
+install_local::
+install_only_local::
+uninstall_local::
+mostlyclean_local::
+clean_local:: mostlyclean_local
+distclean_local:: clean_local
+	-$(RM) -f tags .depend Makefile Makefile.bak
+depend_local: $(DEPEND_SOURCE) 
+	-$(RM) -f .depend
+	-$(CXX) -M $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) %
+		$(DEPEND_SOURCE) > .depend
+tags_local: $(TAGS_SOURCE)
+	Perl $(TOP)/tools/addtags.pl Ctags $(TOP)/tags $(TAGS_SOURCE)
+automatic::
+
+/* These are the recursive targets.  Imakefiles that explicitly define targets
+ * should use the "_local" version (e.g., "all_local:: whatever" rather than
+ * "all:: whatever").
+ */
+all::           all_local
+tests::         tests_local
+install::       install_local
+install_only::  install_only_local
+uninstall::     uninstall_local
+clean::         clean_local
+distclean::     distclean_local
+mostlyclean::   mostlyclean_local
+depend::        depend_local
+tags::          tags_local
+
+/* Mechanism for recursively walking the directory tree.  All of the following
+ * commands walk the directory tree defined by
+ *    #define Subdirs dir1 dir2 ...
+ * entries in Imakefiles.  The traversal is pre-order (that is, "make cmd" is
+ * done in each directory before its children).  Except for the command 'all',
+ * they also descend into the child directories defined by
+ *    #define Tests dir1 dir2 ...
+ */
+%GEN do_subdirs(all,Subdirs)
+
+%GEN do_subdirs(install,Subdirs Tests)
+%GEN do_subdirs(install_only,Subdirs Tests)
+%GEN do_subdirs(tests,Subdirs Tests)
+%GEN do_subdirs(uninstall,Subdirs Tests)
+%GEN do_subdirs(clean,Subdirs Tests)
+%GEN do_subdirs(distclean,Subdirs Tests)
+%GEN do_subdirs(mostlyclean,Subdirs Tests)
+%GEN do_subdirs(depend,Subdirs Tests)
+%GEN do_subdirs(tags,Subdirs Tests)
+
+-include .depend

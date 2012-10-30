@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>What to Include</TITLE>
+<META NAME="description" CONTENT="What to Include">
+<META NAME="keywords" CONTENT="bugreport">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="bugreport.css">
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="up" HREF="bugreport.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html44"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html41"
+ HREF="bugreport.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html35"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html43"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html45"
+ HREF="node4.html">Where to Send the</A>
+<B> Up:</B> <A NAME="tex2html42"
+ HREF="bugreport.html">How to Submit a Report</A>
+<B> Previous:</B> <A NAME="tex2html36"
+ HREF="node2.html">Introduction</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="bugreport:include">&#160;</A><H1><A NAME="SECTION00030000000000000000000">
+What to Include</A>
+</H1>
+<P>
+The more information you can give us about the problem and the environment
+in which it occurs, the faster we can resolve the problem.  Below is
+a list of information that is helpful to us.
+Not every item is appropriate for a particular report, but please include
+whatever you can.
+<P><DL COMPACT>
+<DT>1.
+<DD>Tell us what release of Shore you're using (the current release is
+Version 1.1.1 ).
+<DT>2.
+<DD>Tell us what operating system and architecture you are using.
+<P><DT>3.
+<DD>Indicate whether you are using one of the binary releases
+(and if so, whether it is the debugging or no-debugging version)
+or you compiled Shore yourself.
+If you compiled it yourself, what version of the
+compiler did you use?
+What configuration options did you use (IncludeDebugCode, Optimize, etc.)?
+Include a copy of <TT>config/config.h</TT>.
+<P><DT>4.
+<DD>Is the problem reproducible or sporadic?
+If it is reproducible, tell us exactly what sequence of events led up to the
+problem.
+Send us a typescript if possible.
+<P><DT>5.
+<DD>What compiler (including version) are you using to compile
+your application (or value-added server, if that's what
+you are building)?
+Run <TT>gcc -v</TT> to get this version number.
+If this is not a version supported by Shore
+(see the <A HREF="../installation/node3.html#installation:requirements"><EM>Requirements</EM> </A> section
+of the
+<A NAME="tex2html2"
+ HREF="../installation/installation.html">Installation Manual</A>),
+don't send a problem report;
+upgrade your compiler.
+Similarly, check versions of other software mentioned in the
+<A HREF="../installation/node3.html#installation:requirements"><EM>Requirements</EM> </A>.
+<P><DT>6.
+<DD>What error messages or warnings were produced by your
+failed program?  Don't try to reproduce them from memory.
+Yank the messages verbatim with your mouse, or better still capture the
+output by rerunning your program with the Unix
+<TT>script(1)</TT> utility and send the resulting <TT>typescript</TT>.
+<P><DT>7.
+<DD>If the program that failed is a client, what did the server
+have to say about it?
+Did the server produce any error messages?
+If possible, run the server in the foreground with a Tcl shell
+and type &quot;suppress off&quot; and &quot;log client info&quot; before
+running your client.
+Once again, capture the actual server output and include it with your bug
+report.
+<P><DT>8.
+<DD>If your program aborted with a segmentation fault
+or an assertion failure, try to get a stack trace with
+<TT>gdb</TT>
+and send us the result.
+<P>
+If your program does not get a segmentation fault,
+but does get another error, run it with
+<TT>gdb</TT> and get a stack trace at
+<TT>perrstop</TT> (unless you are writing
+your own value-added server and using the Storage
+Manager directly).
+<P>
+Please do your best to track down the source of the
+problem with <TT>gdb</TT>, debugging print statements,
+and other debugging tools at hand (that is, to give us a reasonable
+amount of detailed information).
+Remember that Shore is freeware; the project runs on limited
+resources, and every bit of help you can give us
+allows us to do more work on Shore extensions.
+<P><DT>9.
+<DD>If you cannot compile your program because you get a compilation
+error that you do not understand, and if the error appears to be in the
+Shore sources, try using the <TT>-E -dD</TT> options on <TT>gcc</TT>.
+Send the output to a file and look at the file.
+Often these problems are due to the fact that a file (included before
+<TT>config.h</TT> or before the C++ language binding)
+defines a C-preprocessor-macro that
+confuses matters.
+<P>
+If you cannot glean any useful information from this,
+use the <TT>-E -dD -P</TT> options on <TT>gcc</TT>, and
+pipe the results to a file <TT>junk.C</TT>. Compile
+<TT>junk.C</TT> with gcc.  Often this will pinpoint the problem.
+<P>
+If you still cannot glean any useful information,
+send us <TT>junk.C</TT> <EM>in a separate mail message</EM> , with
+the subject &quot;junk.C&quot;.
+<P></DL><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html44"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html41"
+ HREF="bugreport.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html35"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html43"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html45"
+ HREF="node4.html">Where to Send the</A>
+<B> Up:</B> <A NAME="tex2html42"
+ HREF="bugreport.html">How to Submit a Report</A>
+<B> Previous:</B> <A NAME="tex2html36"
+ HREF="node2.html">Introduction</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,50 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+This directory contains three example programs illustrating object
+creation, pool scans, and object deletion.  These programs use a simple
+type called "Part", defined in part.sdl.  Parts have an integer part
+identifier, a character string name, and an array of integers that is
+entirely unused; it is included to make part object larger.  The
+"build" program creates some number of part objects in a pool.  The
+"pscan" program scans the pool and prints the part id and name of each
+part object.  The "destroy" program scans the pool and destroys all of
+the part objects.
+
+To compile the programs, copy Makefile.template to Makefile, edit the
+INSTALL_DIR variable in Makefile to point to the top of your Shore
+installation directory, make sure you are running a Shore server, and
+type "make".
+
+
+build
+=====
+
+The usage for build is: build nparts [poolname]
+
+"nparts" indicates the number of part objects to create, and "poolname"
+is the pathname of the pool in which to create the parts.  The pool
+name defaults to "/pool".  If the named pool does not exist, then it is
+created.
+
+Although "build" can create objects in any pool, it is suggested that
+you specify an empty pool (or have the program create a new pool),
+because in the current release of Shore, programs can only manipulate
+an object if it has compiled-in knowledge of the object's type.  Since
+"pscan" and "destroy" only have compiled-in knowledge of the "part"
+type, they should not be run against pools containing objects of other
+types.
+
+
+pscan and destroy
+=================
+
+The usage for pscan is:   pscan   [poolname]
+The usage for destroy is: destroy [poolname]
+
+In both cases, "poolname" is the pathname of the pool to scan.  It
+defaults to "/pool".

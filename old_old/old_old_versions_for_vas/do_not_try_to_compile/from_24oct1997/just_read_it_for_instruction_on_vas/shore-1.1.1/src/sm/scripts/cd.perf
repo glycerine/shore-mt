@@ -1,0 +1,179 @@
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#   Compare creation and destruction of records
+#   This is to work on the problem of destroying being
+#   inordinately slow.
+#   Parameters: 
+#   	        size of objects written 
+#
+
+#  NB: DON'T RUN THIS DIRECTLY -- use cd.perf.nn
+
+set nobjs [expr { ($max_small_rec/$objsize) * $npages } ]
+
+source ../scripts/vol.init
+
+# make an objsize buffer full of alphabetic characters
+set ten "abcde12345"
+set hundred ""
+# make 100 bytes
+for {set i 0} {$i < 10} {incr i}  {
+    set hundred "$hundred$ten"
+}
+
+set body ""
+for {set i 100} {$i < $objsize} {set i [expr $i + 100]}  {
+    set body "$body$hundred"
+}
+
+
+set hdr "" 
+# set id_body_width zvec%d
+# set body [format $id_body_width $objsize]
+
+# 
+# in existing file, create a buncha records
+# in one transaction
+#
+# First, clear out the file
+#
+set fid 0
+
+sm begin_xct
+    if {$fid!=0} {
+	sm destroy_file $fid 
+	set fid 0
+    }
+
+    # Now, start over and time it
+    set fid [sm create_file $volid ]
+    echo fid=$fid
+sm commit_xct
+
+sm checkpoint
+
+echo CREATING $nobjs RECS of size $objsize
+
+set i 0
+
+sm begin_xct
+set dummy [sm gather_stats reset]
+set wtime [ time {
+	for {set i 0} {$i < $nobjs} {set i [expr $i + 1]} {
+	    sm create_rec $fid $hdr $objsize $body
+	}
+	sm force_buffers true
+} 1 ]
+
+echo CREATED $nobjs RECS of size $objsize, forced buffers
+echo total create time = $wtime
+set dummy [sm gather_stats reset]
+echo $dummy
+sm commit_xct
+
+# scan the file to gather the rids
+# we separated this from the create to be
+# sure we're not timing something in tcl that's expensive
+
+set i 0
+sm begin_xct
+set dummy [sm gather_stats reset]
+set wtime [ time {
+	set scan [sm scan_file_create $fid t_cc_record]
+	set pin [sm scan_file_next $scan 0]
+	while {$pin != "NULL"} {
+	    set r($i) [sm pin_rid $pin]
+	    incr i
+	    set pin [sm scan_file_next $scan 0]
+	}
+	sm scan_file_destroy $scan
+} 1 ]
+assert {expr $nobjs == $i}
+
+echo SCANNED $nobjs RECS of size $objsize
+sm commit_xct
+
+
+echo forcing buffers again
+sm force_buffers true
+sm checkpoint
+
+echo destroying forward
+
+sm begin_xct
+set dummy [sm gather_stats reset]
+set wtime [ time {
+	for {set i 0} {$i < $nobjs} {set i [expr $i + 1]} {
+	    sm destroy_rec $r($i) 
+	}
+	sm force_buffers true
+} 1 ]
+echo
+
+echo DESTROYED FWD $nobjs RECS of size $objsize, forced buffers
+echo total destroy time = $wtime
+set dummy [sm gather_stats reset]
+echo $dummy
+
+sm abort_xct
+
+echo forcing buffers again
+sm force_buffers true
+sm checkpoint
+
+echo destroying backward 
+
+sm begin_xct
+set dummy [sm gather_stats reset]
+set wtime [ time {
+	for {set i [expr $nobjs - 1]} {$i >= 0} {set i [expr $i - 1]} {
+	    sm destroy_rec $r($i) 
+	}
+	sm force_buffers true
+} 1 ]
+echo
+
+echo DESTROYED BWD $nobjs RECS of size $objsize, forced buffers
+echo total destroy time = $wtime
+set dummy [sm gather_stats reset]
+echo $dummy
+
+sm abort_xct
+
+# pseudo-randomly swap the list of objects
+for {set i 0} {$i < $nobjs} {incr i} {
+    set pick [random $nobjs]
+    set save $r($i)
+    set r($i) $r($pick)
+    set r($pick) $save
+}
+echo forcing buffers again
+sm force_buffers true
+sm checkpoint
+
+echo destroying randomly 
+
+sm begin_xct
+set dummy [sm gather_stats reset]
+set wtime [ time {
+	for {set i [expr $nobjs - 1]} {$i >= 0} {set i [expr $i - 1]} {
+	    sm destroy_rec $r($i) 
+	}
+	sm force_buffers true
+} 1 ]
+echo
+
+echo DESTROYED RANDOMLY $nobjs RECS of size $objsize, forced buffers
+echo total destroy time = $wtime
+set dummy [sm gather_stats reset]
+echo $dummy
+sm commit_xct
+
+unset r wtime dummy fid i body hdr
+
+echo shutting down

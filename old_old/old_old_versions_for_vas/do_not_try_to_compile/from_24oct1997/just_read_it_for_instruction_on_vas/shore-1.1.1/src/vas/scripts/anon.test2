@@ -1,0 +1,55 @@
+#source ../scripts/anon.test
+source ../scripts/setup.all
+source ../scripts/anon.tests.setup
+
+cd /small
+
+#
+# this is more for correctness than for stats
+#
+
+set p $pagesize
+set sizes1 [ list\
+	$p [expr {$p + 1}] [expr {$p - 1}] \
+	[expr {2 * $p }] [expr {$p * 2 - 1}] [expr {$p * 2 + 1}] \
+	[expr {50 * $p }] [expr {50 * $p - 1}] [expr {50 * $p + 1}] ]
+
+cout sizes1 = $sizes1
+set sizes2 { 1 10 100 1000 976658 751927 787220 374771 860846 927749 }
+
+set sizes3 [ list  \
+	[expr {101 * $p }] [expr {101 * $p - 1}] [expr {101 * $p + 1}] \
+	[expr {1234 * $p }] [expr {1234 * $p - 1}] [expr {1234 * $p + 1}] ]
+
+#
+# ok.. now run the tests
+#
+
+cout mkanon... append... abort
+foreach sz $sizes1 { 
+	cout testa $sz abort
+	testa $sz abort 
+}
+foreach sz $sizes2 { 
+	cout testa $sz abort 
+	testa $sz abort 
+}
+
+cout mkanon... append... commit
+foreach sz $sizes1 { testa $sz commit }
+foreach sz $sizes2 { testa $sz commit }
+
+compensate
+
+cout mk Z anon... append... abort
+foreach sz $sizes1 { testz $sz abort }
+foreach sz $sizes2 { testz $sz abort}
+foreach sz $sizes3 { testz $sz abort}
+
+cout mk Z anon... append... commit
+foreach sz $sizes1 { testz $sz commit }
+foreach sz $sizes2 { testz $sz commit }
+foreach sz $sizes3 { testz $sz commit }
+
+compensate
+return "anon.test2 done."

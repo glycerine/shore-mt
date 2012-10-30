@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Grammatical Conventions</TITLE>
+<META NAME="description" CONTENT="Grammatical Conventions">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="sdlman.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html104"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html101"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html95"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html103"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html105"
+ HREF="node5.html">Objects and Values</A>
+<B> Up:</B> <A NAME="tex2html102"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html96"
+ HREF="node3.html">Lexical Syntax</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="sdlman:syntax">&#160;</A><H1><A NAME="SECTION00040000000000000000000">
+Grammatical Conventions</A>
+</H1>
+SDL grammar rules are presented at the start of many of the following
+sections.
+They are also collected in Appendix A.
+The notation is an extended form of BNF, with
+&quot;regular expressions&quot;
+allowed on the right-hand side.
+<P>
+Terminal symbols (tokens) are represented by upper-case words or strings
+enclosed in single quotes.
+Non-terminal symbols (syntax classes) are denoted by lower-case words.
+Grammar operators are as follows.
+<P><DL>
+<DT><STRONG><EM>word</EM> : <EM>spec</EM></STRONG>
+<DD>-<EM>word</EM> is defined to be an instance of <EM>spec</EM>
+<DT><STRONG><EM>spec</EM> +</STRONG>
+<DD>-one or more instances of <EM>spec</EM> 
+<DT><STRONG><EM>spec</EM> *</STRONG>
+<DD>-zero or more instances of <EM>spec</EM> 
+<DT><STRONG><EM>spec1 spec2</EM></STRONG>
+<DD>-an instance of <EM>spec1</EM> followed by an instance of <EM>spec2</EM> 
+<DT><STRONG><EM>spec1 </EM> <TT>|</TT> <EM>spec2</EM></STRONG>
+<DD>-an instance of <EM>spec1</EM> or an instance of <EM>spec2</EM>
+<DT><STRONG>[ <EM>spec</EM> ]</STRONG>
+<DD>-an optional instance of <EM>spec</EM>
+<DT><STRONG>( <EM>spec</EM> )</STRONG>
+<DD>-an instance of <EM>spec</EM> 
+</DL>
+<P>
+The postfix operators `+' and `*'
+have higher precedence than concatenation, which has higher precedence
+than `<code>|</code>'.
+Colon (`:') has the lowest precedence of all.
+Parentheses are used to override these precedences as appropriate.
+Indentation is used to indicate continuation of a grammar rule over multiple
+lines.
+A standard BNF grammar (acceptable to YACC or Bison) is given in Appendix B.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html104"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html101"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html95"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html103"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html105"
+ HREF="node5.html">Objects and Values</A>
+<B> Up:</B> <A NAME="tex2html102"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html96"
+ HREF="node3.html">Lexical Syntax</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

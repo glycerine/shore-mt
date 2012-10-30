@@ -1,0 +1,354 @@
+****************** TEST WITH BTREES
+***Scan indx0 START
+***Scan indx1 START
+***Scan indx3 START
+***Scan indx4 START
+***Scan indx a[0] START
+***Scan indx a[1] START
+***Scan indx a[2] START
+***end scan START
+indx0.insert c->386
+indx1.insert 386->387
+indx3.insert manualindex2.C->400,c
+indx4.insert 400,c->manualindex2.C
+a[0].insert 400->0
+a[1].insert 401->1
+a[2].insert 402->2
+indx0.insert c->384
+indx1.insert 384->385
+indx3.insert manualindex2.C->398,c
+indx4.insert 398,c->manualindex2.C
+a[0].insert 398->0
+a[1].insert 399->1
+a[2].insert 400->2
+indx0.insert c->385
+indx1.insert 385->386
+indx3.insert manualindex2.C->399,c
+indx4.insert 399,c->manualindex2.C
+a[0].insert 399->0
+a[1].insert 400->1
+a[2].insert 401->2
+***Scan indx0 AFTER INSERTS
+key=c val=384
+key=c val=385
+key=c val=386
+***Scan indx1 AFTER INSERTS
+key=384 val=385
+key=385 val=386
+key=386 val=387
+***Scan indx3 AFTER INSERTS
+key=manualindex2.C val=398,c
+key=manualindex2.C val=399,c
+key=manualindex2.C val=400,c
+***Scan indx4 AFTER INSERTS
+key=398,c val=manualindex2.C
+key=399,c val=manualindex2.C
+key=400,c val=manualindex2.C
+***Scan indx a[0] AFTER INSERTS
+key=398 val=0
+key=399 val=0
+key=400 val=0
+***Scan indx a[1] AFTER INSERTS
+key=399 val=1
+key=400 val=1
+key=401 val=1
+***Scan indx a[2] AFTER INSERTS
+key=400 val=2
+key=401 val=2
+key=402 val=2
+***end scan AFTER INSERTS
+BEGIN find/remove pass 2
+indx0.remove c
+removed 3
+indx1.remove 386
+removed 1
+indx3.remove manualindex2.C
+removed 3
+indx4.remove 400,c
+removed 1
+a[0].remove 400
+removed 1
+a[1].remove 401
+removed 1
+a[2].remove 402
+removed 1
+***Scan indx0 AFTER find/remove pass
+***Scan indx1 AFTER find/remove pass
+key=384 val=385
+key=385 val=386
+***Scan indx3 AFTER find/remove pass
+***Scan indx4 AFTER find/remove pass
+key=398,c val=manualindex2.C
+key=399,c val=manualindex2.C
+***Scan indx a[0] AFTER find/remove pass
+key=398 val=0
+key=399 val=0
+***Scan indx a[1] AFTER find/remove pass
+key=399 val=1
+key=400 val=1
+***Scan indx a[2] AFTER find/remove pass
+key=400 val=2
+key=401 val=2
+***end scan AFTER find/remove pass
+find/remove out of order 3
+find c
+indx0 value not found for key c
+indx3 value not found for key manualindex2.C
+remove c 
+indx0.remove c
+348 manualindex2.C:
+1. error in ObjCache.C:3676 No such file or directory
+	called from:
+	0) Shore.C:555
+	1) sdl_index.C:105
+2. error in ObjCache.C:669 Item not found 
+
+removed 0
+indx1.remove 384
+removed 1
+indx3.remove manualindex2.C
+358 manualindex2.C:
+1. error in ObjCache.C:3676 No such file or directory
+	called from:
+	0) Shore.C:555
+	1) sdl_index.C:105
+2. error in ObjCache.C:669 Item not found 
+
+removed 0
+indx4.remove 398,c
+removed 1
+a[0].remove 398
+removed 1
+a[1].remove 399
+removed 1
+a[2].remove 400
+removed 1
+find c
+indx0 value not found for key c
+indx3 value not found for key manualindex2.C
+remove c
+indx0.remove c
+348 manualindex2.C:
+1. error in ObjCache.C:3676 No such file or directory
+	called from:
+	0) Shore.C:555
+	1) sdl_index.C:105
+2. error in ObjCache.C:669 Item not found 
+
+removed 0
+indx1.remove 385
+removed 1
+indx3.remove manualindex2.C
+358 manualindex2.C:
+1. error in ObjCache.C:3676 No such file or directory
+	called from:
+	0) Shore.C:555
+	1) sdl_index.C:105
+2. error in ObjCache.C:669 Item not found 
+
+removed 0
+indx4.remove 399,c
+removed 1
+a[0].remove 399
+removed 1
+a[1].remove 400
+removed 1
+a[2].remove 401
+removed 1
+***Scan indx0 AFTER find/removes out of order
+***Scan indx1 AFTER find/removes out of order
+***Scan indx3 AFTER find/removes out of order
+***Scan indx4 AFTER find/removes out of order
+***Scan indx a[0] AFTER find/removes out of order
+***Scan indx a[1] AFTER find/removes out of order
+***Scan indx a[2] AFTER find/removes out of order
+***end scan AFTER find/removes out of order
+****************** REPEAT WITH UNIQUE BTREES
+***Scan indx0 START
+***Scan indx1 START
+***Scan indx3 START
+***Scan indx4 START
+***Scan indx a[0] START
+***Scan indx a[1] START
+***Scan indx a[2] START
+***end scan START
+indx0.insert c->386
+indx1.insert 386->387
+indx3.insert manualindex2.C->400,c
+indx4.insert 400,c->manualindex2.C
+a[0].insert 400->0
+a[1].insert 401->1
+a[2].insert 402->2
+indx0.insert c->384
+123 manualindex2.C:
+1. error in ObjCache.C:3676 The requested operation was already performed
+	called from:
+	0) Shore.C:546
+	1) sdl_index.C:82
+2. error in ObjCache.C:658 Object already exists, or request was already performed
+
+indx1.insert 384->385
+indx3.insert manualindex2.C->398,c
+129 manualindex2.C:
+1. error in ObjCache.C:3676 The requested operation was already performed
+	called from:
+	0) Shore.C:546
+	1) sdl_index.C:82
+2. error in ObjCache.C:658 Object already exists, or request was already performed
+
+indx4.insert 398,c->manualindex2.C
+a[0].insert 398->0
+a[1].insert 399->1
+a[2].insert 400->2
+indx0.insert c->385
+123 manualindex2.C:
+1. error in ObjCache.C:3676 The requested operation was already performed
+	called from:
+	0) Shore.C:546
+	1) sdl_index.C:82
+2. error in ObjCache.C:658 Object already exists, or request was already performed
+
+indx1.insert 385->386
+indx3.insert manualindex2.C->399,c
+129 manualindex2.C:
+1. error in ObjCache.C:3676 The requested operation was already performed
+	called from:
+	0) Shore.C:546
+	1) sdl_index.C:82
+2. error in ObjCache.C:658 Object already exists, or request was already performed
+
+indx4.insert 399,c->manualindex2.C
+a[0].insert 399->0
+a[1].insert 400->1
+a[2].insert 401->2
+***Scan indx0 AFTER INSERTS
+key=c val=386
+***Scan indx1 AFTER INSERTS
+key=384 val=385
+key=385 val=386
+key=386 val=387
+***Scan indx3 AFTER INSERTS
+key=manualindex2.C val=400,c
+***Scan indx4 AFTER INSERTS
+key=398,c val=manualindex2.C
+key=399,c val=manualindex2.C
+key=400,c val=manualindex2.C
+***Scan indx a[0] AFTER INSERTS
+key=398 val=0
+key=399 val=0
+key=400 val=0
+***Scan indx a[1] AFTER INSERTS
+key=399 val=1
+key=400 val=1
+key=401 val=1
+***Scan indx a[2] AFTER INSERTS
+key=400 val=2
+key=401 val=2
+key=402 val=2
+***end scan AFTER INSERTS
+BEGIN find/remove pass 2
+indx0.remove c
+removed 1
+indx1.remove 386
+removed 1
+indx3.remove manualindex2.C
+removed 1
+indx4.remove 400,c
+removed 1
+a[0].remove 400
+removed 1
+a[1].remove 401
+removed 1
+a[2].remove 402
+removed 1
+***Scan indx0 AFTER find/remove pass
+***Scan indx1 AFTER find/remove pass
+key=384 val=385
+key=385 val=386
+***Scan indx3 AFTER find/remove pass
+***Scan indx4 AFTER find/remove pass
+key=398,c val=manualindex2.C
+key=399,c val=manualindex2.C
+***Scan indx a[0] AFTER find/remove pass
+key=398 val=0
+key=399 val=0
+***Scan indx a[1] AFTER find/remove pass
+key=399 val=1
+key=400 val=1
+***Scan indx a[2] AFTER find/remove pass
+key=400 val=2
+key=401 val=2
+***end scan AFTER find/remove pass
+find/remove out of order 3
+find c
+indx0 value not found for key c
+indx3 value not found for key manualindex2.C
+remove c 
+indx0.remove c
+348 manualindex2.C:
+1. error in ObjCache.C:3676 No such file or directory
+	called from:
+	0) Shore.C:555
+	1) sdl_index.C:105
+2. error in ObjCache.C:669 Item not found 
+
+removed 0
+indx1.remove 384
+removed 1
+indx3.remove manualindex2.C
+358 manualindex2.C:
+1. error in ObjCache.C:3676 No such file or directory
+	called from:
+	0) Shore.C:555
+	1) sdl_index.C:105
+2. error in ObjCache.C:669 Item not found 
+
+removed 0
+indx4.remove 398,c
+removed 1
+a[0].remove 398
+removed 1
+a[1].remove 399
+removed 1
+a[2].remove 400
+removed 1
+find c
+indx0 value not found for key c
+indx3 value not found for key manualindex2.C
+remove c
+indx0.remove c
+348 manualindex2.C:
+1. error in ObjCache.C:3676 No such file or directory
+	called from:
+	0) Shore.C:555
+	1) sdl_index.C:105
+2. error in ObjCache.C:669 Item not found 
+
+removed 0
+indx1.remove 385
+removed 1
+indx3.remove manualindex2.C
+358 manualindex2.C:
+1. error in ObjCache.C:3676 No such file or directory
+	called from:
+	0) Shore.C:555
+	1) sdl_index.C:105
+2. error in ObjCache.C:669 Item not found 
+
+removed 0
+indx4.remove 399,c
+removed 1
+a[0].remove 399
+removed 1
+a[1].remove 400
+removed 1
+a[2].remove 401
+removed 1
+***Scan indx0 AFTER find/removes out of order
+***Scan indx1 AFTER find/removes out of order
+***Scan indx3 AFTER find/removes out of order
+***Scan indx4 AFTER find/removes out of order
+***Scan indx a[0] AFTER find/removes out of order
+***Scan indx a[1] AFTER find/removes out of order
+***Scan indx a[2] AFTER find/removes out of order
+***end scan AFTER find/removes out of order

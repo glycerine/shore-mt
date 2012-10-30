@@ -1,0 +1,11 @@
+source $script_dir/vol.init
+
+sm begin_xct
+    set f0 [sm create_file $volid]
+sm commit_xct
+
+# NB: The following MUST be echo, not verbose.
+# Since this script is not run but "all", it's
+# not going to affect the output of scripts/all.
+
+echo $f0

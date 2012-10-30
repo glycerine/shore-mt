@@ -1,0 +1,16 @@
+# this: source ../scripts/3
+
+# tests namei a little bit
+
+source ../scripts/setup.all
+
+begin
+cd /
+cd /small
+cd /small/
+cd /small/.
+cd /small/..
+commit
+
+return "3 done."
+

@@ -1,0 +1,106 @@
+# remove empty dir, non-empty dir
+# remove empty pool, non-empty pool
+
+source ../scripts/setup.all
+
+set printusererrors 0
+set expecterrors 0
+cd /small
+
+begin
+# compensating transaction
+foreach f { a/a/xref a/a/lg1 a/a/lg2 a/a/sym1 a/a/sym2 a/a/pool 
+	a/a a/xref a/lg1 a/lg2 a/sym1 a/sym2 a/pool
+	a b
+	} {
+	cout [unlink $f]
+}
+commit
+cout cleaned up for script 5
+
+suppress on
+
+begin
+mkdir a
+rmdir a
+abort
+
+begin
+mkdir a
+cd a
+mkdir b
+cd ..
+expect OS_NotEmpty from { rmdir a } 
+if { [expr {[tstate] != "none"}] } {
+	abort
+}
+
+begin
+if [sfile exists a/b]  {
+	rmdir a/b
+	rmdir a
+}
+commit
+
+begin
+mkdir a
+expect OS_AlreadyExists from { mkdir a } 
+if { [expr {[tstate] != "none"}] } {
+	abort
+}
+
+# unix files
+begin
+	mkdir a
+	cd a
+	set uf [mkuserdef lg1 $pagesize]
+	set uf2 [mkuserdef lg2 $pagesize]
+	rm  lg2
+commit
+
+cd /small/a
+begin
+	mkdir a
+	set uf [mkuserdef a/lg1 $pagesize]
+	expect OS_NotEmpty from { rmdir a } 
+
+# xrefs
+	mkxref $uf xref
+	rmxref xref
+	mkxref $uf xref
+commit
+
+cd /small/a
+begin
+	mksymlink ./xref sym1
+	rmsymlink sym1
+	mksymlink ./xref sym1
+
+	mksymlink /small/a/../a/xref sym2
+	rmsymlink sym2
+	mksymlink /small/a/../a/xref sym2
+commit
+
+cd /small/a
+begin
+	readlink sym1
+	readlink sym2
+commit
+
+begin
+	mkpool pool
+	set anon [mkanon pool 10:10:NoText]
+	# should get NotEmpty
+	expect OS_NotEmpty from { rmpool pool } 
+	if { [expr {[tstate] != "none"}] } {
+		abort
+	}
+
+begin
+	mkpool pool
+	set anon [mkanon pool 10:10:NoText]
+	rmanon $anon
+	rmpool pool
+commit
+
+return "5 done."

@@ -1,0 +1,40 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test volume dismount, create, destroy
+#
+
+source $script_dir/vol.init
+
+sm begin_xct
+set root_iid [sm vol_root_index $volid]
+verbose root_index_id $root_iid
+sm commit_xct
+
+verbose testing that duplicate mount_dev calls are ok
+set dev [lindex [lindex $ssh_device_list 0] 0]
+
+if {$Use_logical_id} {
+    sm mount_dev $dev
+} else {
+    sm mount_dev $dev $volid
+}
+
+verbose testing destroy_vol $volid
+sm destroy_vol $volid
+verbose testing dismount_dev
+sm dismount_dev $dev
+
+set volid 0
+source $script_dir/vol.init
+verbose testing dismount_all
+sm dismount_all
+
+set volid 0
+
+unset root_iid 

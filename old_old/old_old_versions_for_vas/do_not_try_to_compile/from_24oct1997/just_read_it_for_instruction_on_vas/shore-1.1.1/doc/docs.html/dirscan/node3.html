@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>The DirScan Class</TITLE>
+<META NAME="description" CONTENT="The DirScan Class">
+<META NAME="keywords" CONTENT="dirscan">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="dirscan.css">
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="up" HREF="dirscan.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html43"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html40"
+ HREF="dirscan.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html34"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html42"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html44"
+ HREF="node4.html">A Directory Scan Example</A>
+<B> Up:</B> <A NAME="tex2html41"
+ HREF="dirscan.html">Scanning Directories in a Application</A>
+<B> Previous:</B> <A NAME="tex2html35"
+ HREF="node2.html">Introduction</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="dirscan:class">&#160;</A><H1><A NAME="SECTION00030000000000000000000">
+The DirScan Class</A>
+</H1>
+<P>
+An application scans a directory by creating a DirScan object.  DirScan
+objects are transient C++ objects, not persistent Shore objects.  A DirScan
+object can be in one of two states: <EM>open</EM> or <EM>closed</EM>.  A scan
+must be opened inside a transaction, and can only be used inside the
+transaction in which it was opened.  Once a scan is opened, it stays open
+until it is explicitly closed, or until the scan object is destroyed, or
+the transaction terminates.  In particular, the scan object
+remains open even after the end of the scan has been reached or an
+error has occurred.
+<P>
+Directory scans request blocks of directory entries from the Shore server
+and store them in a buffer.  Applications can set the size of this buffer,
+although the size must be at least <TT>DEF_DIRSCAN_BUFSIZE</TT> to ensure
+that the buffer is large enough to hold at least one directory entry.  If a
+smaller buffer size is requested, it will be replaced by the default
+size.
+<P>
+A scan of a directory returns some number of <TT>DirEntry</TT> structures.
+The <TT>DirEntry</TT> type (defined in <TT>OCTypes.h</TT>) looks like this:
+<P><PRE>
+    struct DirEntry {
+        LOID loid;
+        int namelen;
+        char name[MAXNAMLEN + 1];
+    };
+</PRE>
+<P>
+The members of the structure are
+<DL>
+<DT><STRONG><TT>loid</TT>,</STRONG>
+<DD>the logical OID of the object named by the directory entry,
+<DT><STRONG><TT>namelen</TT>,</STRONG>
+<DD>the length of the <TT>name</TT> field, and
+<P><DT><STRONG><TT>name</TT>,</STRONG>
+<DD>the null-terminated name of the entry
+(the last component of the pathname of the named object).
+<P></DL>
+<P>
+The public interface to the DirScan class is
+<P><PRE>
+    class DirScan {
+     public:
+        DirScan();
+        DirScan(const char *path, int bufsize = DEF_DIRSCAN_BUFSIZE);
+
+        shrc open(const char *path, int bufsize = DEF_DIRSCAN_BUFSIZE);
+
+        shrc next(DirEntry *entry);
+
+        bool is_open();
+        shrc rc();
+        int operator==(shrc &amp;rc);
+        int operator!=(shrc &amp;rc);
+
+        shrc close();
+        ~DirScan();
+    };
+</PRE>
+<P><DL>
+<DT><STRONG><TT>DirScan()</TT></STRONG>
+<DD>is the default constructor.  The resulting DirScan object is in the
+<EM>closed</EM>  state.
+It may be opened by the <TT>open</TT> member function.
+<DT><STRONG><TT>DirScan(const char *path, int bufsize)</TT>.</STRONG>
+<DD>This constructor invokes the <TT>open</TT> member function.
+The caller should whether the <TT>open</TT> operation was successful by calling
+<TT>is_open()</TT> or by testing the return code with <TT>rc()</TT>,
+<TT>operator==()</TT>, or <TT>operator!=()</TT>.
+<P><DT><STRONG><TT>shrc open(const char *path, int bufsize)</TT>.</STRONG>
+<DD>The <TT>path</TT> argument should be the pathname of a valid directory
+in the Shore filesystem namespace, and the DirScan object should be in
+the <EM>closed</EM>  state.
+The caller must have (at least) read permission for the named directory
+and must have a transaction open.
+The <TT>bufsize</TT> argument indicates the size of the scan's buffer.  This
+parameter defaults to <TT>DEF_DIRSCAN_BUFSIZE</TT>, which is large enough to
+hold at least one directory entry.  
+Any smaller value for this argument is treated as
+<TT>DEF_DIRSCAN_BUFSIZE</TT>.
+Upon successful completion, <TT>RCOK</TT> is returned.  Any
+other return value indicates an error condition.
+<P><DT><STRONG><TT>shrc next(DirEntry *entry)</TT></STRONG>
+<DD>copies the next director entry into the DirEntry structure
+pointed to by the argument.
+Returns RCOK on success.
+Returns <TT>OC_EndOfScan</TT> if no more entries exist 
+(i.e., <TT>next</TT> is called after the last item in the scan has already
+been returned).
+Any other return code indicates an error condition.
+<P><DT><STRONG><TT>bool is_open()</TT></STRONG>
+<DD>indicates whether the scan is open or closed.
+Note that the scan remains open after retrieving the last entry.
+<P><DT><STRONG><TT>shrc rc()</TT></STRONG>
+<DD>returns the return code generated by the last operation
+(<TT>open</TT> or <TT>next</TT>).
+<P><DT><STRONG><TT>int operator==(shrc rc)</TT></STRONG>
+<DD><DT><STRONG><TT>int operator!=(shrc rc)</TT></STRONG>
+<DD>These operators provide a convenient way to check the status of the scan.
+For example, applications can say <TT>if (scan == RCOK) ...</TT>.
+<P><DT><STRONG><TT>shrc DirScan::close()</TT></STRONG>
+<DD>closes the scan object.  Closing a scan object releases any resources
+associated with the scan in both the server and client processes (such as
+the scan buffer).  It also allows the scan object to be reused.
+The scan is closed implicitly when the DirScan object is
+destroyed (either via operator delete or when the DirScan object goes out
+of scope), or when the transaction in which the scan was opened terminates.
+<P><DT><STRONG><TT>~DirScan()</TT>.</STRONG>
+<DD>The DirScan destructor closes the scan object if it is open.
+<P></DL><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html43"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html40"
+ HREF="dirscan.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html34"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html42"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html44"
+ HREF="node4.html">A Directory Scan Example</A>
+<B> Up:</B> <A NAME="tex2html41"
+ HREF="dirscan.html">Scanning Directories in a Application</A>
+<B> Previous:</B> <A NAME="tex2html35"
+ HREF="node2.html">Introduction</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,190 @@
+# source ../scripts/chmod
+
+source ../scripts/chmod.compensate
+
+set true "1"
+set false "0"
+
+cd /small/z
+
+#
+# Tests much of _INTRO_2_MAN_PAGE_ in Registered.C
+#
+# One tx for testing a file
+begin
+	set subject tfile
+	set oid [mkuserdef $subject 0:1:0]
+
+#   make it readable, writable and executable
+	cout chmod 0755 $subject
+	chmod 0755 $subject
+	readablefile $subject $true
+	writeablefile $subject $true
+	execablefile $subject $true
+
+	cout chmod 0570 $subject
+	chmod 0570 $subject
+	readablefile $subject $true
+	writeablefile $subject $true
+	execablefile $subject $true
+
+	cout chmod 0007 $subject
+	chmod 0007 $subject
+	readablefile $subject $true
+	writeablefile $subject $true
+	execablefile $subject $true
+
+#	 read only - owner
+	cout chmod 0400 $subject
+	chmod 0400 $subject
+	readablefile $subject $true
+	writeablefile $subject $false
+	execablefile $subject $false
+
+#	 read only - group
+	cout chmod 0040 $subject
+	chmod 0040 $subject
+	readablefile $subject $true
+	writeablefile $subject $false
+	execablefile $subject $false
+
+#	 read only - public
+	cout chmod 0004 $subject
+	chmod 0004 $subject
+	readablefile $subject $true
+	writeablefile $subject $false
+	execablefile $subject $false
+
+# no access
+	cout chmod 0000 $subject
+	chmod 0000 $subject
+	readablefile $subject $false
+	writeablefile $subject $false
+	execablefile $subject $false
+
+# exec only - public
+	cout chmod 0001 $subject
+	chmod 0001 $subject
+	readablefile $subject $false
+	writeablefile $subject $false
+	execablefile $subject $true
+
+# exec only -group
+	cout chmod 0010 $subject
+	chmod 0010 $subject
+	readablefile $subject $false
+	writeablefile $subject $false
+	execablefile $subject $true
+
+# exec only - owner
+	cout chmod 0100 $subject
+	chmod 0100 $subject
+	readablefile $subject $false
+	writeablefile $subject $false
+	execablefile $subject $true
+
+# write only -public
+	cout chmod 0002 $subject
+	chmod 0002 $subject
+	readablefile $subject $false
+	writeablefile $subject $true
+	execablefile $subject $false
+
+# write only - group
+	cout chmod 0020 $subject
+	chmod 0020 $subject
+	readablefile $subject $false
+	writeablefile $subject $true
+	execablefile $subject $false
+
+# write only - group owner
+	cout chmod 0200 $subject
+	chmod 0200 $subject
+	readablefile $subject $false
+	writeablefile $subject $true
+	execablefile $subject $false
+
+commit
+
+
+# Another tx for testing a dir
+begin
+	set subject direct
+	set oid [mkdir $subject]
+	assert [ expr { [sfile oid direct] == $oid }]
+
+#   make it readable, writable and executable
+	chmod 0755 $subject
+	readabledir $subject $true
+	writeabledir $subject $true
+	execabledir $subject $true
+
+	chmod 0570 $subject
+	readabledir $subject $true
+	writeabledir $subject $true
+	execabledir $subject $true
+
+	chmod 0007 $subject
+	readabledir $subject $true
+	writeabledir $subject $true
+	execabledir $subject $true
+
+#	 read only
+	chmod 0400 $subject
+	readabledir $subject $true
+	writeabledir $subject $false
+	execabledir $subject $false
+
+	chmod 0040 $subject
+	readabledir $subject $true
+	writeabledir $subject $false
+	execabledir $subject $false
+
+	chmod 0004 $subject
+	readabledir $subject $true
+	writeabledir $subject $false
+	execabledir $subject $false
+
+# no access
+	chmod 0000 $subject
+	readabledir $subject $false
+	writeabledir $subject $false
+	execabledir $subject $false
+
+# exec only
+	chmod 0001 $subject
+	readabledir $subject $false
+	writeabledir $subject $false
+	execabledir $subject $true
+
+	chmod 0010 $subject
+	readabledir $subject $false
+	writeabledir $subject $false
+	execabledir $subject $true
+
+	chmod 0100 $subject
+	readabledir $subject $false
+	writeabledir $subject $false
+	execabledir $subject $true
+
+# write only
+	chmod 0002 $subject
+	readabledir $subject $false
+	writeabledir $subject $true
+	execabledir $subject $false
+
+	chmod 0020 $subject
+	readabledir $subject $false
+	writeabledir $subject $true
+	execabledir $subject $false
+
+	chmod 0200 $subject
+	readabledir $subject $false
+	writeabledir $subject $true
+	execabledir $subject $false
+
+# can't do dunlink if no x permission
+	chmod 0755 $subject
+commit
+
+return "chmod done."

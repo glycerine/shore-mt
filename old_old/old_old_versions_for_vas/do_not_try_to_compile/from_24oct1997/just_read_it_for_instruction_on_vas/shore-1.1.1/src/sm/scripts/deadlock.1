@@ -1,0 +1,76 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#  Testing that the following scenario is NOT a deadlock.
+#
+#  {1IS, 2IX} <-- 3S
+#  {3X} <-- 1IS
+# 
+
+##########  global variables  ##########
+
+set o1 "10"
+set o2 "20"
+
+proc t1 {} {
+    global o1 o2
+    sm begin_xct
+    sm lock $o1 IS LONG
+    verbose "t1: IS granted on o1"
+sync
+sync
+    verbose "t1: IS requested on o2"
+    sm lock $o2 IS LONG
+    verbose "t1: IS granted on o2"
+    sm commit_xct
+}
+
+proc t2 {} {
+    global o1 o2
+    sm begin_xct
+    sm lock $o1 IX LONG
+    verbose "t2: IX granted on o1"
+sync
+sync
+sync
+    sm commit_xct
+    verbose "t2: commit, release IX lock on o1"
+}
+
+proc t3 {} {
+    global o1 o2
+    sm begin_xct
+    sm lock $o2 EX LONG
+    verbose "t3: EX granted on o2"
+sync
+sync
+    verbose "t3: SH requested on o1"
+    sm lock $o1 SH LONG
+    verbose "t3: SH granted on o1"
+    sm commit_xct
+}
+
+##########  main  ##########
+
+    set x [fork_thread t1 {}]
+    set y [fork_thread t2 {}]
+    set z [fork_thread t3 {}]
+
+    sync_thread $x $y $z
+    verbose "setup completed --- {1IS, 2IX},  {3X}"
+    if {$verbose_flag}  {
+	sm dump_locks
+    }
+    sync_thread $z 
+    sync_thread $x
+    sync_thread $y
+    sync_thread $y
+    join_thread $x $y $z
+verbose "SUCCESS"
+
+unset o1 o2
+unset x y z

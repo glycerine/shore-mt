@@ -1,0 +1,109 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  test btree bulk load - this script is called by btree.3 and 
+# is strictly subordinate to that script
+# 
+# It assumes that ktype is defined by the calling script
+#
+
+
+#
+# create file of <key, el> pair (to be sorted later in blkld)
+#
+sm begin_xct
+set f1 [sm create_file $volid]
+for {set i $nrec} {$i > 0} {set i [ expr {$i - 1} ]} {
+    verbose sm create_typed_hdr_rec $f1 $i $ktype 10 $i b*1000
+    sm create_typed_hdr_rec $f1 $i $ktype 10 $i b*1000
+}
+
+sm commit_xct
+
+#
+# create index and load it up 
+#
+sm begin_xct
+set ndx [sm create_index $volid btree regular $ktype]
+set stat [sm blkld_ndx $ndx $f1 $ktype]
+verbose created index $ndx
+# verbose stats: $stat
+
+if {$logging==0} {
+    verbose "Logging off: sm abort_xct not done.  Committing instead."
+    sm commit_xct 
+} else {
+    verbose sm abort_xct 
+    sm abort_xct 
+}
+
+# dstats $volid
+
+
+sm begin_xct
+set ndx [sm create_index $volid btree regular $ktype]
+set stat [sm blkld_ndx $ndx $f1 $ktype]
+verbose created index $ndx again
+# verbose stats: $stat
+#sm print_index $ndx
+sm commit_xct
+
+# dstats $volid
+
+#
+# verify ascending
+#
+verbose "scan up:"
+sm begin_xct
+set scan [sm create_scan $ndx >= neg_inf <= pos_inf]
+for {set i 1} {$i <= $nrec} {incr i}  {
+    set r [sm scan_next $scan $ktype]
+    if {[string compare $r eof] == 0} then { break }
+    verbose "scanned ($r)"
+    set key [string trimleft [lindex $r 0] 0]
+    set el [lindex $r 1]
+    verbose "scanned ($key,$el)"
+    switch $ktype {
+	f4 {
+	    verbose checking $ktype i=$i el=$el
+	    assert {expr {[string compare $i $el] == 0}}
+	}
+	f8 { 
+	    verbose checking $ktype i=$i el=$el
+	    assert {expr {[string compare $i $el] == 0}}
+	}
+	b*1000 {
+	    verbose checking $ktype i=$i el=$el key=$key
+	    assert {expr {[string compare $key $el] == 0}}
+	    # key != i because lexicographic order is 1,10,2,...
+	}
+	default {
+	    verbose checking --$ktype-- i=$i el=$el key=$key
+	    assert {expr {[string compare $key $i] == 0}}
+	    assert {expr {[string compare $el $i] == 0}}
+	}
+    }
+}
+
+assert {expr $i > $nrec}
+assert {expr [string compare [sm scan_next $scan $ktype] eof] == 0}
+sm destroy_scan $scan
+verbose "---- successful -- $ktype"
+
+for {set i 1} {$i <= $nrec} {incr i} {
+    verbose "probe: $ktype $i"
+    set el [sm find_assoc_typed $ndx $i $ktype]
+    verbose "probe $ktype got $el"
+    assert {expr $i == $el}
+    verbose probed $i
+}
+sm commit_xct
+verbose "---- successful -- $ktype"
+
+
+unset f1 stat key scan i r el ndx

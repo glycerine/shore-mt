@@ -1,0 +1,29 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+set scripts [ list	\
+    deadlock.1 deadlock.2 deadlock.3 deadlock.4 \
+    lock.1 \
+    lock.hier lock.hier_sm \
+    lock.upgrade \
+    lockrec_pin lockrec_sm lockfile_sm \
+    ]
+
+verbose scripts: $scripts
+
+echo CLEANUP BEFORE lock.all :
+cleanup stdout
+addcleanupvars {script}
+
+foreach script $scripts {
+    echo
+    echo "RUNNING:  $script"
+    source $script_dir/$script
+    checkstats  $script
+    puts stdout [concat CLEANUP AFTER  $script  : ]
+    cleanup stdout
+}

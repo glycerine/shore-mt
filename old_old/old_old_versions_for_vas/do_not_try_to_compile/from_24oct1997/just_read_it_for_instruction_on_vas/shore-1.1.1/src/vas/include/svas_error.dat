@@ -1,0 +1,148 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+svas = 0x00100000 "Shore VAS" {
+
+NotImplemented		Feature is not implemented
+ABORTED			Transaction was aborted 
+WARNING			Warning
+FAILURE			Shore request failed
+TxNotAllowed		This request cannot be made in a transaction; a transaction is active
+TxRequired		This request must be made in a transaction; no transaction is active
+TxInterrupted		This transaction was interrupted by the system administrator
+Already			Object already exists, or request was already performed
+MustMknod			Volume does not contain a Shore filesystem 
+CantFormat		Shore server cannot format the volume
+SmFailure			Shore Storage Manager failure
+RpcFailure		Error in Remote Procedure Call
+WrongObjectType	The object is not the type you expected it to be
+NotFound			The requested object was not found
+BadParam1			The first argument to this request was bad
+BadParam2			The second argument to this request was bad
+BadParam3			The third argument to this request was bad
+BadParam4			The fourth argument to this request was bad
+BadParam5			The fifth argument to this request was bad
+BadParam6			The sixth argument to this request was bad
+BadParam7			The seventh argument to this request was bad
+BadParam8			The eighth argument to this request was bad
+BadParam9			The ninth argument to this request was bad
+MallocFailure		Space could not be allocated
+VersionMismatch		Volume was created by a server with incompatible data structures
+ConfigMismatch		Configurations of client and server are incompatible
+BadRange	The given range of bytes does not make sense for the given object
+IntegrityBreach	 Filesystem integrity would be compromised by this operation
+IndexScanIsOpen	 You have a scan of an index in progress
+PoolScanIsOpen	You have a scan of a pool in progress
+CantChangeCoreSize You cannot truncate or extend an object's core
+NotAPool			 The given object is not a pool
+BadPathSyntax		 The syntax of the given path is bad
+BadFileNameSyntax	 The syntax of the given filename is bad
+ScanNotInProgress  A scan is not in progress; the request requires one
+WrongObjectKind 	You tried an operation for registered/anonymous objects on an object that is anonymous/registered.
+VolumesDontMatch 	The request involves two objects or OIDs, and they must be on the same volume, but they are not.
+NotEnoughShm  	The amount of shared memory allocated to this client is insufficient for this request.
+XdrError  		An error was encountered while byte-swapping some data
+ShmError  		An error was encountered while allocating shared memory
+InternalError  	Internal error in Shore Value-Added Server; please report this to the Shore project
+BadType  		Cannot create an object with this type oid (not a type or is a protected type)
+AuthenticationFailure		The Shore server could not authenticate the client
+UnixFailure		A Unix library function or system call returned an error
+BadSerial		The given serial number is unreasonable
+UserAbort		You aborted this transaction
+NotMounted		The requested volume is not mounted.
+BadMountA		Volume's reverse link is null.
+BadMountB		No mountpoint for volume in directory indicated by volume's reverse link.
+BadMountC		Volume's reverse link points to the wrong directory.
+BadMountD		Corrupted reverse link (could be null or other mountpoint).
+BadMountE		Link is in the namespace, but no automount info for the volume.
+BadMountF		Link is in the namespace, but wrong automount info for the volume.
+AlreadyMounted		A volume is already mounted at this mountpoint.
+CannotMount		This volume is already mounted at another mountpoint.
+NotAMountpoint		Object is not a mountpoint.
+NoIndex			Index operation attempted on object with no indexes
+NoSuchIndex		Index operation attempted on non-index
+NotInitialized		Layer was not yet initialized; operation is premature.
+BatchingActive		This request is not permitted during batching.
+BatchingNotActive	Batching of requests is not active. 
+VecTooBig     The vector is too large to send over this connection.
+PoolNotEmpty  Pool is not empty
+BadCookie		Bad cookie given as an argument
+}
+
+#
+# Unix mask is 0
+#
+
+os = 0x00000000 "OS Errors for SVAS" {
+
+NotOwner		Unix:EPERM
+Missing			Unix:ENOENT
+NoSuchProcess	Unix:ESRCH
+Interrupt		Unix:EINTR
+IOError			Unix:EIO
+NoSuchAddress	Unix:ENXIO
+ArgListTooLong	Unix:E2BIG
+ExecFormatError	Unix:ENOEXEC
+BadFileNumber	Unix:EBADF
+NoChildren		Unix:ECHILD
+NoMoreProcess	Unix:EAGAIN
+NotEnoughCore	Unix:ENOMEM
+PermissionDenied	Unix:EACCES
+BadAddress	Unix:EFAULT
+BlockDeviceReqd	Unix:ENOTBLK
+InUse			Unix:EBUSY
+AlreadyExists	Unix:EEXIST
+CrossDeviceRef	Unix:EXDEV
+NoSuchDevice	Unix:ENODEV
+NotADirectory	Unix:ENOTDIR
+IsADirectory	Unix:EISDIR
+InvalidArgument	Unix:EINVAL
+FileTableOverflow	Unix:ENFILE
+TooManyOpenFiles	Unix:EMFILE
+NotATTY			Unix:ENOTTY
+TextFileBusy	Unix:ETXTBSY
+FileTooLarge	Unix:EFBIG
+NoSpaceLeft		Unix:ENOSPC
+IllegalSeek		Unix:ESPIPE
+ReadOnlyFS		Unix:EROFS
+TooManyLinks	Unix:EMLINK
+BrokenPipe		Unix:EPIPE
+ArgTooLarge		Unix:EDOM
+ResultTooLarge	Unix:ERANGE
+WouldBlock		Unix:EWOULDBLOCK
+OpNowInProgress	Unix:EINPROGRESS
+OpInProgress	Unix:EALREADY
+NotSocket		Unix:ENOTSOCK
+DestReqd		Unix:EDESTADDRREQ
+MessageTooLong	Unix:EMSGSIZE
+ProtocolWrong	Unix:EPROTOTYPE
+ProtocolUNNA	Unix:ENOPROTOOPT
+ProtocolUNSUP	Unix:EPROTONOSUPPORT
+SockUNSUP		Unix:ESOCKTNOSUPPORT
+OpUNSUP			Unix:EOPNOTSUPP
+ProtocolFUNSUP	Unix:EPFNOSUPPORT
+AddressFUNSUP	Unix:EAFNOSUPPORT
+AddressInUse	Unix:EADDRINUSE
+AddressNA		Unix:EADDRNOTAVAIL
+NetworkDown		Unix:ENETDOWN
+NetworkUnreach	Unix:ENETUNREACH
+NetworkReset	Unix:ENETRESET
+ConnectionAbort	Unix:ECONNABORTED
+ConnectionClosed	Unix:ECONNRESET
+NoBuffers		Unix:ENOBUFS
+AlreadyConnected	Unix:EISCONN
+NotConnected	Unix:ENOTCONN
+SocketShutdown	Unix:ESHUTDOWN
+TooManyRefs		Unix:ETOOMANYREFS
+ConnectionTimeout	Unix:ETIMEDOUT
+ConnectionRefused	Unix:ECONNREFUSED
+TooManySymlinks	Unix:ELOOP
+PathTooLong		Unix:ENAMETOOLONG
+HostDown		Unix:EHOSTDOWN
+HostUnreachable	Unix:EHOSTUNREACH
+NotEmpty			Unix:ENOTEMPTY
+}

@@ -1,0 +1,243 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Compiling and Installing the Source Release</TITLE>
+<META NAME="description" CONTENT="Compiling and Installing the Source Release">
+<META NAME="keywords" CONTENT="installation">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="installation.css">
+<LINK REL="next" HREF="node7.html">
+<LINK REL="previous" HREF="node5.html">
+<LINK REL="up" HREF="installation.html">
+<LINK REL="next" HREF="node7.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html100"
+ HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html97"
+ HREF="installation.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html91"
+ HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html99"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html101"
+ HREF="node7.html">Testing Your Installation</A>
+<B> Up:</B> <A NAME="tex2html98"
+ HREF="installation.html">Shore Software Installation Manual</A>
+<B> Previous:</B> <A NAME="tex2html92"
+ HREF="node5.html">Installing a Binary Release</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html102"
+ HREF="node6.html#SECTION00060100000000000000000">
+Setting Configuration Options</A>
+<LI><A NAME="tex2html103"
+ HREF="node6.html#SECTION00061000000000000000000">
+Compilation Steps</A>
+<LI><A NAME="tex2html104"
+ HREF="node6.html#SECTION00062000000000000000000">
+Installing the Compiled Files</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="installation:compiling">&#160;</A><H1><A NAME="SECTION00060000000000000000000">
+Compiling and Installing the Source Release</A>
+</H1>
+<P>
+This section describes how to re-build Shore from the source release.
+First, un-<TT>tar</TT> the release somewhere. 
+Set the shell variables TARDIR and SHROOT and create the directory $SHROOT
+as explained in
+<A HREF="node3.html#installation:vars">the <B>Requirements</B> section</A>.
+You can extract the sources in the same directory as a binary
+or documentation release, or you can make a new directory for them.
+<PRE>
+    # Go to a directory where you want to install 
+    # the sources.
+    # For simplicity, we let that be $SHROOT.
+    # If you use another directory, make the
+    # appropriate substitution for SHROOT in
+    # the next step.
+    set SRCDIR=$SHROOT
+    cd $SRCDIR
+    gzip -d -c $TARDIR/src.tar.gz | tar xvf -
+</PRE>
+(users of sh, ksh, etc. should omit the word &quot;set&quot;).
+<P>
+This step creates directories
+<TT>$SRCDIR/config</TT>, <TT>$SRCDIR/tools</TT>, and <TT>$SRCDIR/src</TT>.
+The directions below tell you how to determine where
+the binaries will be installed when you build Shore from
+the sources.
+<P><A NAME="installation:setting">&#160;</A><H3><A NAME="SECTION00060100000000000000000">
+Setting Configuration Options</A>
+</H3>
+<P>
+Before you build Shore, you must give values to some
+configuration options.
+These options are located at the top of the file 
+<TT>$SRCDIR/config/config.h</TT>.
+<P><PRE>
+    vi $SRCDIR/config/config.h
+</PRE>
+<P>
+For compilation to succeed you <EM>must</EM>  set
+the values of
+<TT>FlexLib</TT> and
+<TT>FlexInclude</TT>
+to the absolute paths of the flex library <TT>libfl.a</TT> and the
+directory containing <TT>FlexLexer.h</TT>, respectively.
+Similarly, you must set
+<TT>TclLib</TT> and
+<TT>TclInclude</TT>
+to the absolute paths of the TCL library <TT>libtcl.a</TT>, and the directory
+containing <TT>tcl.h</TT>.
+In addition, either make sure that
+<TT>gcc</TT>,
+<TT>g++</TT>,
+<TT>bison</TT>,
+<TT>flex</TT>,
+<TT>perl</TT>, and
+<TT>tcl</TT>
+are in your <EM>path</EM>  or modify the corresponding variables in
+<TT>$SRCDIR/config/config.h</TT> as appropriate.
+Be sure that you are you have the correct versions of these programs
+as indicated in the
+<A HREF="node3.html#installation:requirements"><B>Requirements</B></A> section.
+Also be sure that your <EM>path</EM>  is set up so that &quot;make&quot;
+invokes GNU make.
+<P>
+You may also change the
+<TT>IncludeDebugCode</TT>,
+<TT>Debugging</TT>,
+<TT>Optimize</TT>,
+<TT>RcDebugging</TT>, and
+<TT>InstallDir</TT>
+options as indicated by comments in the <TT>config.h</TT> file.
+<P><A NAME="installation:compilation">&#160;</A><H2><A NAME="SECTION00061000000000000000000">
+Compilation Steps</A>
+</H2>
+<P><PRE>
+    cd $SRCDIR
+
+    # generate the Makefiles.
+    perl tools/makemake -r
+
+    # start compiling
+    cd $SRCDIR/src
+    make
+</PRE>
+<P>
+The Perl script <TT>tools/makemake</TT> generates a Makefile from the Imakefile
+in each source directory, as controlled by various files in the <TT>$SRCDIR/config</TT> directory.
+(Unlike previous releases of Shore, we no longer used the <TT>imake</TT> utility
+from the X Window system to generate Makefiles.
+The script <TT>makemake</TT>, although inspired by <TT>imake</TT> is written from
+scratch in Perl and has many features lacking in <TT>imake</TT>.)
+Once Makefiles are generated, later changes to Imakefiles
+can be installed by typing <TT>make make</TT> in the <TT>src</TT>
+directory.
+<P>
+The command <TT>make depend</TT> can be used to generate <TT>.depend</TT> files
+in all the source directories.
+It is not necessary to invoke this command before compiling Shore, but if
+you intend to make modifications to any source files, it is a good idea
+to do it before proceeding, to ensure that modifications of header files,
+sdl grammar files, etc. properly cause recompilation of all affected files.
+Typing <TT>make</TT> in one directory will only build programs in that directory.
+Therefore, if you are making changes in one source directory, you can
+do a local <TT>make</TT> to check for compilation errors, but you should then do
+a <TT>make</TT> in the directory <TT>$SRCDIR/src</TT> to make sure that all
+other directories that depend on your changes are rebuilt.
+You can type <TT>make depend</TT> before <TT>make all</TT> if you like.
+It will build the tools it needs to complete its job.
+For example, <TT>make depend</TT> effectively does <TT>make all</TT> in
+<TT>$SRCDIR/src/rpc4.0/rpcgen</TT> because
+<TT>rpcgen</TT> is needed to make the dependencies
+in the Shore Value-Added Server.
+<P>
+The principal <TT>make</TT> targets (<TT>all</TT>,
+<TT>depend</TT>,
+<TT>install</TT>,
+<TT>clean</TT>, etc.) descend recursively into all sub-directories of the
+directory in which they are invoked.  There are counterparts
+<TT>all_local</TT>,
+<TT>depend_local</TT>,
+<TT>install_local</TT>,
+<TT>clean_local</TT>,
+etc.) that affect <EM>only</EM>  the current directory.
+<P><A NAME="installation:compiled">&#160;</A><H2><A NAME="SECTION00062000000000000000000">
+Installing the Compiled Files</A>
+</H2>
+<P>
+The <TT>make</TT> target <TT>install</TT> installs
+executable files in <TT>$SRCDIR/installed/bin</TT>,
+include files in <TT>$SRCDIR/installed/include</TT>,
+and other
+supporting files in <TT>$SRCDIR/installed/lib</TT>.
+It also installs
+code and README files 
+from <TT>src/examples</TT> and <TT>src/oo7</TT> in <TT>$SRCDIR/installed/examples</TT>.
+(You can replace <TT>$SRCDIR/installed</TT> by another location by changing
+the definition of <TT>InstallDir</TT> in <TT>$SRCDIR/config/config.h</TT> and
+re-running <TT>make make</TT>).
+<P><PRE>
+    # edit InstallDir in config/config.h if you
+    # want to change the destination 
+
+    cd $SRCDIR/src
+    make install
+</PRE>
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html100"
+ HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html97"
+ HREF="installation.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html91"
+ HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html99"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html101"
+ HREF="node7.html">Testing Your Installation</A>
+<B> Up:</B> <A NAME="tex2html98"
+ HREF="installation.html">Shore Software Installation Manual</A>
+<B> Previous:</B> <A NAME="tex2html92"
+ HREF="node5.html">Installing a Binary Release</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

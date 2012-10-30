@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Modules</TITLE>
+<META NAME="description" CONTENT="Modules">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node7.html">
+<LINK REL="previous" HREF="node5.html">
+<LINK REL="up" HREF="sdlman.html">
+<LINK REL="next" HREF="node7.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html126"
+ HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html123"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html117"
+ HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html125"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html127"
+ HREF="node7.html">Linking</A>
+<B> Up:</B> <A NAME="tex2html124"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html118"
+ HREF="node5.html">Objects and Values</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html128"
+ HREF="node6.html#SECTION00061000000000000000000">
+Examples</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="sdlman:module">&#160;</A><H1><A NAME="SECTION00060000000000000000000">
+Modules</A>
+</H1>
+<PRE>
+ 
+    specification : module*
+    module : 'module' ID '{' mod_export* mod_import* 
+            module_member* '}' [';']
+    mod_export : 'export' ( ID | 'all' ) ';'
+    mod_import : 'use' module_name [ 'as' ID ] ';'
+        | 'import' module_name ';'
+    module_name : STRING_LITERAL
+    module_member : const_dcl ';'
+        | type_dcl ';'
+        | interface_dcl ';'
+    scoped_name : ID ( '::' ID )*
+</PRE>
+<P>
+An SDL definition is a sequence of
+<EM>module definitions</EM>.
+Multiple module declarations can be combined in one source file, but they
+are separately processed as if they were in separate source files.
+In other words, there is no special scope associated with a file.
+The result of compiling a module definition is a
+<EM>module object</EM>
+in the database.
+A module defines a name scope (see the following section)
+in which names are bound to constants, types, and interfaces.
+These names are exported if they appear in the
+<TT>export</TT>
+declaration
+at the start of the module; otherwise, they are local and can only be used in
+the module in which they are defined.
+<A NAME="tex2html6"
+ HREF="footnode.html#88"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+<P>
+The declaration
+<TT>export all</TT>
+exports all
+&quot;top level&quot;
+names defined in the module.
+The declaration
+<TT>use</TT>
+<EM>module_name</EM>
+<TT>as</TT>
+<EM>ID</EM>;
+makes all exported names defined in the named module (as well as
+the types, constants, etc. that they designate)
+available in the current module.
+The
+<EM>module_name</EM>
+is a file name of a module object stored in the database, expressed as
+a string literal.
+It is interpreted relative to a path given as
+a command-line argument to the SDL compiler 
+(see the manual page
+<A NAME="tex2html7"
+ HREF="../man/sdl.sdl.html">sdl(sdl)</A>).
+<P>
+Each exported name in that module can be used in the current module as
+<EM>ID::name</EM>,
+where
+<EM>ID</EM>
+is the identifier specified in the
+<TT>use</TT>
+declaration.
+If no
+<EM>ID</EM>
+is specified, the name of the module (as indicated in the module header)
+is used.
+<P>
+The
+<EM>import</EM>
+declaration imports all names exported by the indicated module as if
+they were defined in the current module.
+That is, they can be used without any
+<EM>ID::</EM>
+prefix if there is no ambiguity.
+(Importing a module M does not import the modules imported
+by M; it imports only the names exported by M, except if
+M exports &quot;all.&quot;)
+<P>
+The module name given on an 
+<EM>import</EM>
+declaration can be an identifier or a quoted path name.
+An identifier 
+<TT>mod</TT>
+is treated the same as 
+<TT>&quot;mod&quot;</TT>, 
+and the module is expected to be found
+in the list of directories determined by 
+command-line arguments
+to the compiler.
+<A NAME="sdlman:moduleexample">&#160;</A><H2><A NAME="SECTION00061000000000000000000">
+Examples</A>
+</H2>
+<P><PRE>
+    module constants { 
+        // installed as &quot;constants&quot; in the 
+        // directory determined by the first -d flag if present,
+        // /types otherwise.
+        export TitleSize; 
+        const long CharacterWidth = 1; 
+        const long TitleSize = 40*CharacterWidth;
+    } 
+
+    module mod1 {
+        export all; 
+        use &quot;constants&quot; as C;
+        typedef char Title[C::TitleSize]; 
+    } 
+
+    module mod2 {
+        export all; 
+        import &quot;constants&quot;; 
+        typedef char header[TitleSize]; // NB: TitleSize is 40!
+    }
+</PRE>
+<P>
+The 
+<EM>import</EM>
+declarations must follow the 
+<EM>export</EM>
+declarations.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html126"
+ HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html123"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html117"
+ HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html125"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html127"
+ HREF="node7.html">Linking</A>
+<B> Up:</B> <A NAME="tex2html124"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html118"
+ HREF="node5.html">Objects and Values</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

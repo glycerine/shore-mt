@@ -1,0 +1,29 @@
+/////////////////
+// PR 218
+////////////////
+module m1 {
+	export attri;
+	import m2;
+
+	 interface opi;
+
+	interface attri {
+	public:
+		attribute int m1;
+
+        attribute bag<opi> opi_bag;
+	};
+
+}
+
+module m2 {
+	export all;
+	import m1;
+
+	interface opi {
+	private:
+		// all combinations
+        relationship ref<attri> attri_ref;
+	};
+
+}

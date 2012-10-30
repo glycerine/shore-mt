@@ -1,0 +1,18 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Mount a volume, create a file,  and crash
+#
+
+source $script_dir/vol.init
+
+sm begin_xct
+set f1 [sm create_file $volid]
+restart
+
+unset f1

@@ -1,0 +1,23 @@
+
+# OK: these, we can't get around:
+
+suppress miu malloc;Balloc
+suppress miu malloc;MakeFileTable
+suppress miu malloc;...;strtol
+suppress fmr StringValue; ...; Tcl_DeleteInterp
+suppress fmw StringValue; ...; Tcl_DeleteInterp
+suppress umr write;writetcp
+suppress miu malloc; ... ; Tcl_CreateInterp
+suppress miu malloc; ... ; re_comp
+suppress miu malloc;calloc;StRrChR;openlog
+suppress miu malloc;...;setgrjunk
+suppress miu malloc;calloc;SiGpRoCmAsK;getpwuid
+suppress miu malloc;...;getnetgrent
+suppress miu malloc;...;yp_match;getprotobyname
+suppress miu malloc;yp_unbind
+suppress miu malloc;strtol;openlog
+
+
+# TODO: to fix this we'll have to make our own g++ iostream library with -g
+# from /p/src/gnu/libg++-2.6/libio/strstream.cc
+suppress miu malloc;...;strstreambase::strstreambase;logstream::logstream

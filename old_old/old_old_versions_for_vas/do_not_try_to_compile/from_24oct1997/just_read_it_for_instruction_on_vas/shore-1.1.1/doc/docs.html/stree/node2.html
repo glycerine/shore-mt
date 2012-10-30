@@ -1,0 +1,237 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Introduction</TITLE>
+<META NAME="description" CONTENT="Introduction">
+<META NAME="keywords" CONTENT="stree">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="stree.css">
+<LINK REL="next" HREF="node3.html">
+<LINK REL="previous" HREF="node1.html">
+<LINK REL="up" HREF="stree.html">
+<LINK REL="next" HREF="node3.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html114"
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html111"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html105"
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html113"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html115"
+ HREF="node3.html">Defining Data Types</A>
+<B> Up:</B> <A NAME="tex2html112"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html106"
+ HREF="node1.html">Contents</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html116"
+ HREF="node2.html#SECTION00021000000000000000000">
+What this Tutorial Is</A>
+<LI><A NAME="tex2html117"
+ HREF="node2.html#SECTION00022000000000000000000">
+What this Tutorial Is Not</A>
+<LI><A NAME="tex2html118"
+ HREF="node2.html#SECTION00023000000000000000000">
+What the Example Does</A>
+<LI><A NAME="tex2html119"
+ HREF="node2.html#SECTION00024000000000000000000">
+What the Examples Demonstrate</A>
+<LI><A NAME="tex2html120"
+ HREF="node2.html#SECTION00025000000000000000000">
+What the Examples are <EM>Not</EM></A>
+<LI><A NAME="tex2html121"
+ HREF="node2.html#SECTION00026000000000000000000">
+Reading the Example Program</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="stree:intro">&#160;</A><H1><A NAME="SECTION00020000000000000000000">
+Introduction</A>
+</H1>
+<P>
+This tutorial explains, through the use of detailed examples, how
+to write application programs in C++ that store and manipulate complex
+data structures in Shore.
+<P><A NAME="stree:goals">&#160;</A><H2><A NAME="SECTION00021000000000000000000">
+What this Tutorial Is</A>
+</H2>
+<P>
+This tutorial illustrates many aspects of Shore, including
+<UL>
+<LI> how to use the SDL data-definition language to define data types of
+persistent data,
+<LI> how to use the SDL compiler to translate these definitions into
+C++ class definitions,
+<LI> how to implement the member functions of these classes in C++,
+<LI> how to write a driver program that creates, looks up, and destroys
+objects,
+<LI> how to compile, build, and run the application program,
+<LI> how to perform an &quot;inventory&quot; of persistent objects that have
+been created, and
+<LI> how to combine Shore application programs with &quot;legacy&quot; Unix
+programs that access Shore objects as if they were Unix files.
+</UL><A NAME="stree:nongoals">&#160;</A><H2><A NAME="SECTION00022000000000000000000">
+What this Tutorial Is Not</A>
+</H2>
+<P>
+This tutorial does not try to do everything.
+In particular:
+<UL>
+<LI> It is not a general introduction to Shore, its goals,
+structure or status.
+You should read
+<A NAME="tex2html2"
+ HREF="../overview/overview.html"><EM>An Overview of Shore</EM></A>
+before reading any further.
+<LI> It is not a reference manual.
+Reference manuals exist or are being written for all aspects of Shore.
+See
+<A NAME="tex2html3"
+ HREF="../release/release.html"><EM>The Shore Release</EM></A>
+for an index to the rest of the documentation.
+<LI> It does not even attempt to demonstrate all the features
+of Shore, just a subset sufficient to get you started.
+<LI> Most importantly, <EM>it is not a tutorial on how to write
+high-quality, efficient applications</EM>.
+It uses a rather contrived example designed to show off several features,
+but it does not claim the algorithms presented are a good way to
+manipulate persistent data.
+</UL><A NAME="stree:examplesummary">&#160;</A><H2><A NAME="SECTION00023000000000000000000">
+What the Example Does</A>
+</H2>
+<P>
+The example program <TT>stree</TT> uses an unbalanced binary search
+tree as an inverted index to a set of documents.
+The tree contains one node for each distinct word appearing in any of the
+documents.
+Associated with each word is a set of citations, each of which indicates
+a document and the offset within the document of the start of a line containing
+the word.
+Each tree node, citation, and document is a separate object stored in
+the Shore database.
+Although the documents are actually stored in the Shore database, they are
+stored in such a way that existing Unix programs can manipulate them as
+if they were ordinary files.
+<P>
+The program has options to add and remove documents from the database
+and to list the lines containing a given word.
+It also has a debugging option that dumps all the objects in the database.
+This option illustrates how to write a maintenance program that iterates through
+the objects in the database in a &quot;raw&quot; form.
+<P>
+The tutorial then shows how to modify the example to use the
+<EM>index</EM> facility of Shore to accomplish the same task in a different way.
+<P><A NAME="stree:examplegoals">&#160;</A><H2><A NAME="SECTION00024000000000000000000">
+What the Examples Demonstrate</A>
+</H2>
+<P>
+The example programs illustrate how to define objects with methods
+(&quot;member functions&quot; in C++) linked together with pointers
+(called &quot;references&quot; in Shore).
+They show how to use <EM>relationships</EM>, which generalize pointers,
+adding the ability to represent &quot;1-to-N&quot; and &quot;M-to-N&quot;
+associations and automatically maintain inverse &quot;pointers&quot;.
+They also illustrate the Unix-compatibility features of Shore.
+<P><A NAME="stree:examplenongoals">&#160;</A><H2><A NAME="SECTION00025000000000000000000">
+What the Examples are <EM>Not</EM></A>
+</H2>
+<P>
+First and foremost, the binary search tree program does not illustrate the
+best-or even a good-way to build inverted indices.
+The second example, which uses Shore's built-in index feature, is closer
+to the way a real application would accomplish this task.
+A binary search
+tree is not a very good data structure for disk-based data structures,
+since fetching each node requires a disk access.
+In fact, even this program was designed to run in main memory,
+a hash table would be better!
+The example was chosen to illustrate how a program that manipulates linked
+data structures can easily be adapted to make those structures persistent,
+but converting a main-memory program to
+run <EM>efficiently</EM> with persistent data generally requires a careful
+re-design of data structures and algorithms.
+<P>
+The examples do not illustrate <EM>all</EM> the features of Shore or the
+SDL data-definition language.
+They do not use all the available pre-defined data structures (such
+<A HREF="../sdlman/node11.html#sdlman:sequence">sequences</A>
+or <A HREF="../sdlman/node14.html#sdlman:relationship">bags</A>),
+the <A HREF="../sdlman/node6.html#sdlman:module">&quot;module&quot; facility</A>
+for managing large complex
+designs, or inheritance (SDL supports multiple inheritance).
+See <A NAME="tex2html4"
+ HREF="../sdlman/sdlman.html"><EM>The SDL Reference Manual</EM></A>)
+for more details.
+<P><A NAME="stree:reading">&#160;</A><H2><A NAME="SECTION00026000000000000000000">
+Reading the Example Program</A>
+</H2>
+<P>
+This tutorial walks through the sources of the search-tree program in detail.
+These sources, as well as associated test programs and data, may be
+found in the <TT>src/examples/stree</TT> sub-directory of the distribution.
+They are also included in
+<A HREF="node8.html#stree:appendix">the Appendix</A>.
+The next few sections walk through this example in detail.
+It will be useful to keep a copy of the program sources close to hand.
+Throughout this tutorial, we will assume (as does the
+<A NAME="tex2html5"
+ HREF="../installation/installation.html"><EM>Shore Software Installation Manual</EM></A>),
+that the environment variable <TT>$SHROOT</TT> contains the absolute path name
+of the root directory of the installed Shore software.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html114"
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html111"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html105"
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html113"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html115"
+ HREF="node3.html">Defining Data Types</A>
+<B> Up:</B> <A NAME="tex2html112"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html106"
+ HREF="node1.html">Contents</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

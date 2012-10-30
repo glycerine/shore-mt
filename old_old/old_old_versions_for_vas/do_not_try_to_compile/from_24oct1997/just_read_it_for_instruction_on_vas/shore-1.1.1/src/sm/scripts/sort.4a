@@ -1,0 +1,47 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test sort on integers and floats -- this is called by sort.4
+#    This assumed that $ktype and $nrec  are set by calling script
+#
+
+#create and load a file with integers in reverse order
+sm begin_xct
+set f1 [sm create_file $volid]
+verbose f1 = $f1
+for {set i 0} {$i < $nrec} {incr i} {
+    set hdr [expr { $nrec - $i } ]
+   sm create_typed_rec $f1 $hdr 4 $pattern $ktype
+}
+sm commit_xct
+
+
+
+proc do_sort_and_display { f1 volid ktype distinct destruct } {
+	#sort and display 
+    sm begin_xct
+	verbose sort ...
+	set f3 [sm sort_file $f1 $volid 3 $ktype $distinct $destruct]
+	verbose f3 = $f3
+
+	verbose scans on f3 ...
+	verbose [sm scan_sorted_recs $f3 $ktype b*1000]
+
+	if { $destruct == "destruct" } {
+	    # used destruct for sort of this, so f1 doesn't exist anymore
+	    catch {sm destroy_file $f1} err
+	    assert { expr {[error_is $err E_BADSTID] == 1} }
+	}
+	sm destroy_file $f3
+    sm commit_xct
+}
+
+do_sort_and_display $f1 $volid $ktype distinct keep
+do_sort_and_display $f1 $volid $ktype distinct destruct
+
+unset i f1 hdr

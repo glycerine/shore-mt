@@ -1,0 +1,38 @@
+source ../scripts/vol.init
+
+sm begin_xct
+set fid [sm create_file $volid]
+set r [sm create_rec $fid head 7000 [format %07000d 99]]
+verbose created rec $r
+set r [sm create_rec $fid head 7000 [format %07000d 99]]
+verbose created rec $r
+set r1 [sm create_rec $fid head 4 body]
+verbose r1=$r1
+set r2 [sm create_rec $fid head 4 body]
+verbose r2=$r2
+sm destroy_rec $r
+verbose destroyed rec $r
+sm commit_xct
+
+# r1 and r2 should be on the same page.
+# should not be on the first page in the store, since it is treated special.
+# should be the only records on the page, so both will hold IX locks on the
+# page when one tries to free the page.  this will propagate an error of
+# eLOCKTIMEOUT, since the page freeing code won't be able to get it's EX
+# lock.
+
+proc deleteit {r} {
+	sm begin_xct
+	verbose about to destroy_rec $r
+	sm destroy_rec $r
+	verbose destroyed rec $r
+	sync
+	sm commit_xct
+}
+
+set t1 [fork_thread deleteit $r1]
+set t2 [fork_thread deleteit $r2]
+sync_thread $t1 $t2
+join_thread $t1 $t2
+
+unset t1 t2 fid r r1 r2

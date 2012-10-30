@@ -1,0 +1,27 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+
+BATCH Batching RPCs, TCP   = 0x00010000 batchstats {
+
+int	_hit_qmax	Times queue was flushed because queue filled
+int	_hit_tcpmax Times queue was flushed because socket buffer filled
+int	_sent 		Batches sent at request of user
+int	_batches 	Batches sent (total)
+float _avgsent    Average #msgs/batch
+int	_queued 	Requests queued in batched form
+int	_min_capacity Minimum unused capacity
+// computed
+int _max_q_len	Capacity of queue in # requests
+int _max_capacity	Total capacity in bytes
+};
+
+shmbatch Batching RPCs, shared-memory = 0x00030000 shmbatchstats {
+int	_hit_shmmax	Times queue was flushed because shared memory was filled
+int	_min_left 	Minimum unused shared memory capacity
+int _whole		Total shared memory
+};

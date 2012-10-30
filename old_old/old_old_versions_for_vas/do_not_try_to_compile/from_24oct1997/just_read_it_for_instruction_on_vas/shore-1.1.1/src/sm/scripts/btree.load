@@ -1,0 +1,145 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  test btree bulk load
+#
+
+#
+# start up
+#
+source $script_dir/vol.init
+
+set nrec 500
+#
+# create file of <key, el> pair (to be sorted later in blkld)
+#
+sm begin_xct
+set f1 [sm create_file $volid]
+for {set i $nrec} {$i > 0} {set i [ expr {$i - 1} ]} {
+    sm create_rec $f1 [format $short_form $i] 10 $i
+}
+sm commit_xct
+#
+# verify file is descending
+#
+proc print_file {f1 in_xct} {
+    if { $in_xct == 0 } {
+	sm begin_xct
+    }
+    set scan [sm scan_file_create $f1 t_cc_file]
+    set i 0
+    set pin [sm scan_file_next $scan 0]
+    while {$pin != "NULL"}  {
+	incr i
+	set r [sm read_rec [sm pin_rid $pin] 0 0]
+	verbose $i: read $r
+	set pin [sm scan_file_next $scan 0]
+    }
+    sm scan_file_destroy $scan
+    if { $in_xct == 0 } {
+	sm commit_xct
+    }
+}
+#print_file $f1  0
+
+#
+# verify ascending
+#
+proc verify { ndx2 nrec str in_xct } {
+    global short_form
+    verbose "scan up:"
+    if { $in_xct == 0 } {
+	sm begin_xct
+    }
+    set scan [sm create_scan $ndx2 >= neg_inf <= pos_inf]
+    for {set i 1} {$i <= $nrec} {incr i}  {
+	set r [sm scan_next $scan]
+	if {[string compare $r eof] == 0} then { break }
+	set key [string trimleft [lindex $r 0] 0]
+	set el [lindex $r 1]
+	verbose "scanned ($key, $el)"
+	assert {expr $key == $el}
+	assert {expr $i == $key}
+    }
+    assert {expr $i > $nrec}
+    assert {expr [string compare [sm scan_next $scan] eof] == 0}
+    sm destroy_scan $scan
+    verbose "---- successful"
+
+
+    verbose "probe:"
+    for {set i 1} {$i <= $nrec} {incr i} {
+	set dummy [sm gather_stats reset]
+	set el [sm find_assoc $ndx2 [format $short_form $i]]
+	if [expr $i == $el] {
+	    verbose probed $i $el
+	} else {
+	    pstats
+	    verbose PROBLEM AT $i $el
+	}
+	assert {expr $i == $el}
+    }
+    if { $in_xct == 0 } {
+	sm commit_xct
+    }
+    verbose "verify successful"
+}
+
+sm begin_xct
+
+set dummy [sm gather_stats reset]
+set ndx1 [sm create_index $volid uni_btree]
+
+set stat [sm blkld_ndx $ndx1 $f1 b*1000]
+verbose result of bulkload: $stat
+verbose verify  ndx1 one
+verify $ndx1 $nrec one 1
+
+# sm print_index $ndx1
+
+set dummy [sm gather_stats reset]
+set ndx2 [sm create_index $volid uni_btree]
+
+set stat [sm blkld_ndx $ndx2 $f1 b*1000]
+verbose result of bulkload: $stat
+
+# print_file $f1 1
+
+verbose "verify ndx2" two
+verify $ndx2 $nrec two 1
+
+if { 1 == 0 } {
+    set dummy [sm gather_stats reset]
+    set ndx3 [sm create_index $volid uni_btree]
+    set stat [sm blkld_ndx $ndx3 $f1 b*1000]
+    verbose result of bulkload: $stat
+    verbose stats after ndx3
+    pstats
+    verbose "verify ndx3" three
+    verify $ndx3 $nrec three 1
+}
+
+sm commit_xct
+
+
+verbose verify  ndx1 one
+verify $ndx1 $nrec one 0
+verbose "verify ndx2" two
+verify $ndx2 $nrec two 0
+if { 1 == 0 } {
+    verbose "verify ndx3" three
+    verify $ndx3 $nrec three 0
+}
+
+pstats
+verbose "---- successful"
+
+
+unset ndx1 ndx2 nrec i f1 stat dummy
+
+

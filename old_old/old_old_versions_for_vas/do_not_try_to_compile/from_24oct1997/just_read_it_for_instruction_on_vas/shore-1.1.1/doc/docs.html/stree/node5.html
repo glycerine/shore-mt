@@ -1,0 +1,512 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>The Main Program</TITLE>
+<META NAME="description" CONTENT="The Main Program">
+<META NAME="keywords" CONTENT="stree">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="stree.css">
+<LINK REL="next" HREF="node6.html">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="stree.html">
+<LINK REL="next" HREF="node6.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html153"
+ HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html150"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html144"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html152"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html154"
+ HREF="node6.html">Building and Running the</A>
+<B> Up:</B> <A NAME="tex2html151"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html145"
+ HREF="node4.html">Implementing the Operations</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html155"
+ HREF="node5.html#SECTION00051000000000000000000">
+Initialization</A>
+<LI><A NAME="tex2html156"
+ HREF="node5.html#SECTION00052000000000000000000">
+Transactions</A>
+<LI><A NAME="tex2html157"
+ HREF="node5.html#SECTION00053000000000000000000">
+Registered Objects</A>
+<LI><A NAME="tex2html158"
+ HREF="node5.html#SECTION00054000000000000000000">
+Anonymous Objects</A>
+<LI><A NAME="tex2html159"
+ HREF="node5.html#SECTION00055000000000000000000">
+Relationships</A>
+<LI><A NAME="tex2html160"
+ HREF="node5.html#SECTION00056000000000000000000">
+Strings and Text</A>
+<LI><A NAME="tex2html161"
+ HREF="node5.html#SECTION00057000000000000000000">
+Scanning Pools</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="stree:main">&#160;</A><H1><A NAME="SECTION00050000000000000000000">
+The Main Program</A>
+</H1>
+<P>
+The main program of our sample application is in
+<A HREF="node8.html#stree:mainSRC">main.C</A>.
+Most of the code should be clear to any experienced C++ programmer.
+We will only concentrate on those statements that exercise Shore
+features.
+<P><A NAME="stree:init">&#160;</A><H2><A NAME="SECTION00051000000000000000000">
+Initialization</A>
+</H2>
+<P>
+Any program that interacts with Shore must call the static member function
+<A HREF="node8.html#stree:initcall"><TT>Shore::init</TT></A>
+exactly once before doing any Shore operations, to initialize the client-side
+machinery.
+It searches the command line (supplied by the first two arguments,
+which are usually the same as the first two arguments to <TT>main</TT>)
+for options specifically meaningful Shore
+and removes them from <TT>argc</TT> and <TT>argv</TT>.
+The forth argument to <TT>Shore::init</TT> is the name of an options file,
+which can supply parameters, such as the size of the object cache.
+It is a good idea to get the name of this file from the environment,
+as indicated here, rather than wiring into the program.
+If there is no value for <TT>STREE_RC</TT> specified in the environment,
+the standard Unix library function <TT>getenv</TT> will return 0, and a
+null fourth argument tells <TT>Shore::init</TT> to use reasonable defaults.
+The third argument to <TT>Shore::init</TT> is the application name, which is
+used to look up options in the option file.
+A null argument (as shown here) tells <TT>Shore::init</TT> to use <TT>argv[0]</TT>.
+For more details, consult the <A NAME="tex2html7"
+ HREF="../man/init.oc.html"><EM>init(oc)</EM></A>
+manual page.
+<P>
+Like many Shore interface functions, <TT>Shore::init</TT> returns a value of type
+<TT>shrc</TT> (&quot;rc&quot; stands for &quot;return code&quot;).
+The macro <TT>SH_DO</TT> is handy for calling functions that are not
+expected to fail.
+It evaluates its argument and verifies that the result is <TT>RCOK</TT>.
+If not, it prints (on <TT>cerr</TT>) an error message and aborts the program.
+For more details about errors, consult the
+<A NAME="tex2html8"
+ HREF="../man/errors.oc.html"><EM>errors(oc)</EM></A>
+manual page.
+<TT>SH_DO</TT> is described on the
+<A NAME="tex2html9"
+ HREF="../man/transaction.oc.html"><EM>transaction(oc)</EM></A>
+manual page.
+<P><A NAME="stree:transactions">&#160;</A><H2><A NAME="SECTION00052000000000000000000">
+Transactions</A>
+</H2>
+<P>
+Every Shore operation except <TT>Shore::init</TT> must be executed inside
+a <A NAME="tex2html10"
+ HREF="../man/transaction.oc.html"><EM>transaction</EM></A>.
+A transaction groups a set of interactions with the database into a single
+atomic unit.
+Shore ensures that transactions running concurrently by multiple programs have
+a net effect that is equivalent to running them one at a time.
+(This property is called &quot;serializability&quot;).
+Moreover, if a transaction should fail, Shore guarantees that all changes
+to the database performed by the transaction are undone.
+A program starts a transaction by invoking the macro
+<A HREF="node8.html#stree:begintrans"><TT>SH_BEGIN_TRANSACTION</TT></A>.
+Its argument is a variable of type <TT>shrc</TT>.
+When the program has successfully completed all the actions in a transaction,
+it invokes the parameterless macro
+<TT>SH_COMMIT_TRANSACTION</TT>
+to make all of its changes to the database permanent and to unlock
+any database objects that Shore may have locked to ensure serializability.
+In exceptional circumstances, Shore may reject the attempt to commit the
+transaction.
+Therefore, <TT>SH_COMMIT_TRANSACTION</TT> returns an <TT>shrc</TT> value.
+Since we do not want to try any fancy recovery actions if
+<TT>SH_COMMIT_TRANSACTION</TT>
+fails in our application, we invoke it with <TT>SH_DO</TT>.
+<P>
+On occasion, an application program may discover that a transaction
+cannot be completed for application-specific reasons.
+In such occasions, the program can explicitly <EM>abort</EM> the transaction
+by calling the macro
+<TT>SH_ABORT_TRANSACTION(rc)</TT>,
+where <TT>rc</TT> is a value of type <TT>shrc</TT>.
+In addition to requesting Shore to undo all changes to persistent data
+and release all locks, this macro performs a longjmp, returning control
+to the statement following the most recently executed
+<TT>SH_BEGIN_TRANSACTION</TT> and assigning the <TT>shrc</TT> value supplied to
+<TT>SH_ABORT_TRANSACTION</TT> to the result parameter of
+<TT>SH_BEGIN_TRANSACTION</TT>.
+Since any transaction may be aborted in this manner, each call to
+<TT>SH_BEGIN_TRANSACTION</TT>
+should be followed by code that tests the resulting <TT>shrc</TT> and takes
+corrective action if it is not <TT>RCOK</TT>.
+The member function <TT>shrc::fatal</TT> prints an appropriate message and
+aborts the program.
+The macro <TT>SH_DO</TT> previously described behaves somewhat differently
+if a transaction is active and an error is detected:
+Instead of terminating the program, it invokes
+<TT>SH_ABORT_TRANSACTION</TT>.
+For more details about errors, consult the
+<A NAME="tex2html11"
+ HREF="../man/transaction.oc.html"><EM>transaction(oc)</EM></A>
+manual page.
+<P><A NAME="stree:registered">&#160;</A><H2><A NAME="SECTION00053000000000000000000">
+Registered Objects</A>
+</H2>
+<P>
+After beginning a transaction, our example program calls
+<A HREF="node8.html#stree:initcall"><TT>Shore::chdir</TT></A>.
+to go to directory <TT>stree</TT>.
+<TT>Shore::chdir</TT> is similar to the <TT>chdir</TT> system call of Unix:
+It alters the current Shore working directory.
+Note that the program has two &quot;current working directories&quot;:
+one that is applies to Unix system calls and one that applies to all
+path names used in calls to Shore.
+<P>
+Like the Unix system call, <TT>Shore::chdir</TT> will fail if the the
+directory does not exist.
+In the case of our example program, <TT>Shore::chdir</TT> fails for this reason
+the first time the program is run.
+It recovers by creating the directory (using <TT>Shore::mkdir</TT>, which is
+similar to the Unix function of that name), and reissues the
+<TT>chdir</TT> request).
+A failure of the first <TT>chdir</TT> operation for any other reason
+is a catastrophic error.
+Thus the program checks that the return code is either <TT>RCOK</TT> or
+<TT>SH_NotFound</TT> and aborts the transaction otherwise.
+<P>
+When run for the first time, our example program also creates two
+&quot;registered&quot; objects: an instance of <TT>SearchTree</TT>
+registered under the path name <TT>stree/repository</TT>
+and a pool named <TT>stree/pool</TT>.
+The pool is used <A HREF="node5.html#stree:anonymous">later</A>
+to allocate &quot;anonymous&quot; instances of
+<TT>Word</TT> and <TT>Cite</TT>.
+See
+<A NAME="tex2html12"
+ HREF="../overview/overview.html"><EM>An Overview of Shore</EM></A>
+for more information about registered and anonymous objects and pools.
+The <TT>SearchTree</TT> object is created by a form of the C++ <EM>new</EM>
+operator applied to the class name <TT>SearchTree</TT> using C++
+&quot;placement syntax&quot; to supply the path name and permission bits
+for the new object.
+If the operation should fail for any reason (such as permission denied),
+it will cause an abort of the current transaction, returning control
+to the statement following the most recent
+<TT>SH_BEGIN_TRANSACTION</TT>.
+Otherwise, a reference to the new object is assigned to the global variable
+<TT>repository</TT>.
+<P>
+The creation of
+<A HREF="node8.html#stree:createrepository">the pool <TT>nodes</TT></A>.
+illustrates an alternative way of creating
+a registered object.
+The variable <TT>nodes</TT> is declared to have type <TT>Ref&lt;Pool&gt;</TT>, where
+<TT>Pool</TT> is a pre-defined Shore type.
+The class <TT>Ref&lt;T&gt;</TT>, for any <TT>T</TT>, has several static member
+functions, such as <TT>create_registered</TT>,
+<TT>create_anonymous</TT>, and <TT>create_pool</TT>.
+Each one has parameters to supply a path name and protection mode,
+as well as a result parameter to receive a reference to the created object.
+In this case we call <TT>nodes.create_pool</TT> to create a new <TT>Pool</TT>
+object.
+(We could have written equivalently <TT>Ref&lt;Pool&gt;::create_pool</TT>).
+Each of these functions returns an
+<TT>shrc</TT> result to indicate success or failure.
+<P>
+The differing failure modes of these two ways of creating registered objects
+illustrate a general design principle of Shore.
+Many Shore operations are invoked implicitly.
+Another example of an implicit operation is dereferencing a <TT>Ref&lt;T&gt;</TT> value.
+When any of them fails (for example, if the reference is null or dangling),
+Shore responds by aborting the current transaction.
+If the program needs more precise control-in particular, if it wants a
+chance to recover from the error-it must use an alternative interface
+by explicitly calling a Shore function that yields a return code.
+<P>
+If the directory <TT>stree</TT> already exists, the program expects
+to find existing registered objects <TT>stree/repository</TT> and
+<TT>stree/pool</TT>.
+Each reference class <TT>Ref&lt;T&gt;</TT> has a static member function <TT>lookup</TT>,
+with a path-name input parameter and an output parameter of type <TT>Ref&lt;T&gt;</TT>.
+This function looks for a registered object with the given name, and if
+one is found, checks that its type (as indicated by data stored in the
+database) matches <TT>T</TT>.
+If both checks succeed, a reference to the object is returned in the result
+parameter.
+The initializations of <TT>repository</TT> and <TT>nodes</TT> illustrate
+two ways of invoking this function.
+<P>
+Finally, the main program performs one of four operations depending on
+a command-line switch.
+It either adds one or more documents to the repository, looks up a word,
+removes a document from the repository, or dumps all anonymous objects.
+<P><A NAME="stree:anonymous">&#160;</A><H2><A NAME="SECTION00054000000000000000000">
+Anonymous Objects</A>
+</H2>
+<P>
+In a typical Shore application, the vast majority of objects created will
+not have path names.
+Unlike registered objects, which can be accessed either by path name or
+by references from other objects, these &quot;anonymous&quot; objects can
+only be accessed by following references.
+To assist in clustering, and to allow the application (and system
+administrators) to keep track of all allocated space, Shore requires
+each anonymous object to be allocated from a <EM>pool</EM>, which is a registered
+object.
+Our example program uses just one pool for all anonymous objects.
+A more sophisticated program might use a separate pool for each type extent,
+or for each major component of a complex data structure.
+<P>
+The function
+<A HREF="node8.html#stree:searchtreeinsertFUNC"><TT>SearchTree::insert(char *fname)</TT></A>
+in
+<A HREF="node8.html#stree:treeSRC">tree.C</A>
+shows how
+to create anonymous objects.
+The expression &quot;<TT>new (nodes) Cite</TT>&quot; allocates a new instance of
+interface <TT>Cite</TT> from the pool referenced by <TT>nodes</TT>.
+The function
+<A HREF="node8.html#stree:documentfinalizeFUNC"><TT>Document::finalize(char *fname)</TT></A>
+in
+<A HREF="node8.html#stree:documentSRC">document.C</A>
+shows how to destroy
+an anonymous object:
+If <TT>p</TT> is a reference (an instance of <TT>Ref&lt;T&gt;</TT>, for some type <TT>T</TT>),
+<TT>p.destroy()</TT> destroys the object referenced by <TT>p</TT>.
+Registered objects cannot be explicitly destroyed;
+like Unix files, they are deleted by the system when they have no path names
+designating them.
+An example of code to delete a registered object may be found in
+the function
+<A HREF="node8.html#stree:deletefilesFUNC"><TT>delete_file</TT></A>
+in
+<A HREF="node8.html#stree:mainSRC">main.C</A>
+The call <TT>Shore::unlink(fname)</TT> removes the name <TT>fname</TT> from a
+registered object.
+Since this object will not have any aliases (&quot;hard&quot; links, which are
+created by <TT>Shore::link</TT>), unlinking it will cause it to be destroyed.
+<P><A NAME="stree:relationships">&#160;</A><H2><A NAME="SECTION00055000000000000000000">
+Relationships</A>
+</H2>
+<P>
+The definitions in <TT>stree.sdl</TT> include two bidirectional relationships.
+One links words to their citations and the other links citations to the
+documents they cite.
+A bidirectional relationship has two names, one for each direction.
+For example, the relationship between citations and documents is called
+&quot;<TT>doc</TT>&quot; in the <TT>Cite</TT>-to-<TT>Document</TT> direction and
+&quot;<TT>cited_by</TT>&quot; in the reverse direction.
+This relationship is declared by the declaration
+<PRE>
+    relationship ref&lt;Document&gt; doc inverse cited_by;
+</PRE>
+in interface <TT>Cite</TT>, and by the declaration
+<PRE>
+    relationship set&lt;Cite&gt; cited_by inverse doc;
+</PRE>
+in interface <TT>Document</TT>.
+The SDL compiler checks that the two declarations are consistent.
+The use of &quot;<TT>ref</TT>&quot; rather than &quot;<TT>set</TT>&quot; in the
+first of these declarations indicates a functional dependency from
+<TT>Cite</TT> to <TT>Document</TT>: Each <TT>Cite</TT> is related to at most
+one <TT>Document</TT>.
+<P>
+In the C++ binding, these declarations give rise to data members
+<TT>Cite::doc</TT>, of type <TT>Ref&lt;Document&gt;</TT> and
+<TT>Document::cited_by</TT>, of type <TT>Set&lt;Cite&gt;</TT>.
+Similarly, the relationship between words and citations is represented
+by <TT>Word::cited_by</TT> and <TT>Cite::cites</TT>.
+<P>
+The type <TT>Set&lt;T&gt;</TT> represents a set of zero or more references to distinct
+<TT>T</TT> objects.
+It has member functions to add and delete values of type <TT>Ref&lt;Cite&gt;</TT>
+and to iterate through its contents.
+The details of the interface, which are documented in the
+<A NAME="tex2html13"
+ HREF="../man/set.cxxlb.html"><EM>set(cxxlb)</EM></A>
+manual page,
+are likely to change in future releases of Shore.
+An example of the use of the current interface may be seen in
+<A HREF="node8.html#stree:wordSRC">word.C</A>.
+In
+<A HREF="node8.html#stree:wordoccursonFUNC"><TT>Word::occurs_on</TT></A>,
+a citation of word <TT>w</TT> is recorded by
+adding the reference <TT>cite</TT> to <TT>w.cited_by</TT>.
+The runtime support automatically adds a reference to <TT>w</TT> to
+<TT>cite-&gt;cites</TT>.
+The function
+<A HREF="node8.html#stree:wordoccurrenceFUNC"><TT>Word::occurrence</TT></A>
+uses the member function
+<TT>Set&lt;Cite&gt;::get_elt</TT> to retrieve (a reference to) one of the citations
+of a word, while <TT>Word::count</TT> uses
+<TT>Set&lt;Cite&gt;::get_size</TT> to determine how many citations there are.
+A reference can be deleted from a set with <TT>Set&lt;T&gt;::del</TT>.
+<TT>Document::finalize</TT> uses an alternative interface:
+The function <TT>Set&lt;T&gt;::delete_one</TT> returns a one of the references,
+deleting it from the set.
+(The implementation chooses an arbitrary reference to return; it retuns
+<TT>NULL</TT> if the set is empty).
+<P>
+The function <TT>Document::finalize</TT> is called just before destroying a
+<TT>Document</TT> object.
+Although the runtime system automatically updates one end of an bidirectional
+relationship when the other end is updated by assignment,
+it does not (yet) update inverse relationships properly when an object
+is destroyed.
+(This is a bug; it will be fixed in a future release).
+However, even if it did so, there might be application-specific cleanup
+operations required.
+In our example program, we would like to &quot;garbage collect&quot;
+the <TT>Cite</TT> objects associated with the document being removed.
+<TT>Document::finalize</TT> iterates through the citations of the document,
+invoking <TT>Cite::finalize</TT> on each one and then destroying it.
+<TT>Cite::finalize</TT> simply removes all references from the citation to
+<TT>Word</TT> objects, thereby removing the citation from the <TT>cited_by</TT>
+set of each word.
+The example program does not remove words from
+the binary search tree when their citation counts drop to zero.
+<A NAME="stree:lazy">&#160;</A> Adding code to do so would not be hard, but
+it would not illustrate any additional features of Shore.
+<P><A NAME="stree:strings">&#160;</A><H2><A NAME="SECTION00056000000000000000000">
+Strings and Text</A>
+</H2>
+<P>
+The pre-defined type <TT>string</TT> is implemented as a <TT>char *</TT> pointer
+and a length (so strings can contain null bytes).
+When a persistent object containing strings is written to disk, the actual
+string data is appended to the object and the pointers are converted to a
+form appropriate for storage on disk.
+When it is brought back into memory, the pointers are restored
+(&quot;swizzled&quot;) to memory addresses.
+When an ordinary C++ (null-terminated) string is assigned to a Shore
+string, the bytes (up to and including the terminating null byte)
+are copied to dynamically allocated space.
+See for example,
+<A HREF="node8.html#stree:wordinitializeFUNC"><TT>Word::initialize</TT></A>.
+When an object containing strings is removed from the object cache, its
+string space is freed.
+Thus Shore strings have value semantics.
+<P>
+Standard library string functions such as <TT>strcmp</TT>, <TT>strncmp</TT>,
+<TT>strlen</TT>, etc., as well as <TT>memcpy</TT> and <TT>bcopy</TT>
+are overloaded to work with Shore strings.
+In addition to <TT>strlen</TT>, strings support an operation <TT>blen</TT>
+which returns the total length (including null bytes).
+It is also possible to assign a character or string to an arbitrary
+offset in a Shore string.
+The target string is expanded if necessary to accommodate the data.
+For example,
+<A HREF="node8.html#stree:documentappendFUNC"><TT>Document::append</TT></A>
+extends the <TT>body</TT> field of a
+document by invoking the <TT>sdl_string::set</TT> function
+(<TT>Document::body</TT> is actually of type <TT>text</TT>, but <TT>text</TT> and
+<TT>string</TT> are the same for the purposes of this discussion).
+See the
+<A NAME="tex2html14"
+ HREF="../man/string.cxxlb.html"><EM>string(cxxlb)</EM></A>
+manual page for more details.
+<P><A NAME="stree:pools">&#160;</A><H2><A NAME="SECTION00057000000000000000000">
+Scanning Pools</A>
+</H2>
+<P>
+The example program supports an option (-p) for dumping all the
+anonymous objects in the <TT>pool</TT> created by the program.
+This last option is useful for verifying that the object deletion code is
+working correctly, and illustrates how one might write administrative programs
+for maintaining a complex database.
+<A HREF="node8.html#stree:poollistFUNC"><TT>pool_list</TT></A>
+in
+<A HREF="node8.html#stree:mainSRC">main.C</A>
+creates a <TT>PoolScan</TT> object
+to scan the contents of the pool, and tests whether the creation was
+successful.  (If for example, the named pool did not exist or permission was
+denied, the <TT>scan</TT> object would be created in an &quot;invalid&quot; state,
+and would test as <EM>false</EM> when converted to Boolean.)
+The function <TT>PoolScan::next</TT> returns a reference to the &quot;next&quot;
+object in the pool (according to some arbitrary ordering) in its result
+parameter.
+It returns some <TT>shrc</TT> value other than <TT>RCOK</TT>
+when no more objects remain.
+The result parameter must be of type <TT>Ref&lt;any&gt;</TT>, the persistent analogue
+of <TT>void *</TT> (a reference to an object of unknown type).
+The actual type of object can be tested dynamically with the function
+<TT>TYPE(T)::isa(Ref&lt;any&gt; &amp;ref)</TT>.
+Each interface <TT>T</TT> defined in an SDL definition gives rise to a
+<EM>type object</EM> (or <EM>meta-type</EM>), which is available as a
+global variable named <TT>TYPE_OBJECT(T)</TT> (of type <TT>TYPE(T)</TT>).
+One of the member functions of this object is <TT>isa</TT>, which accepts
+a parameter of type <TT>Ref&lt;any&gt;</TT>, tests whether it is a reference to
+an object of type <TT>T</TT>, and if so returns a reference of type <TT>Ref&lt;T&gt;</TT>
+to it.
+Otherwise, <TT>isa</TT> returns a null reference.
+It should be noted that this interface for dynamic type checking is
+provisional;
+it may be replaced with a facility more nearly resembling the <TT>dynamic_cast</TT>
+syntax for run-time type identification (RTTI) recently added to the proposed
+C++ standard.
+<P>
+After checking that the type of returned object conforms to one of the expected
+types (the program only creates anonymous objects of type <TT>Word</TT>
+and <TT>Cite</TT>), <TT>pool_list</TT> uses the reference (as converted by
+<TT>isa</TT>) to call the
+appropriate print function (<TT>Word::print</TT> or <TT>Cite::print</TT>).
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html153"
+ HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html150"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html144"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html152"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html154"
+ HREF="node6.html">Building and Running the</A>
+<B> Up:</B> <A NAME="tex2html151"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html145"
+ HREF="node4.html">Implementing the Operations</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

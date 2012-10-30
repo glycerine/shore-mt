@@ -1,0 +1,139 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+# $Header: /p/shore/shore_cvs/src/sdl/tests/Makefile.template.sunos,v 1.1 1996/07/26 19:42:29 nhall Exp $
+
+# Modify the following line as appropriate to point to the place where
+# Shore is installed
+INSTALL_DIR = /p/shore/installed/NEW/debug
+INSTALL_DIR = ../../../installed
+
+GCC             = /s/gcc-2.7.2/bin/gcc
+
+INCLUDE			= -I$(INSTALL_DIR)/include
+LDLIBS			= $(INSTALL_DIR)/lib/libshore.a
+LDFLAGS			= -lstdc++
+SDL				= $(INSTALL_DIR)/bin/sdl
+LD				= $(GCC)
+CXX				= $(GCC) -x c++
+CXXFLAGS		= -g -Wall
+PURIFY          = /s/purify/bin/purify
+PURIFYOPTIONS   = -g++=yes -chain-length=15
+
+# NOTE:  if running sunos, comment out the line below
+# LDFLAGS         += -lnsl
+
+# NOTE:  C++ collector for the constructors to get called...
+# You might have to adjust the architecture in the path here:
+PURIFY_COLLECTOR =/s/gcc-2.7.2/lib/gcc-lib/sparc-sun-sunos4.1.3/2.7.2/ld
+# PURIFY_COLLECTOR =/usr/ccs/bin/ld
+PURIFYOPTIONS = -collector=$(PURIFY_COLLECTOR)
+
+# If you're building a purified executable, you must define PURIFY below
+CXXFLAGS		+= -DPURIFY
+
+
+#
+# unfortunately, the following must be one 
+# line for the Imake-generated makefiles to work
+#
+SDLFILES	= \
+	appends.sdl \
+	array.sdl \
+	consts.sdl \
+	eg1.sdl \
+	eg2.sdl \
+	eg3.sdl \
+	eg4.sdl \
+	eg5.sdl \
+	eg6.sdl \
+	eg7.sdl \
+	eg8.sdl \
+	enums.sdl \
+	err1.sdl \
+	err2.sdl \
+	example.sdl \
+	external.sdl \
+	forward.sdl \
+	index_vars.sdl \
+	inheritance.sdl \
+	inh1.sdl \
+	inh2.sdl \
+	inh3.sdl \
+	isa.sdl \
+	lists.sdl \
+	manualindex.sdl \
+	manualindex2.sdl \
+	pr213.sdl \
+	pool_destroy.sdl \
+	pool_destroy1.sdl \
+	poolref.sdl \
+	refs.sdl \
+	refs2.sdl \
+	seq_of_struct.sdl \
+	array_of_struct.sdl \
+	sequences.sdl \
+	sets.sdl \
+	strings.sdl \
+	struct.sdl \
+	t1.sdl \
+	union.sdl union2.sdl \
+	volid.sdl
+
+HFILES.sdl		= $(SDLFILES:.sdl=.h)
+OFILES.sdl		= $(SDLFILES:.sdl=.o)
+EXEC.sdl		= $(SDLFILES:.sdl=)
+TEMPFILES.sdl		= $(SDLFILES:.sdl=.h.temp)
+LOGFILES.sdl		= $(SDLFILES:.sdl=.log)
+PUREFILES.sdl		= $(SDLFILES:.sdl=.pure)
+
+GENERATED = $(EXEC.sdl) $(HFILES.sdl) $(OFILES.sdl)\
+	$(TEMPFILES.sdl) $(LOGFILES.sdl) $(PUREFILES.sdl)
+
+# Note to Users:
+#   The following line is only needed by Shore developers, users
+#   can ignore it (note, it must be one complete line
+# Note to developers:
+#   When you add a new source file, add it to this line so that
+#   "make install" will install it.  Do not split the line.
+SRCS = $(SDLFILES:.sdl=.C)
+
+
+.SUFFIXES: .C .sdl .h .pure
+.PRECIOUS: %.o
+
+# The following is needed to cancel the built-in default
+%: %.C
+
+%: %.o $(LDLIBS)
+	$(LD) $(CXXFLAGS) $*.o $(LDLIBS) $(LDFLAGS) -o $@ 
+
+%.o: %.C %.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $<
+
+%.pure: %.o $(LDLIBS)
+	$(PURIFY) $(PURIFYOPTIONS) $(LD) $*.o $(LDLIBS) $(LDFLAGS) -o $@
+
+all: $(EXEC.sdl)
+
+tests: all
+	run_tests.sh
+
+.sdl.h:
+	$(SDL) -d /types/examples -f -s $*.sdl -B -o $*.h -L
+# used to try to format the output, but neither indent nor cb is safe.
+# becaus they collapse ref<set<x> > to ref<set<x>>, which is 
+# parsed as >> operator by gcc (grot)
+#	$(SDL) -d /types/examples -f -s $*.sdl -B -o $*.h.temp
+#	indent -st < $*.h.temp > $*.h; rm $*.h.temp
+#	cb -s $*.h.temp > $*.h; rm $*.h
+
+tags: $(SRCS) $(HFILES.sdl)
+	ctags -wt $(SRCS) $(INSTALL_DIR)/include/*.h
+
+clean:
+	$(RM) a.out tags core *.o $(GENERATED)

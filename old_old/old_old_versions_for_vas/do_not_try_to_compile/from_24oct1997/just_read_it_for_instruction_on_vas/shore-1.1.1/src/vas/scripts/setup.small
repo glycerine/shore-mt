@@ -1,0 +1,39 @@
+# source ../scripts/setup.small
+begin
+cd /
+if [not [sfile exists small] ] {
+	mkdir small
+}
+cd /small
+if [not [sfile exists pool] ] {
+	mkpool pool
+}
+if [not [sfile exists z] ] {
+	mkdir	z
+}
+cd z
+
+set objsiz  [expr {$pagesize / 10}]
+
+if [not [sfile exists uf]] {
+  set uf1 [mkuserdef uf $objsiz]
+} else {
+	set uf1 [sfile oid uf]
+}
+
+# xrefs are more difficult:
+set xr1 [cleanupxref xref $uf1]
+
+stat $uf1
+stat xref
+read xref
+#xr1 is oid of the xref
+stat $xr1
+
+# reading xref by oid yields error
+# read $xr1
+
+ls -lF
+
+commit
+return "setup.small done."

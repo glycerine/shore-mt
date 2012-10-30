@@ -1,0 +1,450 @@
+#ifndef oo7_mod
+#define oo7_mod 1
+#include "ShoreApp.h"
+class sdlModule_oo7 	{ public: virtual int oid_20051(); };
+static sdlModule_oo7 oo7_header_version;
+INTERFACE_PREDEFS( AtomicPart);
+INTERFACE_PREDEFS( Connection);
+INTERFACE_PREDEFS( CompositePart);
+INTERFACE_PREDEFS( Document);
+INTERFACE_PREDEFS( Manual);
+INTERFACE_PREDEFS( Assembly);
+INTERFACE_PREDEFS1(ComplexAssembly,Assembly);
+INTERFACE_PREDEFS1(BaseAssembly,Assembly);
+INTERFACE_PREDEFS( Module);
+INTERFACE_PREDEFS( oo7Indices);
+const  long TypeSize = 10 ;
+const  long TitleSize = 40 ;
+const  long DummySize = 1000 ;
+enum AssemblyType {
+	Complex ,
+	Base };
+OVERRIDE_INDVAL(AssemblyType)
+NO_APPLY(AssemblyType)
+;
+enum BenchmarkOp {
+	Trav1 ,
+	Trav1WW ,
+	Trav2a ,
+	Trav2b ,
+	Trav2c ,
+	Trav3a ,
+	Trav3b ,
+	Trav3c ,
+	Trav4 ,
+	Trav5do ,
+	Trav5undo ,
+	Trav6 ,
+	Trav7 ,
+	Trav8 ,
+	Trav9 ,
+	Trav10 ,
+	Query1 ,
+	Query2 ,
+	Query3 ,
+	Query4 ,
+	Query5 ,
+	Query6 ,
+	Query7 ,
+	Query8 ,
+	Insert ,
+	Delete ,
+	Reorg1 ,
+	Reorg2 ,
+	WarmUpdate ,
+	MultiTrav1 ,
+	MultiTrav2 ,
+	MultiTrav3 ,
+	MultiTrav4 ,
+	MultiTrav5 ,
+	MultiTrav6 };
+OVERRIDE_INDVAL(BenchmarkOp)
+NO_APPLY(BenchmarkOp)
+;
+enum UpdateType {
+	UpdateOne ,
+	UpdateAll ,
+	UpdateRepeat };
+OVERRIDE_INDVAL(UpdateType)
+NO_APPLY(UpdateType)
+;
+enum UpdateDirectionType {
+	UpdateDirectionDo ,
+	UpdateDirectionUndo };
+OVERRIDE_INDVAL(UpdateDirectionType)
+NO_APPLY(UpdateDirectionType)
+;
+ struct PartIdSet ;
+ class CompositePart ;
+ class Connection ;
+ class Document ;
+ class Module ;
+ class Assembly ;
+ class ComplexAssembly ;
+class AtomicPart  : public sdlObj {
+COMMON_FCT_DECLS(AtomicPart)
+public:
+ long id ;
+ char type [10];
+ long buildDate ;
+ long x ;
+ long y ;
+ long docId ;
+BagInv<Connection,AtomicPart,36> to
+;
+BagInv<Connection,AtomicPart,48> from
+;
+ Ref< CompositePart  >  partOf ;
+virtual  void  swapXY ();
+virtual  void  toggleDate ();
+virtual  void  DoNothing () const ;
+virtual  long traverse ( enum BenchmarkOp op , struct PartIdSet &visitedIds ) const ;
+virtual  void  init ( long ptId , Ref< CompositePart  >  cp );
+virtual  void  Delete ();
+};
+class Connection  : public sdlObj {
+COMMON_FCT_DECLS(Connection)
+public:
+ char type [10];
+ long length ;
+RefInv<AtomicPart,Connection,20> from
+;
+RefInv<AtomicPart,Connection,24> to
+;
+virtual  void  init ( Ref< AtomicPart  >  fromPart , Ref< AtomicPart  >  toPart );
+};
+class CompositePart  : public sdlObj {
+COMMON_FCT_DECLS(CompositePart)
+public:
+ long id ;
+ char type [10];
+ long buildDate ;
+ Ref< Document  >  documentation ;
+ Bag< Ref< AtomicPart  >   >  parts ;
+ Ref< AtomicPart  >  rootPart ;
+ Bag< Ref< BaseAssembly  >   >  usedInPriv ;
+ Bag< Ref< BaseAssembly  >   >  usedInShar ;
+virtual  long traverse ( enum BenchmarkOp op ) const ;
+virtual  long traverse7 () const ;
+virtual  long reorg1 () const ;
+virtual  long reorg2 () const ;
+virtual  void  init ( long cpId );
+virtual  void  Delete ();
+};
+class Document  : public sdlObj {
+COMMON_FCT_DECLS(Document)
+public:
+ char title [40];
+ long id ;
+ sdl_string Text ;
+ long textLen ;
+ Ref< CompositePart  >  part ;
+virtual  long searchText ( char c ) const ;
+virtual  long replaceText ( LREF( char  )  oldString , LREF( char  )  newString );
+virtual  void  init ( long cpId , Ref< CompositePart  >  cref );
+virtual  void  Delete ();
+};
+class Manual  : public sdlObj {
+COMMON_FCT_DECLS(Manual)
+public:
+ char title [40];
+ long id ;
+ sdl_string Text ;
+ long textLen ;
+ Ref< Module  >  mod ;
+virtual  long searchText ( char c ) const ;
+virtual  long replaceText ( LREF( char  )  oldString , LREF( char  )  newString );
+virtual  long firstLast () const ;
+virtual  void  init ( long modId , Ref< Module  >  myMod );
+virtual  void  Delete ();
+};
+class Assembly  : public sdlObj {
+COMMON_FCT_DECLS(Assembly)
+public:
+ long id ;
+ char type [10];
+ long buildDate ;
+ enum AssemblyType assmType ;
+ Ref< ComplexAssembly  >  superAssembly ;
+ Ref< Module  >  oModule ;
+virtual  long traverse ( enum BenchmarkOp op ) const ;
+virtual  long traverse7 ( struct PartIdSet &visitedComplexIds ) const ;
+virtual  enum AssemblyType mytype () const ;
+virtual  void  DoNothing () const ;
+};
+class ComplexAssembly :public Assembly  {
+COMMON_FCT_DECLS(ComplexAssembly)
+public:
+ Bag< Ref< Assembly  >   >  subAssemblies ;
+virtual  long traverse ( enum BenchmarkOp op ) const ;
+virtual  long traverse7 ( struct PartIdSet &visitedComplexIds ) const ;
+virtual  enum AssemblyType mytype () const ;
+virtual  void  init ( long asId , Ref< Module  >  mod , Ref< ComplexAssembly  >  parentAssembly , long levelNo );
+};
+class BaseAssembly :public Assembly  {
+COMMON_FCT_DECLS(BaseAssembly)
+public:
+ Bag< Ref< CompositePart  >   >  componentsPriv ;
+ Bag< Ref< CompositePart  >   >  componentsShar ;
+virtual  long traverse ( enum BenchmarkOp op ) const ;
+virtual  long traverse7 ( struct PartIdSet &visitedComplexIds ) const ;
+virtual  enum AssemblyType mytype () const ;
+virtual  void  init ( long asId , Ref< Module  >  mod , Ref< ComplexAssembly  >  parentAssembly );
+};
+class Module  : public sdlObj {
+COMMON_FCT_DECLS(Module)
+public:
+ long id ;
+ char type [10];
+ long buildDate ;
+ Ref< Manual  >  man ;
+ Ref< ComplexAssembly  >  designRoot ;
+ Bag< Ref< BaseAssembly  >   >  allBases ;
+virtual  long traverse ( enum BenchmarkOp op ) const ;
+virtual  long scanManual () const ;
+virtual  long firstLast () const ;
+virtual  void  init ( long modId );
+virtual  void  Delete ();
+};
+class oo7Indices  : public sdlObj {
+COMMON_FCT_DECLS(oo7Indices)
+public:
+Index< long  , Ref< AtomicPart  >    >  AtomicPartIdx ;
+Index< long  , Ref< CompositePart  >    >  CompPartIdx ;
+Index< sdl_string  , Ref< Document  >    >  DocumentIdx ;
+Index< long  , Ref< Document  >    >  DocumentIdIdx ;
+Index< long  , Ref< BaseAssembly  >    >  BaseAssemblyIdx ;
+Index< sdl_string  , Ref< Module  >    >  ModuleIdx ;
+Index< long  , Ref< AtomicPart  >    >  BuildDateIndex ;
+ Set< Ref< Module  >   >  AllModules ;
+virtual  void  init ();
+};
+const int AtomicPart_OID = 20107;
+INTERFACE_POSTDEFS(AtomicPart)
+const int Connection_OID = 20109;
+INTERFACE_POSTDEFS(Connection)
+const int CompositePart_OID = 20111;
+INTERFACE_POSTDEFS(CompositePart)
+const int Document_OID = 20113;
+INTERFACE_POSTDEFS(Document)
+const int Manual_OID = 20115;
+INTERFACE_POSTDEFS(Manual)
+const int Assembly_OID = 20117;
+INTERFACE_POSTDEFS(Assembly)
+const int ComplexAssembly_OID = 20119;
+INTERFACE_POSTDEFS(ComplexAssembly)
+const int BaseAssembly_OID = 20121;
+INTERFACE_POSTDEFS(BaseAssembly)
+const int Module_OID = 20123;
+INTERFACE_POSTDEFS(Module)
+const int oo7Indices_OID = 20125;
+INTERFACE_POSTDEFS(oo7Indices)
+
+#ifdef MODULE_CODE
+struct rModule oo7("oo7",0,10,20051 );
+#define CUR_MOD oo7
+extern char * metatype_version_1_29;
+int sdlModule_oo7::oid_20051(){ return (int)metatype_version_1_29; };
+template class noappIndVal<AssemblyType>;
+template class noappIndVal<BenchmarkOp>;
+template class noappIndVal<UpdateType>;
+template class noappIndVal<UpdateDirectionType>;
+SETUP_VTAB(AtomicPart,0)
+NEW_PERSISTENT(AtomicPart)
+CLASS_VIRTUALS(AtomicPart)
+template class BRef<AtomicPart,Ref<any> >;
+template class WRef<AtomicPart>;
+template class Apply<Ref<AtomicPart> >;
+template class RefPin<AtomicPart>;
+template class WRefPin<AtomicPart>;
+template class srt_type<AtomicPart>;
+TYPE(AtomicPart) TYPE_OBJECT(AtomicPart);
+TYPE_CAST_DEF(AtomicPart)
+TYPE_CAST_END(AtomicPart)
+void AtomicPart::__apply(HeapOps op) {
+to.__apply(op);
+from.__apply(op);
+partOf.__apply(op);
+} // end AtomicPart::__apply
+BAG_INV_IMPL(Connection,from,AtomicPart,36)
+BAG_INV_IMPL(Connection,to,AtomicPart,48)
+SETUP_VTAB(Connection,0)
+NEW_PERSISTENT(Connection)
+CLASS_VIRTUALS(Connection)
+template class BRef<Connection,Ref<any> >;
+template class WRef<Connection>;
+template class Apply<Ref<Connection> >;
+template class RefPin<Connection>;
+template class WRefPin<Connection>;
+template class srt_type<Connection>;
+TYPE(Connection) TYPE_OBJECT(Connection);
+TYPE_CAST_DEF(Connection)
+TYPE_CAST_END(Connection)
+void Connection::__apply(HeapOps op) {
+from.__apply(op);
+to.__apply(op);
+} // end Connection::__apply
+REF_INV_IMPL(AtomicPart,to,Connection,20)
+REF_INV_IMPL(AtomicPart,from,Connection,24)
+SETUP_VTAB(CompositePart,0)
+NEW_PERSISTENT(CompositePart)
+CLASS_VIRTUALS(CompositePart)
+template class BRef<CompositePart,Ref<any> >;
+template class WRef<CompositePart>;
+template class Apply<Ref<CompositePart> >;
+template class RefPin<CompositePart>;
+template class WRefPin<CompositePart>;
+template class srt_type<CompositePart>;
+TYPE(CompositePart) TYPE_OBJECT(CompositePart);
+TYPE_CAST_DEF(CompositePart)
+TYPE_CAST_END(CompositePart)
+void CompositePart::__apply(HeapOps op) {
+documentation.__apply(op);
+parts.__apply(op);
+rootPart.__apply(op);
+usedInPriv.__apply(op);
+usedInShar.__apply(op);
+} // end CompositePart::__apply
+SETUP_VTAB(Document,0)
+NEW_PERSISTENT(Document)
+CLASS_VIRTUALS(Document)
+template class BRef<Document,Ref<any> >;
+template class WRef<Document>;
+template class Apply<Ref<Document> >;
+template class RefPin<Document>;
+template class WRefPin<Document>;
+template class srt_type<Document>;
+TYPE(Document) TYPE_OBJECT(Document);
+TYPE_CAST_DEF(Document)
+TYPE_CAST_END(Document)
+void Document::__apply(HeapOps op) {
+Text.__apply(op);
+part.__apply(op);
+} // end Document::__apply
+SETUP_VTAB(Manual,0)
+NEW_PERSISTENT(Manual)
+CLASS_VIRTUALS(Manual)
+template class BRef<Manual,Ref<any> >;
+template class WRef<Manual>;
+template class Apply<Ref<Manual> >;
+template class RefPin<Manual>;
+template class WRefPin<Manual>;
+template class srt_type<Manual>;
+TYPE(Manual) TYPE_OBJECT(Manual);
+TYPE_CAST_DEF(Manual)
+TYPE_CAST_END(Manual)
+void Manual::__apply(HeapOps op) {
+Text.__apply(op);
+mod.__apply(op);
+} // end Manual::__apply
+SETUP_VTAB(Assembly,0)
+NEW_PERSISTENT(Assembly)
+CLASS_VIRTUALS(Assembly)
+template class BRef<Assembly,Ref<any> >;
+template class WRef<Assembly>;
+template class Apply<Ref<Assembly> >;
+template class RefPin<Assembly>;
+template class WRefPin<Assembly>;
+template class srt_type<Assembly>;
+TYPE(Assembly) TYPE_OBJECT(Assembly);
+TYPE_CAST_DEF(Assembly)
+TYPE_CAST_END(Assembly)
+void Assembly::__apply(HeapOps op) {
+superAssembly.__apply(op);
+oModule.__apply(op);
+} // end Assembly::__apply
+SETUP_VTAB(ComplexAssembly,0)
+NEW_PERSISTENT(ComplexAssembly)
+CLASS_VIRTUALS(ComplexAssembly)
+template class BRef<ComplexAssembly,Ref<Assembly> >;
+template class WRef<ComplexAssembly>;
+template class Apply<Ref<ComplexAssembly> >;
+template class RefPin<ComplexAssembly>;
+template class WRefPin<ComplexAssembly>;
+template class srt_type<ComplexAssembly>;
+TYPE(ComplexAssembly) TYPE_OBJECT(ComplexAssembly);
+TYPE_CAST_DEF(ComplexAssembly)
+TYPE_CAST_CASE(ComplexAssembly,Assembly)
+TYPE_CAST_END(ComplexAssembly)
+void ComplexAssembly::__apply(HeapOps op) {
+	Assembly::__apply(op);
+subAssemblies.__apply(op);
+} // end ComplexAssembly::__apply
+SETUP_VTAB(BaseAssembly,0)
+NEW_PERSISTENT(BaseAssembly)
+CLASS_VIRTUALS(BaseAssembly)
+template class BRef<BaseAssembly,Ref<Assembly> >;
+template class WRef<BaseAssembly>;
+template class Apply<Ref<BaseAssembly> >;
+template class RefPin<BaseAssembly>;
+template class WRefPin<BaseAssembly>;
+template class srt_type<BaseAssembly>;
+TYPE(BaseAssembly) TYPE_OBJECT(BaseAssembly);
+TYPE_CAST_DEF(BaseAssembly)
+TYPE_CAST_CASE(BaseAssembly,Assembly)
+TYPE_CAST_END(BaseAssembly)
+void BaseAssembly::__apply(HeapOps op) {
+	Assembly::__apply(op);
+componentsPriv.__apply(op);
+componentsShar.__apply(op);
+} // end BaseAssembly::__apply
+SETUP_VTAB(Module,0)
+NEW_PERSISTENT(Module)
+CLASS_VIRTUALS(Module)
+template class BRef<Module,Ref<any> >;
+template class WRef<Module>;
+template class Apply<Ref<Module> >;
+template class RefPin<Module>;
+template class WRefPin<Module>;
+template class srt_type<Module>;
+TYPE(Module) TYPE_OBJECT(Module);
+TYPE_CAST_DEF(Module)
+TYPE_CAST_END(Module)
+void Module::__apply(HeapOps op) {
+man.__apply(op);
+designRoot.__apply(op);
+allBases.__apply(op);
+} // end Module::__apply
+SETUP_VTAB(oo7Indices,7)
+NEW_PERSISTENT(oo7Indices)
+CLASS_VIRTUALS(oo7Indices)
+template class BRef<oo7Indices,Ref<any> >;
+template class WRef<oo7Indices>;
+template class Apply<Ref<oo7Indices> >;
+template class RefPin<oo7Indices>;
+template class WRefPin<oo7Indices>;
+template class srt_type<oo7Indices>;
+TYPE(oo7Indices) TYPE_OBJECT(oo7Indices);
+TYPE_CAST_DEF(oo7Indices)
+TYPE_CAST_END(oo7Indices)
+void oo7Indices::__apply(HeapOps op) {
+AtomicPartIdx.__apply(op);
+CompPartIdx.__apply(op);
+DocumentIdx.__apply(op);
+DocumentIdIdx.__apply(op);
+BaseAssemblyIdx.__apply(op);
+ModuleIdx.__apply(op);
+BuildDateIndex.__apply(op);
+AllModules.__apply(op);
+} // end oo7Indices::__apply
+#undef CUR_MOD oo7
+template class  Bag< Ref< Connection  >   >  ;
+ template class  Set< Ref< Connection  >   >  ;
+ template class Sequence< Ref< Connection  >    > ;
+template class  Bag< Ref< AtomicPart  >   >  ;
+ template class  Set< Ref< AtomicPart  >   >  ;
+ template class Sequence< Ref< AtomicPart  >    > ;
+template class  Bag< Ref< BaseAssembly  >   >  ;
+ template class  Set< Ref< BaseAssembly  >   >  ;
+ template class Sequence< Ref< BaseAssembly  >    > ;
+template class  Bag< Ref< Assembly  >   >  ;
+ template class  Set< Ref< Assembly  >   >  ;
+ template class Sequence< Ref< Assembly  >    > ;
+template class  Bag< Ref< CompositePart  >   >  ;
+ template class  Set< Ref< CompositePart  >   >  ;
+ template class Sequence< Ref< CompositePart  >    > ;
+template class  Set< Ref< Module  >   >  ;
+ template class Sequence< Ref< Module  >    > ;
+
+#endif MODULE_CODE
+#endif oo7_mod

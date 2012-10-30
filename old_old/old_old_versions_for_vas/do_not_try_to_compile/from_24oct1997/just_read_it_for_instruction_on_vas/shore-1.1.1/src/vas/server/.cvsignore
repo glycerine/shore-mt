@@ -1,0 +1,27 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+Makefile
+.gdbinit
+.purify
+.pure
+*.bak
+TODO
+NO_G_FILES
+voltab
+volumes
+log
+tags
+vas.rc
+oo7.rc
+.depend
+TESTRPC.README
+local.tmpl
+nfs.h
+nfs_svc.c
+nfs_xdr.c
+shore

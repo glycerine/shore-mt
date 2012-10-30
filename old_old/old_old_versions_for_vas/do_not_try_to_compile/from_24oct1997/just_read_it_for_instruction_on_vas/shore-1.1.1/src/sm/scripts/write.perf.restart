@@ -1,0 +1,3 @@
+
+set STARTOVER 1
+source $script_dir/write.perf

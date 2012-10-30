@@ -1,0 +1,36 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  This script runs VERIFY scripts (ones that use the gdbm
+#  verification scheme -- now obsolete).  Can only be run with
+#  a system built with -DUSE_VERIFY (in shore.def) .
+#
+
+source $script_dir/vol.init
+
+set RESTART 1
+
+set scripts [ list append.st truncate.st update.st ]
+
+verbose CLEANUP BEFORE rec.all :
+cleanup stdout
+addcleanupvars {script RESTART}
+
+foreach script $scripts {
+    verbose
+    verbose "RUNNING:  $script"
+    source $script_dir/$script
+    checkstats  $script
+    puts stdout [concat CLEANUP AFTER  $script  : ]
+    cleanup stdout
+}
+verbose "rec.all STATUS: ok"
+if {[is_set RESTART]} {
+	unset RESTART
+    deletecleanupvars {RESTART}
+}

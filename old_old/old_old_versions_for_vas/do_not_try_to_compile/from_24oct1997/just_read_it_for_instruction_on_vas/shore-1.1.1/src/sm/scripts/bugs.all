@@ -1,0 +1,47 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+source $script_dir/vol.init
+source $script_dir/trans.lib
+
+set scripts [list  \
+    btree_split.1 createsmall.1  file_destroy.1 \
+    forward.1 lgrec_conv.1 mount.1 \
+    record_create_abort.1\
+    recovery.1 \
+    alloc.2 \
+    sync.bug \
+    ]
+
+echo CLEANUP BEFORE bugs.all :
+cleanup stdout
+addcleanupvars {script}
+
+foreach script $scripts {
+    echo
+    echo RUNNING: $script (no checkpoint)
+    source $script_dir/bugs.fixed/$script
+    checkstats  $script
+    puts stdout [concat CLEANUP AFTER  $script  : ]
+    cleanup stdout
+}
+
+set scripts [list  \
+    alloc.2 \
+    create_file.sync  \
+    file.undo \
+    ]
+
+foreach script $scripts {
+    echo
+    echo RUNNING: $script (with checkpoint)
+    source $script_dir/bugs/$script
+    checkstats  $script
+    puts stdout [concat CLEANUP AFTER  $script  : ]
+    cleanup stdout
+}
+

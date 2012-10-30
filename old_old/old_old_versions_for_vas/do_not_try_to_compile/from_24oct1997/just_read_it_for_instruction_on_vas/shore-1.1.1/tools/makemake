@@ -1,0 +1,648 @@
+#!/bin/perl -w
+use strict 'subs';
+use Getopt::Std;
+
+# Copyright (c) 1994, 1995 Computer Sciences Department,
+# University of Wisconsin-Madison, subject to the terms
+# and conditions given in the file COPYRIGHT.  All Rights
+# Reserved.
+
+# $Header: /p/shore/shore_cvs/tools/makemake,v 1.42 1997/09/30 21:14:39 solomon Exp $
+
+# makemake [-r]
+
+# Replaces the "imake" untility distributed with X11.
+# Generally invoked as "tools/makemake" or "../../../tools/makemake",
+# it generates Makefile from Imakefile.  With the -r flag, it also
+# generates PATH/Makefile from PATH/Imakefile for each PATH/Imakefile
+# that exists in a descendant of the current working directory.
+# It is a fatal error if there is a writable Makefile in any directory with a
+# Imakefile.
+
+# The Makefile is created by running
+#        gcc -E -I$dir -I$dir/.. -I$root/config \
+#               -Uunix -DTop=$to_top -DConfig=$root/config
+# on an input consisting of the single line
+#        #include <Imake.tmpl>
+# and post-processing the output.  Here $dir is the directory containing
+# the Imakefile (and the generated Makefile), $root/config is a path
+# to the config directory (from the place where the script is actually run),
+# and $to_top is a path from the directory containing the Imakefile to $root.
+
+# Note that in addition to the cpp flags explicitly defined here
+# (Top and Config), gcc on a particular platform typically defines
+# a few other flags describing the local environment (type
+#    gcc -E -dM - </dev/null
+# to see what these are).
+
+# The post-processor implements a simple macro processor and does a
+# little extra clean-up.
+
+# A macro definition looks like this:
+#    %DEF name(param1,param2)
+#    body
+#    %ENDDEF
+# A macro call looks like this:
+#    %GEN name(arg1,arg2)
+# The final close parenthesis must be the last non-blank character on the line.
+# The call may be continued over multiple lines simply by ending each line
+# but the last with some non-blank character other than a close parenthesis.
+# Leading whitespace on each continuation line is replaced with a single space
+# Otherwise, all whitespace is retained.   Thus
+#    %GEN something(this, th
+#             at)
+# is equivalent to
+#    %GEN something(this, th at)
+# and calls macro 'something' with arguments 'this' and ' th at' (note the
+# second argument contains two spaces).  Argument parsing is currently very
+# simple-minded:  The argument list is everthing from the first open
+# parenthesis to the last close parenthesis, and every comma is taken
+# as a separator between arguments.  There is no check for balanced parentheses
+# and no way to include a comma in an argument.
+
+# A macro body may contain a line of the form
+#    %NON_NULL whatever
+# If "whatever" (after any parameter substitution) is null (only whitespace),
+# the remainder of the body is skipped during expansion.
+
+# The call is copied verbatim (perserving spaces, tabs and newlines)
+# except that occurences of param1 are replaced by arg1, etc.
+# The replacement text is rescanned for macro calls allowing one macro to call
+# another.  Otherwise, there is no nesting.
+
+# There are three "built-in" macros:
+
+# %CROSS(list1, list2)
+# The arguments list1 and list2 are broken into whitespace-separated lists
+# of words, each word in list1 is concatenated with each word in list2,
+# and the resulting list of words are joined with spaces.
+# For example, the result of %CROSS(a b c, d e) is 'ad ae bd be cd ce'.
+# Occurrences of this macro are exapaned in each line _before_ the line
+# is checked for other % escapes.
+
+# %FOREACH(parm,args,body)
+# The 'args' are split into a whitepace-separated list of words and
+# for each word, a copy of 'body' is generated with all occurences of 'parm'
+# replaced by the word.  The 'body' may extend over multiple lines; it
+# is terminated at the first line ending with ')'.  Note that unlike
+# %GEN, newlines and other whitespace are not compressed out of the arguemnt.
+# For example,
+#   %FOREACH(file,one two,destdir/file: file
+#       cp file destdir
+#   )
+# expands to
+#   destdir/one: one
+#       cp one destdir
+#   destdir/two: two
+#       cp two destdir
+
+# %PATH(path) changes 'path', which is a path relative to the $root, to a path
+# relative to the directory containing the Imakefile. For example, in
+# in src/vas/client, %PATH(src/vas/include) becomes ../include, while in
+# src/sdl it becomes ../vas/include.  We could use $root/path, but that would
+# be a little more confusing in the generated Makefile.  For example,
+# in src/vas/client, %PATH(src/vas/include) expands to ../include.
+# rather than ../../../src/vas/include.
+
+# Additionally,
+#    lines starting with '#' are removed,
+# and after macros are expanded,
+#    '%' at the end of a line is replaced by backslash,
+#    '%|' is deleted along with any white space on either side of it,
+#    '%x' is replaced by 'x' for any other character x,
+#         In particular, you can generate comments in the resulting Makefile
+#         by using source lines starting '%#'; they pass through the C
+#         preprocessor unmolested and have the leading % removed by the
+#         postprocessor here.
+#    trailing spaces are removed from all lines, and
+#    multiple consecutive blank lines are compressed in to one blank line.
+# The keywords %DEF, %ENDDEF, and %GEN are only recognized at
+# the beginnings of lines.
+
+# Variables associated with the directory tree.
+# Let
+#   ROOT    denote the installation root (this script is ROOT/tools/makemake)
+#   CWD     denote the directory where this script is invoked
+#   DIR     denote the directory containing an Imakefile to be processed
+#           (DIR is always a descendant of CWD, which is a descendant of ROOT)
+# Then
+#   $root     is the relative path from CWD to ROOT
+#   $dir      is the relative path from CWD to DIR
+#   $to_top   is the relative path form DIR to ROOT
+#   $cwd      is the relative path from ROOT to CWD
+#   $from_top is the relative path from ROOT to DIR
+# For example, when the file ROOT/src/vas/client/Imakefile is processed,
+#   $to_top   = "../../.."
+#   $from_top = "src/vas/client"
+# and if script was invoked as "tools/makemake" from ROOT,
+#   $root     = "."
+#   $cwd      = "."
+#   $dir      = "src/vas/client"
+# but if it was invoked as "../../tools/makemake" from ROOT/src/vas (which is
+# what happens when you type "make make" in ROOT/src/vas),
+#   $root     = "../.."
+#   $cwd      = "src/vas"
+#   $dir      = "client"
+
+$opt_r = 0;
+$opt_d = 0; # undocumented debug option -d (don't actually do system commands)
+$opt_v = 0; # undocumented debug option -v (verbose)
+$opt_V = 0; # undocumented debug option -V (extra verbose)
+die "usage: $0 [-r]\n"
+	unless getopts("rdvV");
+$level = 0;	# recursion level in %GEN calls
+
+# Find paths between CWD and ROOT
+# Note that CWD must be a descendant of ROOT.
+#   When invoked from       $root      $cwd
+#     ROOT                   "."        "."
+#     ROOT/src               ".."       "src"
+#     ROOT/src/vas           "../.."    "src/vas"
+# Thus if `pwd` has the form .../src/x/y,
+#    $cwd = "src/x/y" and $root = "../../.."
+# else if "./src" exists, we assume we are at ROOT and
+#    $cwd = $root = "."
+# else there is an error.
+chomp($cwd = `pwd`);
+if ($cwd =~ m|/src$|) {
+	$root = "..";
+	$cwd = "src";
+}
+elsif ($cwd =~ s|.*/src/|src/|) {
+	$root = $cwd;
+	$root =~ s|[^/]+|..|g;
+}
+else {
+	die "$0: Cannot figure out the root directory\n"
+		unless -d "src";
+	$root = $cwd = ".";
+}
+
+$config = "$root/config/config.h";
+
+die <<END unless -e $config;
+$config: $!
+   copy $config.example to $config
+   and edit as described in the installation manual
+END
+
+# Produce some diagnostic information to document the current configuration.
+
+print STDERR "Configuring Makefiles with the definitions in $config:\n";
+
+# Gather up defines from config.h to print them out here.
+# NB: this code only understands simple un-nested #ifdef and #ifundef
+# -- no #else, #elsif, etc.
+# As a special kludge, it also handles #if defined(X) || defined(Y) ...
+open(FI, "<$config");
+$skipping = 0;
+while (<FI>) {
+	chomp();
+	next unless /^#/;
+	($command, $var, $val) = split(' ',$_,3);
+	$val = 1 unless $val;
+	if ($command eq "#endif") {
+		$skipping = 0;
+		next;
+	}
+	next if $skipping;
+	if ($command eq "#undef") {
+		$def{$var} = undef;
+	} elsif ($command eq "#define") {
+		while ($val =~ s/\\$//) {
+			chomp($val .= <FI>);
+		}
+		$def{$var} = $val;
+	} elsif ($command eq "#ifdef") {
+		$skipping = !defined($def{$var});
+	} elsif ($command eq "#ifndef") {
+		$skipping = defined($def{$var});
+	} elsif ($command eq "#if") {
+		$val = "$var $val";
+		$skipping = 1;
+		while ($val =~ s/defined\((\w*)\)\s*\|*\s*//) {
+			$var = $1;
+			if (defined($def{$var})) {
+				$skipping = 0;
+				last;
+			}
+		}
+	}
+	else {
+		warn "Unknown control $command in file $config\n";
+	}
+}
+close(FI);
+
+print STDERR "The following options are disabled:\n";
+$line = "   ";
+for $var (keys %def) {
+	if (length($line) + length($var) > 79) {
+		print STDERR "$line\n";
+		$line = "   ";
+	}
+	next if defined $def{$var};
+	$line .= " $var";
+}
+print STDERR "$line\n" unless $line =~ /^\s*$/;
+print STDERR "The following options are enabled:\n";
+$line = "   ";
+for $var (keys %def) {
+	next unless defined $def{$var};
+	$tmp = $def{$var};
+	$tmp = ($tmp && $tmp ne 1) ? " $var='$tmp'" : " $var";
+	if (length($line) + length($tmp) > 79) {
+		print STDERR "$line\n";
+		$line = "   ";
+	}
+	$line .= " $tmp";
+}
+print STDERR "$line\n" unless $line =~ /^\s*$/;
+
+$line = "   ";
+for (`gcc -E -dM - </dev/null`) {
+	chomp();
+	($command, $var, $val) = split(' ',$_,3);
+	$tmp = " $var";
+	$tmp .= "=$val" if $val != 1;
+	if (length($line) + length($tmp) > 79) {
+		print STDERR "$line\n";
+		$line = "   ";
+	}
+	$line .= " $tmp";
+}
+print STDERR "$line\n" unless $line =~ /^\s*$/;
+
+################################################# end of diagnostics
+
+# Now actaully do the translation
+
+@fnames = $opt_r ? `find . -name Imakefile -print` : "Imakefile";
+for (@fnames) {
+	chomp();
+	s|^\./||;
+	# now $_ is a path from CWD to DIR in the form "foo/baz/Imakefile"
+	if ($_ eq "Imakefile") {
+		$dir = ".";
+	}
+	else {
+		die "$0: bad Imake file name $_\n"
+			unless m|(.*)/Imakefile|;
+		$dir = $1;	# foo/baz
+	}
+	$to_top = $root;
+	$from_top = $cwd;
+	while (s|([^/]*)/||) {
+		$to_top .= "/..";
+		$from_top .= "/$1";
+	}
+	# trim leading './'
+	$to_top =~ s|^\./||;
+	$from_top =~ s|^\./||;
+
+	$makefile = "$dir/Makefile";
+	$new_makefile = "$dir/Makefile.new";
+	die "Cannot replace writable file $makefile\n" if -w $makefile;
+	print STDERR "building $makefile from $dir/Imakefile\n";
+	# print STDERR "top for $dir is $to_top\n";
+	do_system("/bin/rm -f $new_makefile");
+	$command = <<END;
+		echo "#include <Imake.tmpl>"
+			| gcc -E -I$dir -I$dir/.. -I$root/config
+			   -Uunix -DTop=$to_top -DConfig=$root/config - |
+END
+	$command =~ s/\s+/ /g;
+	die "imake $dir/Imakefile: $!\n"
+		unless open(PIPE,$command);
+	die "$new_makefile: $!\n" unless open(MAKEFILE,">$new_makefile");
+	$blank_lines = 0;
+	print STDERR "   generating $new_makefile ...\n" if $opt_v;
+	print STDERR "using command '$command'\n" if $opt_v;
+	process_macros();
+	do_system("mv -f $makefile $makefile.bak") if -e $makefile;
+	do_system("mv $new_makefile $makefile");
+	do_system("chmod -w $makefile");
+}
+
+exit(0);
+
+################################################# end of "main" program
+
+# Do the perl system() command, with a little extra feedback and checking.
+sub do_system {
+	local ($cmd) = @_;
+	print STDERR "   $cmd\n" if $opt_v;
+	system $cmd unless $opt_d;
+	fatal("$cmd: $!") unless $? == 0;
+}
+
+# Main loop of the postprocessor.  PIPE supplies the result of the
+# cpp invocation.
+sub process_macros {
+	local ($_, $arg, $blank_lines, $body, $name, $parm, @args);
+	undef %body;
+	while (<PIPE>) {
+		if (/^\#/) {
+			# Process '# line file' line generated by cpp, to synchronize
+			# error messages.
+
+			($_, $curline, $curfile, $_) = split();
+			$curline--;
+			next;
+		}
+		$curline++;
+		if (/^\%DEF/) {
+			# Gather up a macro definition
+
+			fatal("Bad macro definition $_")
+				unless /^\%DEF\s*(\w*)\s*\(([^)]*)\)/;
+			$name = $1;
+			warn "redefining macro $name\n" if exists $body{$name};
+			@args = split(/\s*,\s*/,$2);
+			$args{$name} = [@args];
+			$argc{$name} = scalar(@args);
+			$body = "";
+			while (<PIPE>) {
+				last if /^\%ENDDEF\b/;
+				$body .= $_;
+			}
+			$body{$name} = $body;
+			if ($opt_V) {
+				print "====define $name(", join(',',@{$args{$name}}), ")\n";
+				print "$body{$name}----- end of $name\n";
+			}
+		}
+		else {
+			# Call put_line to process any macro calls on the line and
+			# output the results
+			put_line($_);
+		}
+	}
+	$blank_lines = 0;
+} # process_macros
+
+# Process one "line" and send the resuls to MAKEFILE.
+# The "line" may in fact be an expanded macro call containing multiple lines.
+# If the input contains a macro call (%GEN), it may generate a recursive call
+# to this procedure.
+sub put_line {
+	local ($remainder) = @_;
+	local ($call, $name, $body, $arg, @args, $parm, $line, $_, $dummy);
+	print "***($level) put_line<$remainder>\n" if $opt_V;
+
+	while ($remainder) {
+		($_,$remainder) = split(/\n/, $remainder, 2);
+		print "next line($_\#$remainder)\n" if $opt_V;
+		
+		builtins();
+
+		# Special treatment for FOREACH builtin macro
+		if (/\%FOREACH/) {
+			# Gather continuation lines
+			$call = $_;
+			until ($call =~ /\)\s*$/) {
+				if ($remainder) {
+					($_,$remainder) = split(/\n/, $remainder, 2);
+				}
+				else {
+					$_ = <PIPE>;
+				}
+				fatal("Unterminated FOREACH call")
+					unless defined $_;
+				builtins();
+				$call .= "\n$_";
+			}
+			fatal("malformed FOREACH CALL '$call'")
+				unless ($dummy, $dummy, $body, @args)
+					= get_call($call, '\%FOREACH');
+			fatal("FOREACH requires three arguments")
+				unless @args == 3;
+			foreach $arg (split(' ',$args[1])) {
+				$call = $args[2];
+				$call =~ s/\b$args[0]\b/$arg/g;
+				print MAKEFILE $call;
+			}
+			next;
+		}
+
+		if (/^\%GEN/) {
+			# Macro call.
+
+			# First process continuation lines
+			$call = $_;
+			until ($call =~ /\)\s*$/) {
+				if ($remainder) {
+					($_,$remainder) = split(/\n/, $remainder, 2);
+				}
+				else {
+					$_ = <PIPE>;
+				}
+				fatal("Unterminated macro call")
+					unless defined $_;
+				builtins();
+				chomp();
+				s/^\s*/ /;
+				$call .= $_;
+			}
+
+			# parse the call
+			fatal("Bad macro call '$_'")
+				unless ($name, $dummy, $body, @parms) = get_call($call, '\w+');
+
+			# Generate a header comment
+			print MAKEFILE "\n" if $blank_lines;
+			$blank_lines = 0;
+			++$level;
+			print MAKEFILE "##### $name(",join(',',@parms),")\n"
+				if $level == 1 || $opt_v;
+
+			$body = $body{$name};
+			fatal("Undefined macro '$name'")
+				unless defined $body;
+
+			warn "Warning: wrong number of parameters for macro $name\n"
+					. "...expected $argc{$name} arguments: "
+					. join(', ',@{$args{$name}})
+					. "\n...found " . scalar(@parms) . " arguments:\n\t"
+					. join("\n\t",@parms) . "\n"
+				unless scalar(@parms) == $argc{$name};
+
+			# Replace all occurrences of formal parameters with actuals in the
+			# body
+			print "+++ call $name\n" if $opt_V;
+			for $arg (@{$args{$name}}) {
+				$parm = shift(@parms);
+				$parm = "" unless $parm;
+				print "+ '$arg' = '$parm'\n" if $opt_V;
+				$body =~ s/\b$arg\b/$parm/g;
+			}
+			print "+++ after expansion \n$body+++  end\n" if $opt_V;
+
+			# Strip everything from line containing only /%NON_NUL\s*/ to end.
+			$body =~ s/^\%NON_NULL\s*\n.*//ms;
+			# Remove any remaining %NON_NULL tests
+			$body =~ s/^\%NON_NULL.*\n//m;
+			print "+++ after NONNULL \n$body+++  end\n" if $opt_V;
+
+			# Reprocess the expanded body by recursively calling put_line
+			put_line($body);
+			print MAKEFILE "# end $name\n" if $opt_v;
+			print "## end of $name\n" if $opt_V;
+			$level--;
+			next;
+		}
+		s/\%$/\\/;
+		s/\s*\%\|\s*//g;
+		s/\%(.)/$1/g;
+		s/\s+$//;
+		if ($_) {
+			print MAKEFILE "\n" if $blank_lines;
+			$blank_lines = 0;
+			print MAKEFILE "$_\n";
+		}
+		else {
+			$blank_lines++;
+		}
+	} # while ($remainder)
+	print "## end put_line($level)\n" if $opt_V;
+} # put_line
+
+# handle "built-in" macros (except FOREACH, which is even more special)
+sub builtins {
+	local ($call, $before, $after, @args);
+	while (($call, $before, $after, @args) = get_call($_, '\%CROSS|\%PATH')) {
+		if ($call eq '%CROSS') {
+			fatal("CROSS requires two arguments") unless @args == 2;
+			$_ = $before . cross(@args) . $after;
+		}
+		elsif ($call eq '%PATH') {
+			fatal("PATH requires one argument") unless @args == 1;
+			$_ = $before . path(@args) . $after;
+		}
+		else { die $call; } # can't happen?
+	}
+} # builtin
+
+sub cross {
+	local ($list1,$list2) = @_;
+	local ($x, $y, @res);
+	@res = ();
+	foreach $x (split(' ', $list1)) {
+		foreach $y (split(' ', $list2)) {
+			push(@res,"$x$y");
+		}
+	}
+	return join(' ',@res);
+} # cross
+
+sub path {
+	local ($path) = @_;
+	local($here, $part);
+	# The argument $path is a relative path from ROOT.  Change it to a relative
+	# path from DIR.
+
+	# Case 0
+	return $path if $from_top eq '.';
+
+	# Case 1: The path names a descendant of DIR
+	#   $path           $from_top      result
+	#   src/a/b         src/a/b         .
+	#   src/a/b/c       src/a/b         c
+	#   src/a/b/c/d     src/a/b         c/d
+	return '.' if $path eq $from_top;
+	return $path if $path =~ s|$from_top/||;
+
+	# Case 2:  The path names an ancestor or cousin of DIR
+	#   $path           $from_top      result
+	#   src/a/b/c       src/a/b/c/d     ..
+	#   src/a/b         src/a/b/c/d     ../..
+	#   src/a/b/c/x     src/a/b/c/d     ../x
+	#   src/a/b/x       src/a/b/c/d     ../../x
+
+	# Strip maximal common prefix (there must be a better way to do this!)
+	$here = $from_top;
+	while ($path =~ s|([^/]*/)||) {
+		$part = $1;
+		next if $here =~ s/$part//;
+		$path = $part . $path;
+		last;
+	}
+
+	# Replace remaining components of $from_top with .. and follow with
+	# remaining components of $path
+	$here =~ s|[^/]+|..|g;
+	return "$here/$path";
+} # path
+
+sub fatal {
+	local($msg) = @_;
+	if (defined $curfile) {
+		$curfile =~ s/"//g;
+		print STDERR "fatal error processing file $curfile, line $curline";
+		print STDERR ":\n" if $msg;
+	}
+	print STDERR "$msg\n";
+	exit(1);
+}
+
+# Gather up a macro call
+#   (macro-name, before, after, arg1, ...) = get_call(line, macro_names)
+# Argument 'macro_names' is a pattern of the form 'name1|name2|...'.
+# Results 'before' and 'after' are the parts of the line preceding and
+# following the (first) call of any of the names, and the remaning results are
+# the arguments.  The call is terminated by a matching parentheses, and the
+# arguments are separated by "top-level" commas.
+# For example, if $line = "XXX outer(inner(f(a,b), c) other(d) YYY",
+#   get_call($line, "other|inner")
+# returns ("inner", "XXX outer(", " other(d) YYY", "f(a,b)", " c").
+# Note that the leading space on " c" is retained as is the space following the
+# call.
+# On failure, the null vector is returned.
+sub get_call {
+	local ($_,$pattern) = @_;
+	local ($before, $call, @args, $arg);
+
+	return () unless s/(.*?)($pattern)\(//;
+	$before = $1;
+	$call = $2;
+	@args = ();
+	while ($_) {
+		$arg = get_arg(",)");
+		return ()
+			unless defined($arg);
+		$arg =~ s/[,)]\Z//;	# strip trailing ',' or ')'
+		push(@args, $arg);
+		return ($call,$before,$_,@args)
+			if $& eq ')';
+	}
+	return ();
+}
+
+# Helper function for get_arg.  Each arg is matched by the grammar
+#   arg ::= ( no-comma-or-paren | left bal )* (comma | right)
+#   bal ::= ( no-paren | left bal )* right
+# Get_arg matches "( YYY | left bal )* XXX", or equivalently,
+# "( YYY* left bal )* YYY* XXX", where XXX is the character-class passed in as
+# an argument and YYY is anything other than a left paren or a member of XXX.
+#
+# Note that it expects the opening paren (if any) to have been consumed
+# by the caller, and it consumes the closing delimiter (comma or paren)
+# itself.
+# It operates directly on the global $_.
+sub get_arg {
+	local ($class) = @_;
+	local $res = "";
+	local $pat1 = "\\A[^($class]*[(]";
+	local $pat2 = "\\A[^($class]*[$class]";
+	local $bal;
+	while (s/$pat1//) {
+		$res .= $&;
+		$bal = get_arg(")");
+		return undef unless defined($bal);
+		$res .= $bal;
+	}
+	return undef unless s/$pat2//;
+	$res .= $&;
+	return $res;
+}
+__END__

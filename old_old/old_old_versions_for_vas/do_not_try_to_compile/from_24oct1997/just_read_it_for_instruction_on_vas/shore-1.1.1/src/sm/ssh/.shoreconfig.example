@@ -1,0 +1,65 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# $Header: /p/shore/shore_cvs/src/sm/ssh/.shoreconfig.example,v 1.4 1997/05/27 13:04:09 kupsch Exp $
+#
+# Example .shoreconfig file for ssh
+#
+# Edit a copy of this as you see fit, and save it as
+# ~/.shoreconfig or ./.shoreconfig.
+#
+
+# Options have the form:
+#		type.class.progname.option
+#
+# type = general type of program ("ssh" for the ssh server)
+# class = class of program within type (server or client or whatever
+#		application chooses)
+# progname = program executable name (don't use a.out)
+# option = specific name of option
+#
+# e.g., ssh.server.ssh.ssh_libdir  
+#
+
+#
+# STORAGE MANAGER OPTIONS
+#
+
+# Specify the log directory for all server programs
+*.server.*.sm_logging: yes
+
+#
+# if you want your log to be on a different device,
+# change sm_logdir or make log a link somewhere into
+# the desired device
+#
+*.server.*.sm_logdir: ./log
+
+# use sm_reformat_log to reinitialize a log that is a raw device
+*.server.*.sm_reformat_log: no
+
+*.server.*.sm_logsize: 20000
+*.server.*.sm_multiserver: no
+
+# Specify the sm buffer pool size for any program
+# 400 pages, or 3.2 meg:
+*.server.*.sm_bufpoolsize: 3200
+
+# diskrw process ...
+# Making this relative assumes that we have a symbolic
+# link from . to wherever it's installed:
+*.server.*.sm_diskrw: ./diskrw
+
+#
+# SSH OPTIONS
+#
+# This is the tcl library directory for ssh
+ssh.server.*.ssh_libdir: ../lib
+# location of the .sshrc file
+ssh.server.*.ssh_sshrc: ~/.sshrc
+

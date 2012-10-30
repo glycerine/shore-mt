@@ -1,0 +1,17 @@
+
+module m1 {
+	export all;
+	interface A  {};
+	interface G1  {
+	public:
+			attribute set<A> s;
+	};
+
+	interface I1   { protected: void f(); };
+	interface I2 : public I1 {
+	private:
+			attribute ref<G1> h;
+			override f;
+	};
+} 
+

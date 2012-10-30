@@ -1,0 +1,63 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+
+diskrw Diskrw/Server communications  = 0x00040000  shmc_stats {
+	int alarm ALRM signals received
+	int notify Notified by server (SIGUSR1 or PIPE read)
+	int kicks Kicked server (SIGUSR2 or PIPE write)
+	int falarm Found msg because of ALRM
+	int fnotify Found msg because notified
+	int found Found msg by looking at queue
+	int lastsig Last signal received
+	int spins Busy waits on spin lock
+};
+
+
+sthread Threads = 0x00050000 sthread_stats {
+	// NB: keep floating point stuff at the top for
+	// alignment reasons
+	float   idle_time	total time the sm process remains idle
+	float   io_time		total time threads wait for io.
+	int        namemallocs	Mallocs for sthread_name_t
+	int        ctxsw	Thread context switches
+	int        spins	Busy waits on spin lock
+
+	int        fastpath	Times diskrw was bypassed
+	int	   nofastwrite	Slow Fastpath writes
+	int	   local_io	Local I/O
+
+	// _io() calls can return in error
+	int        io		Calls to _io()
+	int        ccio		Concurrent _io() calls
+	int     iowaits		Times waited on diskrw process
+
+	int     selects		Total # select() calls
+	int     selfound	select() calls that returned before timeout
+	int     eintrs		Times select() was interrupted by EINTR
+	int     idle		Times select() timed out
+	int     idle_yield_return  Times idle thread returned from yield()
+	int     latch_wait  	Times a thread awaited a latch
+	int     latch_time  	Time waiting for latches
+	int     mutex_wait  	Times a thread awaited a mutex
+	int     scond_wait  	Times a thread awaited a condition
+	int     sevsem_wait  	Times a thread awaited an event semaphore 
+
+	// int     idle_wait_return  Times idle thread returned from wait()
+	// same as selects
+
+
+	// we count the # select calls between iowait and return
+	// from iowait;  we count the # times this count was 0, 1, 2, 3, >3
+	// below:
+		int     zero	Times I/O done before next select()
+		int     one	Times I/O done after one select()
+		int     two	Times I/O finished after 2 select()s
+		int     three	Times I/O finished after 3 select()s
+		int     more	Times I/O finished after 4 or more select()s
+		int     wrapped	Times select counter wrapped 
+};

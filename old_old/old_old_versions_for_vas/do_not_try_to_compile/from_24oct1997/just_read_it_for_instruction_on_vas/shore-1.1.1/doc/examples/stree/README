@@ -1,0 +1,12 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+This directory contains the example program used in the
+tutorial document "Getting Started with Shore" (docs.html/stree/stree.html).
+Instructions for building stree are contained in
+that document.
+

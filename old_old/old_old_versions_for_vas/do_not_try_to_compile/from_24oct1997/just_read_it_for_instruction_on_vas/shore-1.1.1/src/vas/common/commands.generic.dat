@@ -1,0 +1,302 @@
+! # --------------------------------------------------------------- #
+! # -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+! # -- University of Wisconsin-Madison, subject to the terms     -- #
+! # -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+! # -- Reserved.                                                 -- #
+! # --------------------------------------------------------------- #
+
+
+! COMMAND <name>
+! ALIAS <alias> ... optional
+! USAGE  arguments ... required    
+! KEYWORDS  optional
+! HELP  required
+! %% required at end of listing for command
+! 
+
+%COMMAND cout
+%USAGE <anything>
+%KEYWORDS output print cerr endl
+%HELP
+\"cout\", takes any number of arguments, which may
+be string constants or the results of commands.
+The concatenation of the arguments is written to the
+standard output stream/file.
+%%
+
+%COMMAND cerr
+%USAGE <anything>
+%KEYWORDS output print cout endl
+%HELP
+\"cerr\", takes any number of arguments, which may
+be string constants or the results of commands.
+The concatenation of the arguments is written to the
+standard error stream/file.
+%%
+
+%COMMAND expect
+%USAGE <status> from <Tcl-command> [fail|nofail|aborted|noaborted]
+%HELP 
+The fail option means that expect will return in error if the result
+    of the command is not what was expected.
+The aborted option means that the expected failure should have aborted
+    the transaction, and expect will abort to clean up.
+    Expect ... aborted command should always be followed by a begin.
+
+Defaults: fail noaborted
+
+Example:
+expect OS_IsADirectory from {mkxref /small/pool p} fail noaborted
+%%
+
+%COMMAND permit
+%USAGE \"status [status]*\" from <Tcl-command> 
+%HELP 
+Permits any one of the results given in the status string.
+Also permits no error to occur.
+
+Examples:
+permit OS_NoSpaceLeft from {mkanon /small/pool 0:100000000:0 } 
+permit \"SVAS_NotFound OS_NoSpaceLeft\" from {mkanon /small/pool 0:100000000:0 } 
+%%
+
+%COMMAND log
+%USAGE [<server> [<level>] ]
+%KEYWORDS logging syslog debug output
+%HELP 
+Where 
+    <server> is one or more of: 
+        nfsd shore all none \"?\"
+
+    <level> is one of: 
+        off debug|trace info warning error internal|critical fatal|alert emerg 
+
+If a question mark is given, the possible logs names are listed.
+
+The command sets or changes the logging level for a server.
+Examples:
+    log nfsd off  // turns off nfsd logging 
+    log shore info  // turns on shore tracing for 
+            // messages of level info through fatal 
+    log all  error  // turns on tracing for 
+            // messages of error info through fatal 
+            // for all servers
+    log none // turns off all logging; same as
+            // log all off
+
+You cannot change the destination of the logging messages once
+a log has been opened.  The destinations of the logs are controlled
+by options in the configuration file.  See the manual page options(svas).
+
+Returns the current logging level of the log.
+%%
+
+%COMMAND pstat
+%ALIAS pstats
+%USAGE 
+%HELP
+Print statistics.
+%%
+
+%COMMAND cstat
+%ALIAS cstats
+%USAGE 
+%HELP
+Clear all global statistics.
+Returns the null string unless an error occurs.
+%%
+
+%COMMAND statistics
+%ALIAS stats
+%USAGE [no][autoclear | autoprint | remote ]
+%HELP
+Control printing and clearing of statistics.
+To print the statistics once, do \"pstats\".
+To clear the statistics once, do \"cstats\".
+
+The rest of the options control an action that
+takes place after each user request to the server:
+
+To have the statistics printed, do \"stats autoprint\".
+
+To have the statistics cleared, do \"stats autoclear\".
+
+To gather remote statistics from a client shell, do \"stats remote\".
+
+The default is:
+    noautoprint noautoclear noremote
+%%
+
+%COMMAND debugflags
+%USAGE [string]
+%KEYWORDS flags debug debugging
+%HELP String can be a list of file or function names or a regular
+expression as in regex(3).
+If no string is provided, it returns the current value.
+%%
+
+%COMMAND variables
+%USAGE
+%KEYWORDS predefined assign set
+%HELP
+Prints the predefined variables:
+  linenumber, verbose, printusererrors, expecterrors,
+  puserstats, pagesize, lgdatasize, smdatasize, direntoverhead.
+
+These predefined variables can be set with the Tcl \"set\" command:
+    verbose     - if non-zero, output is more verbose
+    printusererrors - if non-zero, user errors are printed in full detail
+    puserstats - if non-zero, statistics are printed after each user request.
+        - this is set to 1 by \"statistics verbose\" also.
+
+(The rest are set by the tester or the server.)
+
+%%
+
+%COMMAND echo
+%USAGE <anything>
+%HELP
+This is almost a no-op.
+It returns the concatenated results of the evaluated arguments, 
+with a newline appended. It never returns in error.  
+If you want to PRINT arguments, whether or not your command
+is nested in a \"source\" or other command, use \"cerr\" or \"cout\".
+%%
+
+%COMMAND info
+%USAGE [command or keyword]
+%KEYWORDS help
+%HELP Prints a list of the defined Tcl commands. 
+%%
+
+%COMMAND help
+%USAGE [command or keyword]
+%KEYWORDS assist usage keywords
+%HELP Prints information about the command or keyword.
+Type \"info commands\" to get a list of the Tcl commands
+that this interpreter understands.
+%%
+
+%COMMAND shriek
+%ALIAS \041\041
+%USAGE
+%HELP Repeats previous command. See Tcl history command.
+%%
+
+%COMMAND not
+%USAGE <Tcl command>
+%HELP 
+Returns the reversed sense of the command.
+%%
+
+%COMMAND getuid
+%KEYWORDS get uid from name of user
+%USAGE <user name>
+%HELP Returns the user id of the user-name argument.
+%%
+
+%COMMAND getgid
+%KEYWORDS get gid from name of group
+%USAGE <group name>
+%HELP Returns the group id of the group-name argument.
+%%
+
+%COMMAND bye
+%ALIASES quit exit q x
+%KEYWORDS terminate
+%%
+
+%COMMAND time
+%USAGE { <tcl-command> } [number]
+%HELP Runs <tcl-command> the indicated
+number of times (default=1), and prints
+the time used.
+The Tcl \"time\" command is renamed to \"_time\".
+
+Returns the timing information.
+%%
+
+%COMMAND errmsg
+%USAGE <error code | error name>
+%KEYWORDS errcode errname error message code name
+%HELP 
+Errors have codes (hex, octal, or decimal numbers), 
+names (1-word descriptions), and
+messages (more lengthy descriptions).
+
+This command returns the error message for the given 
+error code or error name.
+%%
+
+%COMMAND errname
+%USAGE <error code>
+%KEYWORDS errcode errmsg error message code name
+%HELP 
+Errors have codes (hex, octal, or decimal numbers), 
+names (1-word descriptions), and
+messages (more lengthy descriptions).
+
+This command returns the error name for the given error code.
+%%
+
+%COMMAND errcode
+%USAGE <error name>
+%KEYWORDS errmsg errname error message code name
+%HELP 
+Errors have codes (hex, octal, or decimal numbers), 
+names (1-word descriptions), and
+messages (more lengthy descriptions).
+
+This command returns the error code for the given error name.
+%%
+
+%COMMAND commands
+%ALIAS command
+%USAGE 
+%KEYWORDS help
+%HELP Print a list of the commands this shell understands.
+%%
+
+%COMMAND keywords
+%ALIAS keyword
+%USAGE keywords
+%KEYWORDS help
+%HELP Print a list of the keywords this shell understands.
+%%
+
+%COMMAND assert
+%USAGE { expression }
+%KEYWORDS assert debug error
+%HELP Prints the expression and exits in error if the 
+value of the expression is not 1.
+%%
+
+%COMMAND random
+%USAGE { int }
+%KEYWORDS pseudorandom number generator
+%HELP 
+returns an integer (modulo the argument).
+%%
+
+%COMMAND getoption
+%USAGE <option name>
+%KEYWORDS option value
+%HELP 
+Returns the (string) value of the option if it was given
+on the command line or in the startup file. 
+%%
+
+%COMMAND sleep
+%USAGE <seconds>
+%HELP 
+Process sleeps given number of seconds -- for testing purposes.
+Returns the number of seconds slept.
+%%
+
+%COMMAND crash
+%KEYWORDS graceless quit exit q x bye 
+%HELP Simulates crashing the server.
+This immediately calls exit(1), so nothing
+is cleaned up before the process exits.
+%%
+

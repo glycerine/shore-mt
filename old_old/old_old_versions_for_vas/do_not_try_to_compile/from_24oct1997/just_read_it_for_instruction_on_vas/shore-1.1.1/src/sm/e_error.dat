@@ -1,0 +1,112 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#
+#    $Header: /p/shore/shore_cvs/src/sm/e_error.dat,v 1.37 1997/05/23 21:03:19 nhall Exp $
+#
+#
+e = 0x00080000 "Storage Manager" smlevel_0 {
+
+ASSERT			Assertion failed
+USERABORT		User initiated abort
+CRASH			Server told to crash or shutdown immediately
+
+# 
+# errors from other subsystems
+#
+COMM			Error from shore communication facility
+
+#
+# Actual SSM errors
+#
+OUTOFSPACE		out of disk space
+ALIGNPARM		parameter is not aligned
+BADSTID			invalid store id
+1PAGESTORELIMIT		1-page store needs to grown beyond 1 page
+BADPID			invalid page id
+BADVOL			invalid volume id
+VOLTOOLARGE		volume is too large for device
+DEVICEVOLFULL		device cannot hold anymore volumes
+DEVNOTMOUNTED		device is not mounted
+ALREADYMOUNTED		device already mounted
+VOLEXISTS		volume already exists
+BADFORMAT		volume has bad format
+NVOL			too many volumes
+EOF			end of scan/record reached
+DUPLICATE		duplicate entries found
+BADSTORETYPE		bad store type
+BADSTOREFLAGS		bad store flags
+BADNDXTYPE		bad index type
+BADSCAN			bad scan
+WRONGKEYTYPE		key type unsupported for current index
+NDXNOTEMPTY		index is not empty
+BADKEYTYPESTR		bad key type descriptor
+BADCMPOP		bad compare operators
+OUTOFLOGSPACE		out of log space
+RECWONTFIT		record will not fit
+BADSLOTNUMBER		record ID slot number is bad
+RECUPDATESIZE		record update request is too large
+BADSTART		start parameter larger than record size
+BADAPPEND		append size too large for the record
+BADLENGTH		bad length parameter
+BADSAVEPOINT		bad save point 
+TOOMANYLOADONCEFILES	too many load-once files
+PAGECHANGED		page has changed
+
+TOOMANYTRANS		too many active transactions
+TWOTRANS		second transaction in one thread
+TWOTHREAD		multiple threads not allowed for this operation
+NOTRANS			no active transaction
+INTRANS			in active transaction (not allowed)
+TWOQUARK		second quark in a single transaction is not allowed
+NOQUARK			no quark is open
+INQUARK			a quark is open
+NOABORT			logging is turned off -- cannot roll back
+NOTPREPARED		transaction thread is not prepared -- cannot commit or abort
+ISPREPARED		transaction thread is prepared  -- cannot do this operaton
+EXTERN2PCTHREAD		transaction is (already) participating in external 2-phase commit 
+NOTEXTERN2PC		transaction is not participating in external 2-phase commit 
+NOSUCHPTRANS		could not find a prepared transaction with given global transaction id
+
+BADLOCKMODE		invalid lock mode
+LOCKTIMEOUT		lock timeout
+MAYBLOCK		lock req will block locally or may block remotely
+DEADLOCK		deadlock detected
+REMOTEDEADLOCK		callback req received deadlock notification from server
+PREEMPTED		lock req cancelled by another xact
+BADCCLEVEL		unsupported concurrency control level
+RETRY			retry the request (used internally)
+FOUNDEXTTOFREE		unlock duration found an ext to free (used internally)
+NOGLOBALDEADLOCKCLIENT	no global deadlock client installed
+
+NOCOPIES		no copies in the copy table
+COPYNOTEXISTS		copy does not exist
+
+BADCBREPLY		invalid reply to callback request
+CBEXISTS		duplicate callback proxy
+
+SERVERNOTCONNECTED	not connected to server
+BADMSGTYPE              unknown or unsupported message type
+NOFREESERVER            no free slot in the server table
+VOTENO            	prepare resulted in vote to abort (abort done)
+VOTEREADONLY           	prepare resulted in vote readonly (commit done)
+
+
+BADLOGICALID		logical ID does not exist 
+BADLOGICALIDTYPE	logical ID has different reference type
+LOGICALIDOVERFLOW	logical ID counter overflow
+NOLOGICALTEMPFILES	logical temp files are prohibited
+
+CANTWHILEACTIVEXCTS	can't do to volume while there are active transactions
+
+INTRANSIT		had to wait for pending remote read
+NOTONREMOTEVOL		this volume operation disallowed on remote volume 
+NOHANDLE		Missing coordinator handle
+PROTOCOL		Two-phase commit protocol error
+MIXED			Aborted two-phase commit got mixed results
+}

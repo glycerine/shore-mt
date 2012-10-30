@@ -1,0 +1,264 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Sources (src)</TITLE>
+<META NAME="description" CONTENT="Sources (src)">
+<META NAME="keywords" CONTENT="sourceguide">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sourceguide.css">
+<LINK REL="next" HREF="node7.html">
+<LINK REL="previous" HREF="node5.html">
+<LINK REL="up" HREF="sourceguide.html">
+<LINK REL="next" HREF="node7.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html105"
+ HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html102"
+ HREF="sourceguide.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html96"
+ HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html104"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html106"
+ HREF="node7.html">Example Applications (installed/examples)</A>
+<B> Up:</B> <A NAME="tex2html103"
+ HREF="sourceguide.html">A Roadmap to the Releases</A>
+<B> Previous:</B> <A NAME="tex2html97"
+ HREF="node5.html">Configuration management (config, tools)</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html107"
+ HREF="node6.html#SECTION00061000000000000000000">
+Foundation Classes (<TT>src/fc</TT>)</A>
+<LI><A NAME="tex2html108"
+ HREF="node6.html#SECTION00062000000000000000000">
+Thread Package (<TT>src/sthread</TT>)</A>
+<LI><A NAME="tex2html109"
+ HREF="node6.html#SECTION00063000000000000000000">
+Common Code (<TT>src/common</TT>)</A>
+<LI><A NAME="tex2html110"
+ HREF="node6.html#SECTION00064000000000000000000">
+Storage Manager (<TT>src/sm</TT>)</A>
+<LI><A NAME="tex2html111"
+ HREF="node6.html#SECTION00065000000000000000000">
+RPC Package (<TT>src/rpc4.0</TT>)</A>
+<LI><A NAME="tex2html112"
+ HREF="node6.html#SECTION00066000000000000000000">
+Shore Value-Added Server (<TT>src/vas</TT>)</A>
+<LI><A NAME="tex2html113"
+ HREF="node6.html#SECTION00067000000000000000000">
+Language Independent Library (<TT>src/lil</TT>)</A>
+<LI><A NAME="tex2html114"
+ HREF="node6.html#SECTION00068000000000000000000">
+Shore Data Language Compiler (<TT>src/sdl</TT>)</A>
+<LI><A NAME="tex2html115"
+ HREF="node6.html#SECTION00069000000000000000000">
+Utilities (<TT>src/util</TT>)</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="sourceguide:sources">&#160;</A><H1><A NAME="SECTION00060000000000000000000">
+Sources (<TT>src</TT>)</A>
+</H1>
+<P>
+The directory <TT>SHROOT/src</TT> is present only in a source release.
+It contains the source code for Shore.  
+The subdirectories of <TT>src</TT> are
+presented here in the order of they are normally visited when
+Shore is compiled, which is more or less &quot;bottom-up.&quot;
+The code in a later
+directory may depend on code in directories described earlier.
+<P><A NAME="sourceguide:fc">&#160;</A><H2><A NAME="SECTION00061000000000000000000">
+Foundation Classes (<TT>src/fc</TT>)</A>
+</H2>
+<P>
+The <TT>SHROOT/src/fc</TT> directory contains 
+what we call &quot;foundation&quot; classes.
+These C++ classes are meant to be
+easy to use in software systems other than Shore.
+They do not depend on any other Shore code.  
+Included are classes for such things as lists, hash tables
+and error handling.
+Most things in this directory have the prefix <TT>w_</TT>.
+Nobody knows what &quot;w&quot; stands for.
+<P><A NAME="sourceguide:sthread">&#160;</A><H2><A NAME="SECTION00062000000000000000000">
+Thread Package (<TT>src/sthread</TT>)</A>
+</H2>
+<P>
+The <TT>SHROOT/sthread</TT> directory contains a thread package.
+It also contains source code for the <TT>diskrw</TT> program, which
+helps the Shore server do asynchronous I/O.
+The server forks a copy of <TT>diskrw</TT> for each volume it is managing.
+When it wants to do I/O, it notifies the <TT>diskrw</TT> process.
+The server and the <TT>diskrw</TT> process communicate data through shared
+memory and synchronize with TCP messages or signals.
+<P><A NAME="sourceguide:common">&#160;</A><H2><A NAME="SECTION00063000000000000000000">
+Common Code (<TT>src/common</TT>)</A>
+</H2>
+<P>
+The <TT>SHROOT/common</TT> directory contains code 
+needed by most layers of Shore.
+In this directory are the interfaces and implementations 
+for data types from which Shore's
+persistent data structures are built.
+Included are implementations of
+object identifiers, thread-safe hash tables and options.
+<P><A NAME="sourceguide:sm">&#160;</A><H2><A NAME="SECTION00064000000000000000000">
+Storage Manager (<TT>src/sm</TT>)</A>
+</H2>
+<P>
+The <TT>SHROOT/sm</TT> directory contains code for 
+the Shore Storage Manager (<A HREF="../glossary/glossary.html#glo:SSM">SSM</A>).
+The interface for the SSM consists of the public interfaces
+of the classes <TT>ssm, pin_i</TT> and <TT>scan_</TT><EM>xxx</EM><TT>_i</TT> classes
+defined in <TT>sm.h, pin.h</TT> and <TT>scan.h</TT>, respectively.
+<P><A NAME="sourceguide:rpc">&#160;</A><H2><A NAME="SECTION00065000000000000000000">
+RPC Package (<TT>src/rpc4.0</TT>)</A>
+</H2>
+<P>
+The <TT>SHROOT/rpc4.0</TT> directory contains 
+a modified copy of 
+Sun Microsystems'
+&quot;Portable ONC/NFS&quot;, a public-domain implementation 
+of the Sun RPC and XDR protocols.
+<P>
+We have made minor changes for its use in Shore.
+We use only a portion of the package. 
+The complete package is included here, but we support
+only the portion that Shore uses (<TT>SHROOT/rpc4.0/rpc</TT> and 
+<TT>SHROOT/rpc4.0/rpcgen</TT>), to the extent that the Shore
+Value-Added Server uses it.  (We do not provide general
+support for it, and we have no manual pages for it.)
+On the Solaris platform, only <TT>SHROOT/rpc4.0/rpcgen</TT> is used.
+<P><A NAME="sourceguide:vas">&#160;</A><H2><A NAME="SECTION00066000000000000000000">
+Shore Value-Added Server (<TT>src/vas</TT>)</A>
+</H2>
+<P>
+The <TT>SHROOT/vas</TT> directory contains code for the Shore Value-Added
+Server (<A HREF="../glossary/glossary.html#glo:SVAS">SVAS</A>).  
+It has the following subdirectories.
+<P><DL>
+<DT><STRONG><TT>include</TT></STRONG>
+<DD>The include files needed by software that uses the SVAS.
+<DT><STRONG><TT>client</TT></STRONG>
+<DD>The SVAS client library, which contains class implementations meant
+to linked with application code to create a Shore client process.
+The client library caches some information for local processing,
+but most SVAS methods are remote operations that are
+performed by the server.
+<P><DT><STRONG><TT>tests</TT></STRONG>
+<DD>A simple program for testing the SVAS client library.
+<P><DT><STRONG><TT>scripts</TT></STRONG>
+<DD>A set of Tcl scripts for testing the SVAS.
+<EM>There is no &quot;support&quot; for these scripts.</EM>
+The testing mechanism for the SVAS is in transition.
+Not all of the scripts work; some use obsolete syntax for commands.
+<P><DT><STRONG><TT>common</TT></STRONG>
+<DD>Code that is used in both the server and the tester.
+<P><DT><STRONG><TT>server</TT></STRONG>
+<DD>The <A HREF="../glossary/glossary.html#glo:svas">Shore Value-Added Server (SVAS)</A>.
+Running <TT>make</TT> in this directory creates a complete SVAS server
+in the form of an executable file named <TT>shore</TT>.
+<P></DL><A NAME="sourceguide:lil">&#160;</A><H2><A NAME="SECTION00067000000000000000000">
+Language Independent Library (<TT>src/lil</TT>)</A>
+</H2>
+<P>
+The <TT>SHROOT/lil</TT> directory 
+is for libraries that provide programming-language-independent 
+functionality above the SVAS.
+Currently, this directory contains only the subdirectory <TT>oc</TT> and
+an Imakefile with instructions for assembling the <TT>libshore.a</TT> and
+<TT>libserver.a</TT> libraries from object files created in other directories.
+<P>
+The <TT>SHROOT/lil/oc</TT> directory contains code for the object
+cache that is linked with applications.
+This code is responsible for managing a fixed-size LRU (least-recently used)
+cache of objects,
+for swizzling and unswizzling references, and for
+for flushing objects back to the server on transaction commit and on buffer
+overflow.
+<P><A NAME="sourceguide:sdl">&#160;</A><H2><A NAME="SECTION00068000000000000000000">
+Shore Data Language Compiler (<TT>src/sdl</TT>)</A>
+</H2>
+<P>
+The <TT>SHROOT/sdl</TT> directory contains source for the
+<A HREF="../glossary/glossary.html#glo:SDL">Shore Data Language (SDL)</A>.
+It creates the executable program <TT>sdl</TT>, which compiles SDL
+specifications into <A HREF="../glossary/glossary.html#glo:metatype">metatype objects</A> stored in the
+database and C++ header files and implementation stubs to support
+support these types.
+This directory also contains a library of routines that support the
+implementation of generated types by communicating with the
+object cache layer.
+<P><A NAME="sourceguide:util">&#160;</A><H2><A NAME="SECTION00069000000000000000000">
+Utilities (<TT>src/util</TT>)</A>
+</H2>
+<P>
+The <TT><TT></TT> util</TT> directory holds 
+miscellaneous Shore utilities.
+<P>
+The only such program in the current release is
+is the <EM>mount</EM>  utility, for mounting the Shore file system as
+an NFS file system
+The directory
+<TT>SHROOT/src/util/mount/generic</TT> contains code for the <TT>smount</TT>
+and <TT>sumount</TT> utilities, which provide only the basic functionality
+of the standard <TT>mount</TT> and <TT>umount</TT> utilities, but with
+an extension required for Shore.
+See the <TT>README</TT> file in that directory for more details.
+These programs are not used on the Linux platform, where the standard
+<TT>mount</TT> untility already has the required extension.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html105"
+ HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html102"
+ HREF="sourceguide.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html96"
+ HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html104"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html106"
+ HREF="node7.html">Example Applications (installed/examples)</A>
+<B> Up:</B> <A NAME="tex2html103"
+ HREF="sourceguide.html">A Roadmap to the Releases</A>
+<B> Previous:</B> <A NAME="tex2html97"
+ HREF="node5.html">Configuration management (config, tools)</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

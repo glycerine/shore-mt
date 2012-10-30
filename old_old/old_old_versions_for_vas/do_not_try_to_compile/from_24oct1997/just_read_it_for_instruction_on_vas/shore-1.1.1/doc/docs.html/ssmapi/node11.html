@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Writing and Compiling a VAS and Client</TITLE>
+<META NAME="description" CONTENT="Writing and Compiling a VAS and Client">
+<META NAME="keywords" CONTENT="ssmapi">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmapi.css">
+<LINK REL="next" HREF="node12.html">
+<LINK REL="previous" HREF="node10.html">
+<LINK REL="up" HREF="ssmapi.html">
+<LINK REL="next" HREF="node12.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html254"
+ HREF="node12.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html251"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html245"
+ HREF="node10.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html253"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html255"
+ HREF="node12.html">References</A>
+<B> Up:</B> <A NAME="tex2html252"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html246"
+ HREF="node10.html">Miscellaneous Facilities</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html256"
+ HREF="node11.html#SECTION000111000000000000000000">
+Include Files and Libraries</A>
+<LI><A NAME="tex2html257"
+ HREF="node11.html#SECTION000112000000000000000000">
+Template Instantiation</A>
+<LI><A NAME="tex2html258"
+ HREF="node11.html#SECTION000113000000000000000000">
+Other Example Code</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="ssmapi:vas">&#160;</A><H1><A NAME="SECTION000110000000000000000000">
+Writing and Compiling a VAS and Client</A>
+</H1>
+<P>
+This section discusses some of the general issues in compiling and
+linking with the SSM libraries.  The best way to learn about
+writing and compiling a VAS and client is to read the VAS Tutorial,
+<A NAME="tex2html45"
+ HREF="../ssmvas/ssmvas.html">Writing Value-Added Servers with the Shore Storage
+Manager</A>.
+<P><A NAME="ssmapi:vasincl">&#160;</A><H2><A NAME="SECTION000111000000000000000000">
+Include Files and Libraries</A>
+</H2>
+<P>
+All of the include files needed to build servers and clients
+are located in <TT>SHROOT/include</TT>.
+Any server code using the SSM should include <TT>sm_vas.h</TT>.
+Since clients do not need all of the SSM functionality,
+they need only include <TT>sm_app.h</TT>.
+The RPC package include files are located in <TT>SHROOT/include/rpc</TT>
+and are usually included with this line:
+<PRE>
+    #include &lt;rpc/rpc.h&gt;
+</PRE>
+<P><B>Note:</B> <EM>The Solaris version of Shore uses the standard
+Solaris version of the rpc libraries.</EM>
+<P>
+All of the libraries needed to build servers and clients
+are located in <TT>SHROOT/lib</TT>.
+Clients only need <TT>libshorecommon.a</TT>.
+Servers need both <TT>libsm.a</TT> and <TT>libshorecommon.a</TT>
+The RPC package library is <TT>librpclib.a</TT> (except for Solaris).
+<P>
+There are two pre-compiled version of these libraries.  The are
+included in the <EM>debugging</EM> and <EM>no-debugging</EM> binary releases.
+The debugging version not only includes symbol table information (<TT>-g</TT> option to <TT>gcc</TT>), but also has considerable additional auditing
+and assert checking code.  This includes code that audits data pages
+whenever an update is made, performs monitoring to detect thread
+stack overflow, and checks over 1,400 additional assertions.
+See the
+<A HREF="../release/node3.html#release:binary">Shore Release</A>
+document for more information on these releases.
+<P><EM>Note:</EM> Use the <TT>-DDEBUG</TT> flag
+when compiling for linkage with the debugging release.
+<P><A NAME="ssmapi:template">&#160;</A><H2><A NAME="SECTION000112000000000000000000">
+Template Instantiation</A>
+</H2>
+<P>
+The SSM uses several C++ templates
+One of the issues that is often confusing is controlling
+template instantiation.  All of the template instantiations
+needed by the SSM are already included in the libraries.
+<P>
+However, due to a bug in <TT>gcc</TT> 2.6.* (supposedly to be
+fixed in 2.7.0), it is possible to have problems
+during linking due to multiple definitions of template code.
+To avoid this, and to have smaller executables,
+we use the <TT>gcc</TT> option <TT>-fno-implicit-templates</TT> in the
+<A HREF="../ssmvas/node9.html#ssmvas:makefile"><TT>Makefile</TT></A>
+from the tutorial example.
+This causes <TT>gcc</TT> not to emit
+any template code unless the template is explicitly instantiated.
+<P>
+Here is an example of explicit instantiation from the tutorial
+<PRE>
+    #ifdef __GNUG__
+    // Explicitly instantiate lists of client_t.
+    template class w_list_t&lt;client_t&gt;;
+    #endif
+</PRE>
+<P>(We haven't checked whether this is still necessary with version 2.7 of g++,
+but if it ain't broke, why fix it?)
+<P><A NAME="ssmapi:vasex">&#160;</A><H2><A NAME="SECTION000113000000000000000000">
+Other Example Code</A>
+</H2>
+<P>
+The SSM has been used to build a few value-added servers.  Some of
+these are publicly available.  You may
+find these helpful in writing your own.
+<P><UL>
+<LI> Shore Server
+<P>
+The Shore Server is the server for the Shore object repository.
+The Shore Server actually has two interfaces.  One is used
+by SDL applications and the other is the NFS interface.
+The Shore Server code is available in <TT>src/vas</TT>.
+<LI> SSM Testing Shell
+<P>
+The SSM testing shell is a server with a TCL interface designed to
+test the SSM.  The code is available in <TT>src/sm/ssh</TT>.
+No documentation is available yet.
+<LI> Paradise
+<P>
+Paradise is a GIS system still under development.  It will be
+publicly available in the future.  See
+<A NAME="tex2html1"
+ HREF="http://www.cs.wisc.edu/paradise/">http://www.cs.wisc.edu/paradise/</A>
+for more information.
+<P></UL><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html254"
+ HREF="node12.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html251"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html245"
+ HREF="node10.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html253"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html255"
+ HREF="node12.html">References</A>
+<B> Up:</B> <A NAME="tex2html252"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html246"
+ HREF="node10.html">Miscellaneous Facilities</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

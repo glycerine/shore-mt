@@ -1,0 +1,93 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test Large records that start out with 0 length
+#       but have large hint
+#
+source $script_dir/vol.init
+set_config_info
+
+###############################################
+#  create  record
+#
+sm begin_xct
+set fid [sm create_file $volid]
+verbose creating rec
+set rid [sm create_rec $fid "" $page_size ""]
+verbose created $rid
+sm commit_xct
+
+###############################################
+#   pin record
+#
+sm begin_xct
+
+proc try {rid} {
+    set pin [sm pin_create]
+    verbose pin $rid
+    sm pin_pin $pin $rid 0
+    verbose check of pin_repin $rid: [sm pin_body $pin]
+    sm pin_repin $pin
+    verbose unpin $rid
+    sm pin_unpin $pin
+    sm pin_destroy $pin
+
+    verbose read_rec $rid
+    set r [sm read_rec $rid 0 0]
+}
+try $rid
+
+sm commit_xct
+
+dstats $volid
+
+sm begin_xct
+###############################################
+#   append to the records
+#
+verbose APPEND hello ...
+sm append_rec $rid "hello"
+try $rid
+
+set pattern [format "%*d" $page_size 10]
+dstats $volid
+verbose APPEND AAApattern ...
+verbose sm append_rec $rid
+sm append_rec $rid AAA$pattern
+try $rid
+dstats $volid
+
+###############################################
+#   pin the records
+#
+sm update_rec $rid 100 hello 
+try $rid
+
+verbose UPDATE 10 hello_this_is_a_long_update ...
+sm update_rec $rid 10 hello_this_is_a_long_update 
+try $rid
+
+verbose UPDATE 10 patternXXX ...
+sm update_rec $rid 0 ${pattern}XXX
+try $rid
+
+###############################################
+#   truncate the records
+#
+
+verbose TRUNCATE ...
+sm truncate_rec $rid 0 
+try $rid
+
+sm destroy_rec $rid
+sm commit_xct
+
+
+unset rid fid pattern
+
+return "lgrec.4 done"

@@ -1,0 +1,87 @@
+#
+# fork many threads to create, populate, and destroy
+# files, sometimes changing them from temp to regular,
+# sometimes starting them out regular.
+# 
+# The point is to get a lot of threads competing for
+# the buffer pool with pages moving around from store
+# to store.
+if {$Use_logical_id == 1} {
+    echo WARNING: tmpfile.1 cannot be run (since logical IDs are turned on)
+    verbose WARNING: until we destroy tmp files properly on dismount for logical ids
+} else {
+
+    set recsize 300
+    set numTests 1
+    set id_width %08d
+
+    proc test {t fileType numObjs numTimes recSize do_change 
+	do_scan sleep do_destroy}  {
+	global id_width volid buffer 
+
+	for {set j 0} {$j < $numTimes} {incr j}  {
+	    sm begin_xct
+	    set fid [sm create_file $volid $fileType]
+	    verbose "$t **** new file $fid $numObjs $recSize"
+
+	    # populate it
+	    for {set i 0} {$i < $numObjs} {incr i}  {
+		# sm create_rec $fid [format $id_width $i] $recSize $buffer
+		sm create_rec $fid [format $id_width $i] $recSize [format "%0*d" $recSize 2]
+	    }
+	    if {$do_change} {
+		verbose "$t **** change property $fid"
+		sm set_store_property $fid regular
+	    }
+
+	    if {$do_scan} {
+		verbose "$t **** beginning scan $fid"
+		set scan [sm scan_file_create $fid t_cc_file]
+		set pin [sm scan_file_next $scan 0]
+		while {$pin != "NULL"}  {
+			set r [sm read_rec [sm pin_rid $pin] 0 0]
+			set pin [sm scan_file_next $scan 0]
+		}
+		sm scan_file_destroy $scan
+	    }
+	    if {$sleep > 0} {
+		sm sleep $sleep
+	    }
+	    if {$do_destroy} {
+		verbose "$t **** begin destroy fid=$fid"
+		sm destroy_file $fid
+		sm commit_xct
+		verbose "$t **** after destroy fid=$fid"
+	    }
+	}
+    }
+
+    # make a 64K buffer
+    set buffer ""
+    for {set i 48} {$i < 112} {incr i}  {
+	set c [format "%c" $i]
+	set buffer "$buffer$c"
+    }
+    for {set i 0} {$i < 10} {incr i}  {
+	set buffer "$buffer$buffer"
+    }
+
+    source ../scripts/vol.init
+    clearstats
+
+    # fileType numObjs numTimes recSize do_change do_scan sleep do_destroy}  {
+    set t1 [fork_thread test t1 "tmp" 1000 4 $recsize 1 0 10 1]
+    set t2 [fork_thread test t2 "tmp" 8000 4 $recsize 1 1 10 1]
+    set t3 [fork_thread test t3 "tmp" 100  3 $recsize 1 0 0  1]
+    set t4 [fork_thread test t4 "tmp" 150  8 $recsize 0 0 1  1]
+
+    set t5 [fork_thread test t5 "regular" 1000 4 $recsize 0 0 10 1]
+    set t6 [fork_thread test t6 "regular" 8000 4 $recsize 0 1 10 1]
+    set t7 [fork_thread test t7 "regular" 100  3 $recsize 0 0 0  1]
+    set t8 [fork_thread test t8 "regular" 150  8 $recsize 0 0 1  1]
+
+    join_thread $t1 $t2 $t3 $t4 $t5 $t6 $t7 $t8
+
+    unset t1 t2 t3 t4 t5 t6 t7 t8 c recsize numTests id_width
+    unset buffer
+}

@@ -1,0 +1,171 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test that vid's are truly transient
+#
+
+source $script_dir/vol.init
+# check that logical id facility is on
+
+if {$Use_logical_id == 0} {
+    echo WARNING: lid.1 cannot be run since logical IDs not turned on
+    return
+}
+
+set_config_info
+set small_vol_size [expr 125 * $pages_per_ext]
+
+verbose configuration info: [sm config_info]
+
+sm begin_xct
+
+set f1 [sm create_file $volid]
+set f2 [sm create_file $volid]
+verbose f1 = $f1
+verbose f2 = $f2
+
+sm commit_xct
+
+sm begin_xct
+verbose dstats $volid 1
+dstats $volid
+
+verbose destroy file $f1 -- should work
+sm destroy_file $f1
+
+verbose dstats $volid 2
+dstats $volid
+
+verbose abort xct
+verbose dstats $volid 3
+dstats $volid
+sm abort_xct
+
+sm begin_xct
+verbose dstats $volid 4
+dstats $volid
+sm commit_xct
+
+verbose dismounting all
+sm dismount_all
+
+verbose creating another volume to test that vid's are transient
+set dev2 /tmp/dev2.[pid]
+verbose formatting $dev2
+sm format_dev $dev2 $small_vol_size force
+sm mount_dev $dev2
+sm create_vol $dev2 222 $small_vol_size
+sm add_logical_id_index 222 100
+
+foreach i $ssh_device_list {
+    verbose remounting [lindex $i 0]
+    if {$Use_logical_id} {
+	sm mount_dev [lindex $i 0]
+    } else {
+	sm mount_dev [lindex $i 0] [lindex $i 2]
+    }
+} 
+
+#verify that all mounted devices are listed
+set devlist [sm list_devices]
+verbose mounted devices: $devlist
+#form list of device names only
+list devnames
+foreach i $devlist {
+    lappend devnames [lindex $i 0] 
+} 
+verbose devnames list $devnames
+foreach i $ssh_device_list {
+    assert {expr [lsearch $devnames [lindex $i 0]] >= 0}
+} 
+
+sm begin_xct
+verbose dstats $volid 5 
+dstats $volid
+sm commit_xct
+
+sm begin_xct
+verbose destroy files $f1  -- should work
+sm destroy_file $f1
+verbose abort xct
+sm abort_xct
+
+sm begin_xct
+set f222 [sm create_file 222]
+sm commit_xct
+
+verbose destroy vol and make sure quota survives (by creating a vol)
+sm destroy_vol 222
+sm create_vol $dev2 333 [expr 125 * $pages_per_ext]
+
+#attempt to access file on just destroyed volume
+sm begin_xct
+verbose destroy files $f222  -- SHOULD GET AN ERROR
+set err 0
+set errorno 0
+catch {sm destroy_file $f222} err
+verbose $err
+sm commit_xct
+
+verbose make sure we can't accidentally mount same volume via hard/soft link
+set dev2.hlink /tmp/dev2.[pid].hlink
+set dev2.slink /tmp/dev2.[pid].slink
+exec ln -s $dev2 $dev2.hlink
+exec ln $dev2 $dev2.slink
+verbose SHOULD GET ERROR
+catch {sm mount_dev $dev2.hlink} errorno
+verbose "(EXPECTED) error : $errorno"
+verbose SHOULD GET ERROR
+catch {sm mount_dev $dev2.slink} errorno
+verbose "(EXPECTED) error : $errorno"
+
+verbose make sure we can't accidentally format a mounted volume
+verbose SHOULD GET ERROR
+catch {sm format_dev $dev2.hlink $small_vol_size force} errorno
+verbose "(EXPECTED) error : $errorno"
+
+verbose SHOULD GET ERROR
+catch {sm format_dev $dev2.slink $small_vol_size force} errorno
+verbose "(EXPECTED) error : $errorno"
+
+exec rm $dev2.hlink
+exec rm $dev2.slink
+
+set devlist [sm list_devices]
+verbose mounted devices: $devlist
+
+verbose dismounting $dev2
+sm dismount_dev $dev2
+set devlist [sm list_devices]
+verbose mounted devices: $devlist
+
+verbose verify volume $vol must be writable
+echo ** IGNORE ** the warning: message!
+
+exec chmod -w $dev2
+verbose SHOULD GET ERROR
+catch {sm mount_dev $dev2} errorno
+verbose "(EXPECTED) error : $errorno"
+
+verbose destroy volume and dismount $dev2
+
+exec chmod u+w $dev2
+sm mount_dev $dev2
+
+sm destroy_vol 333
+sm dismount_dev $dev2
+exec rm $dev2
+
+set devlist [sm list_devices]
+verbose mounted devices: $devlist
+
+unset dev2.hlink dev2.slink
+unset f1 f2
+unset devlist dev2 devnames f222 
+unset err errorno i
+unset small_vol_size 

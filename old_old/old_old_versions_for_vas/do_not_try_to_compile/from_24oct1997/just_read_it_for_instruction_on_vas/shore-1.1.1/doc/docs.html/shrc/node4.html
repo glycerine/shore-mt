@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Macros for Transaction Management</TITLE>
+<META NAME="description" CONTENT="Macros for Transaction Management">
+<META NAME="keywords" CONTENT="shrc">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="shrc.css">
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="shrc.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html61"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html58"
+ HREF="shrc.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html52"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html60"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html62"
+ HREF="node5.html">The Shore Error Handler</A>
+<B> Up:</B> <A NAME="tex2html59"
+ HREF="shrc.html">Handling Errors in a Application</A>
+<B> Previous:</B> <A NAME="tex2html53"
+ HREF="node3.html">The shrc Class</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="shrc:macros">&#160;</A><H1><A NAME="SECTION00040000000000000000000">
+Macros for Transaction Management</A>
+</H1>
+<P>
+The most common way to handle errors in database systems is to abort the
+transaction that caused the error.  Application programs can abort their
+transactions by calling Shore::abort_transaction.  While this method
+causes any changes to persistent data to be be undone, it does not affect
+the state of the application program.
+Shore provides macros to begin, commit, and abort transactions that
+can help to address part of this problem.
+The macros employ ANSI C <TT>setjmp</TT> and <TT>longjmp</TT>
+facilities.
+<P><PRE>
+    SH_BEGIN_TRANSACTION(rc)        // rc is an &quot;out&quot; parameter
+    SH_ABORT_TRANSACTION(rc)        // rc is an &quot;in&quot;  parameter
+    rc = SH_COMMIT_TRANSACTION
+    SH_DO(rc)                       // rc is an &quot;in&quot;  parameter
+</PRE>
+<P>
+These macros are summarized in the manual page
+<A NAME="tex2html4"
+ HREF="../man/transaction.oc.html">transaction(OC)</A>.
+<P>
+The argument to <TT>SH_BEGIN_TRANSACTION</TT> is of type <TT>shrc</TT>.  This
+argument must be an <EM>lvalue</EM>, as the macro will assign to it.  <TT>SH_BEGIN_TRANSACTION</TT> calls <TT>setjmp</TT>, and can therefore return from
+either of two different contexts: a direct call to <TT>SH_BEGIN_TRANSACTION</TT>, or a call to <TT>SH_ABORT_TRANSACTION</TT>
+(described below).  A direct call to <TT>SH_BEGIN_TRANSACTION</TT> calls
+<TT>Shore::begin_transaction</TT>.  Upon return, <TT>rc</TT> will be set to the
+return value of <TT>Shore::begin_transaction</TT>.  When <TT>SH_BEGIN_TRANSACTION</TT> returns because of a call to <TT>SH_ABORT_TRANSACTION</TT>, then the value of <TT>rc</TT> is whatever was passed
+to <TT>SH_ABORT_TRANSACTION</TT>.
+<P><TT>SH_COMMIT_TRANSACTION</TT> is equivalent to <TT>Shore::commit_transaction</TT>.
+<P><TT>SH_ABORT_TRANSACTION</TT> takes as parameter an expression of type <TT>shrc</TT>.  (Unlike <TT>SH_BEGIN_TRANSACTION</TT>, this argument is an <EM>rvalue</EM>, not an <EM>lvalue</EM>).  It calls <TT>Shore::abort_transaction</TT>
+and then performs a <TT>longjmp</TT>, which returns control back to the line
+where <TT>SH_BEGIN_TRANSACTION</TT> was called.  The rc passed to <TT>SH_ABORT_TRANSACTION</TT> will be the return value of <TT>SH_BEGIN_TRANSACTION</TT>.
+<P><TT>SH_DO</TT> takes an expression of type <TT>shrc</TT>.  If this expression
+evaluates to <TT>RCOK</TT> then the macro returns.  Otherwise, <TT>SH_ABORT_TRANSACTION</TT> is called with the value of the given expression as
+its argument.
+<P>
+The following code fragment illustrates the use of the transaction macros.
+<P><PRE>
+    shrc rc;
+
+    // Begin a transaction.  A subsequent call to SH_ABORT_TRANSACTION
+    // will return us here.
+    SH_BEGIN_TRANSACTION(rc);
+
+    if(rc){
+
+        // Some error occurred.  The rc indicates why new transaction could
+        // not be started or why the transaction was aborted.
+        cerr &lt;&lt; rc &lt;&lt; endl;
+    }
+
+    else {
+
+
+        // We successfully started a transaction.  The main body of the
+        // transaction goes here.
+
+        SH_DO(operation 1);
+        SH_DO(operation 2);
+        SH_DO(...);
+
+
+        // If we completed the main body of the transaction without
+        // errors, then we try to commit the transaction.  Note that
+        // if the commit fails, then SH_DO will call SH_ABORT_TRANSACTION
+        // for us.  The shrc returned by SH_COMMIT_TRANSACTION will become
+        // the the return value of SH_BEGIN_TRANSACTION (above).
+
+        SH_DO(SH_COMMIT_TRANSACTION);
+    }
+</PRE>
+<P>
+Because these macros make use of setjmp and longjmp, the function
+containing the call to <TT>SH_BEGIN_TRANSACTION</TT> must not have
+terminated before <TT>SH_DO</TT> or <TT>SH_ABORT_TRANSACTION</TT> is called.
+However, a call to <TT>SH_COMMIT_TRANSACTION</TT>, <TT>SH_DO</TT>, or <TT>SH_ABORT_TRANSACTION</TT> does not have to be in the same function as the
+call to <TT>SH_BEGIN_TRANSACTION</TT>.  In particular, it may be useful to
+call <TT>SH_ABORT_TRANSACTION</TT> from within the Shore error handler
+function, which is described in the next section.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html61"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html58"
+ HREF="shrc.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html52"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html60"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html62"
+ HREF="node5.html">The Shore Error Handler</A>
+<B> Up:</B> <A NAME="tex2html59"
+ HREF="shrc.html">Handling Errors in a Application</A>
+<B> Previous:</B> <A NAME="tex2html53"
+ HREF="node3.html">The shrc Class</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

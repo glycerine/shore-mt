@@ -1,0 +1,79 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test Create, Destroy of Large Records
+#
+# Also fills the volume and then aborts last operation. 
+# If you look at the pages this allocates, you'll see that
+# it demonstrated the fact that the pages aren't allocated from
+# the large-object store as we'd like or expect.
+#
+
+source $script_dir/vol.init
+
+if { $logging == 0 } {
+    echo "Logging off: script not run. "
+} else {
+set_config_info
+
+set long_len [expr $lg_rec_page_space * 50]
+
+set long_body [format %0$long_len\d  1]
+
+verbose length of long_body [string length $long_body]
+
+sm begin_xct
+set fid [sm create_file $volid regular]
+sm commit_xct
+
+set errorno 0
+set i 0
+while {1} {
+    verbose loop $i
+    verbose [sm gather_stats reset]
+    sm begin_xct
+	set caught [
+	    catch  {
+		set r [
+		    sm create_rec $fid $i 10 $long_body 
+		]
+		verbose creating long
+		sm create_rec $fid $i 10 $long_body 
+
+	    } errorno
+	]
+	if {$caught} {
+	    verbose EXPECTED error during create: $errorno
+		verbose aborting...
+	    sm abort_xct
+	    break
+	}
+    sm commit_xct
+
+    sm begin_xct
+	verbose destroying 
+	sm destroy_rec $r
+    sm commit_xct
+    incr i
+}
+
+verbose SPACE BEFORE DESTROY
+dstats $volid
+
+sm begin_xct
+sm destroy_file $fid
+
+verbose volume_quota [sm get_volume_quota $volid]
+verbose sm_stats [sm gather_stats]
+sm commit_xct
+
+verbose SPACE AFTER DESTROY
+dstats $volid
+
+unset r long_body long_len caught fid i errorno
+}

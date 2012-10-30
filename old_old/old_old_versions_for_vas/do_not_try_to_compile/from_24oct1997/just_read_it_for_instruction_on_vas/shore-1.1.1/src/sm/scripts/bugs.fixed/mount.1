@@ -1,0 +1,34 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test mounting
+#
+
+set volid0 10
+set volid1 11
+
+sm create_vol $volid0
+set volid0 [sm init_vol_logical_id $volid0 100]
+set mvid0 [sm mount_logical /var/home/zwilling/shore/vol/disk0]
+if {$mvid0 != $volid0} {
+    echo $mvid0 != $volid0
+    exit 1
+}
+echo $mvid0 == $volid0
+echo rootid0 [sm vol_root_index $mvid0]
+
+sm create_vol $volid1
+set volid1 [sm init_vol_logical_id $volid1 100]
+set mvid1 [sm mount_logical /var/home/zwilling/shore/vol/disk1]
+if {$mvid1 != $volid1} {
+    echo $mvid1 != $volid1
+    exit 1
+}
+echo $mvid1 == $volid1
+echo rootid1 [sm vol_root_index $mvid1]
+

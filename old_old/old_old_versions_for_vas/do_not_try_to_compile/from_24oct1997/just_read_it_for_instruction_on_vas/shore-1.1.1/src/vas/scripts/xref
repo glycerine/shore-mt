@@ -1,0 +1,89 @@
+source ../scripts/setup.all
+
+cd /small/z
+# compensating transaction
+begin
+	foreach f { symlink2pool xobj xr1 xr2 xr3 xr4 junk sym1 xrinf } {
+		unlink $f
+	}
+commit
+
+# 	/large/x/offvol is created by setup
+#	and it's an xref
+#
+
+begin
+	read /large/x/offvol
+	readref /large/x/offvol
+commit
+
+
+begin
+#	RESTRICTION REMOVED:
+# 	xrefs to directories are not allowed
+#	expect OS_IsADirectory from { mkxref /small/z pool } 
+
+#	RESTRICTION REMOVED:
+# 	xrefs to pools are not allowed
+#	expect OS_PermissionDenied from { mkxref /small/pool pool } 
+
+# 	xrefs to symlinks, xrefs, and normal objects  *are* allowed
+	set s [mksymlink /small/pool symlink2pool]
+	mkxref $s xrinf
+
+#	RESTRICTION REMOVED:
+#	expect SVAS_NotFound from { mkxref 99999 junk } 
+
+	unlink xrinf
+commit
+
+set subject xobj
+
+begin
+#	create an object
+	mkuserdef $subject 0:30:0
+	assert [expr {[sfile size $subject] == "30"} ]
+
+# 	create and remove an xref
+	set oid [sfile oid $subject]
+	mkxref $oid xr1
+	rmxref xr1
+commit
+
+
+begin
+	mkxref $oid xr1
+# 	read through xref by name
+	read xr1
+
+# 	read xref by oid
+	read $oid
+
+	assert [expr {[sfile size xr1] != [sfile size $subject]}]
+	rmxref xr1
+commit
+
+begin
+#	make an xref to an xref to an xref to an xref to a file
+	
+	set x1 [mkxref $subject xr1]
+	set x2 [mkxref $x1 xr2]
+	set x3 [mkxref $x2 xr3]
+	set x4 [mkxref $x3 xr4]
+
+#	demonstrate that it works
+	set objsize [sfile size $subject]
+	append xr4	100
+
+	set newobjsize [sfile size $subject]
+
+	assert [expr { [expr { $newobjsize - 100}] == $objsize }]
+
+#	ELOOP: make a circular xref/symlink chain
+	set x1 [mksymlink xrinf sym1]
+	mkxref $x1 xrinf
+	expect OS_TooManyLinks from { read xrinf }
+
+commit
+
+return "xref done."

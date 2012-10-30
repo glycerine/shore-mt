@@ -1,0 +1,23 @@
+# source ../scripts/largedir.create
+
+cd /small
+
+global verbose
+set st 0123456789
+set med $st.$st.$st.$st.$st
+set long $med.$med
+set nent  [expr {$pagesize / 100}]
+set nent  [expr {$nent * 2}]
+set nent  [expr {$nent + 2}]
+
+begin
+	for {set i 0} {$i < $nent} {incr i} {
+		if ($verbose) {
+			cout "mkdir " $long.$i 
+		}
+		mkdir $long.$i
+		ls -lid .
+	}
+commit
+
+ls -lid .

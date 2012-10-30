@@ -1,0 +1,24 @@
+
+! # --------------------------------------------------------------- #
+! # -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+! # -- University of Wisconsin-Madison, subject to the terms     -- #
+! # -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+! # -- Reserved.                                                 -- #
+! # --------------------------------------------------------------- #
+
+
+! COMMAND <name>
+! ALIAS <alias> ... optional
+! USAGE  arguments ... required    
+! KEYWORDS  optional
+! HELP  required
+! %% required at end of listing for command
+! 
+
+
+%COMMAND sdltest
+%KEYWORDS sdl application
+%HELP run server resident sdl/object cache application
+attempt to run builtin application.
+%%
+

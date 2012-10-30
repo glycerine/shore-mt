@@ -1,0 +1,9 @@
+
+module m1 {
+    interface stg {
+    public:
+	    attribute string	astring;
+	    attribute string	stringarray[10];
+		attribute text   	atext;
+    };
+}

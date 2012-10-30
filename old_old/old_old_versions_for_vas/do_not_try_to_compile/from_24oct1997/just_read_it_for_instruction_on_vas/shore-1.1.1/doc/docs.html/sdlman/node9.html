@@ -1,0 +1,272 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Interfaces</TITLE>
+<META NAME="description" CONTENT="Interfaces">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node10.html">
+<LINK REL="previous" HREF="node8.html">
+<LINK REL="up" HREF="sdlman.html">
+<LINK REL="next" HREF="node10.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html161"
+ HREF="node10.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html158"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html152"
+ HREF="node8.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html160"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html162"
+ HREF="node10.html">Constants</A>
+<B> Up:</B> <A NAME="tex2html159"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html153"
+ HREF="node8.html">Name Scopes</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html163"
+ HREF="node9.html#SECTION00091000000000000000000">
+Example</A>
+<LI><A NAME="tex2html164"
+ HREF="node9.html#SECTION00092000000000000000000">
+More Examples</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="sdlman:interface">&#160;</A><H1><A NAME="SECTION00090000000000000000000">
+Interfaces</A>
+</H1>
+<P><PRE>
+    interface_dcl : 'interface' ID [ interface_body ]
+    interface_body : [ inheritance ] '{' interface_dcls '}'
+    inheritance : ':' parent ( ',' parent )*
+    parent : access_spec scoped_name
+    access_spec : 'private' | 'protected' | 'public'
+    interface_dcls : ( access_spec ':' interface_members )*
+    interface_members : interface_member*
+    interface_member : const_dcl ';'
+        | type_dcl ';'
+        | attr_dcl ';'
+        | relationship_dcl ';'
+        | op_dcl ';'
+        | override ';'
+    override : 'override' scoped_name ( ',' scoped_name )*
+</PRE>
+<P>
+An
+<EM>interface</EM>
+definition is similar to a class definition in C++.
+The
+<EM>access_specs</EM>
+preceding names of parent interfaces and introducing groups of member
+declarations have exactly the same meaning as in C++,
+except that they are not optional.
+The form
+<EM>&quot;interface ID;</EM>
+(with no
+<TT>interface_body</TT>)
+denotes a
+<EM>&quot;forward-declaration</EM>;
+the complete declaration of the interface must appear elsewhere in the
+same module.
+<P>
+A
+<EM>const_dcl</EM>
+defines a constant value.
+A
+<EM>type_dcl</EM>
+defines a type, which may be simple (integer, float, etc.) or structured.
+Types are described in more detail below.
+An
+<EM>attr_dcl</EM>
+introduces an
+<EM>attribute</EM>,
+which corresponds to an
+&quot;instance variable&quot;
+in SmallTalk
+or a
+&quot;data member&quot;
+in C++.
+The attributes of an object define its state.
+A
+<TT>relationship_dcl </TT>
+defines a special kind of attribute called a
+<EM>relationship</EM>,
+which establishes a correspondence between objects.
+<P>
+An
+<EM>op_dcl</EM>
+introduces an
+<EM>operation</EM>.
+Operations are similar to
+&quot;methods&quot;
+in SmallTalk
+or
+&quot;function members&quot;
+in C++.
+SDL defines only the
+<EM>signatures</EM>
+of operations.
+They are bound to executable code in a language-dependent manner.
+An
+<EM>override</EM>
+does not introduce a new member, but indicates that the
+named members (which must designate inherited operations) will be bound
+to code in this class that overrides the binding in ancestor classes.
+(A similar feature is in Modula 3.
+C++ requires that the entire function header be repeated, but that it
+exactly match the header in base class from which the function member is
+inherited.
+The proposed C++ standard relaxes the requirement for an exact match,
+allowing the return type of the overriding function to be derived from
+the return type of the function it is overriding.
+Introduction of a similar feature into SDL is for further study.)
+<P><EM>Override</EM>
+applies only to operations; it is an error to name attributes or any
+members other than operations in an
+<EM>override</EM>.
+<P><A NAME="sdlman:interfaceexample">&#160;</A><H2><A NAME="SECTION00091000000000000000000">
+Example</A>
+</H2>
+<P><PRE>
+    interface AtomicPart {
+    public: 
+        attribute long               id; 
+        attribute char               type[TypeSize]; 
+        attribute long               buildDate; 
+        attribute long               x, y; 
+        attribute long               docId; 
+
+        attribute set&lt;Connection&gt;    to;   // to connection objs
+        attribute set&lt;Connection&gt;    from; // back pointers 
+
+        attribute ref&lt;CompositePart&gt; partOf; // up pointer 
+
+        void swapXY(); 
+        void toggleDate(); 
+        void DoNothing() const; 
+
+        long traverse(in BenchmarkOp op, 
+                inout PartIdSet visitedIds) const; 
+        void init(in long ptId, in ref&lt;CompositePart&gt; cp); 
+        void Delete(); 
+    };
+</PRE>
+<P><A NAME="sdlman:inheritance">&#160;</A>An interface is a name space, as defined in the previous section.
+The complete set of names defined by an interface
+includes the names defined by the interface's
+<TT>member</TT>s
+as well as names defined by its parents (if any).
+The complete set of definitions is formed by taking the set-theoretic union
+of sets of scoped names.
+Thus members with the same name introduced in different interfaces can be
+distinguished by their scoped names, and a given member inherited from the
+one ancestor by multiple paths contributes only one member to a derived
+interface.
+(In C++ terminology, this means that all inheritance is effectively
+&quot;virtual.&quot;)
+Each name defined by a (member of an) interface
+<EM>hides</EM>
+definitions of that name inherited from its parents.
+A use of an unqualified name inside an interface refers to the definition
+of that name in the interface or one of its ancestors that hides all
+other definitions.
+If no definition hides all others, the name is ambiguous and must be
+qualified.
+(This corresponds to the so-called
+&quot;dominance rule&quot;
+of C++).
+If there is no definition of the name in the scope containing the use,
+the use identifies a definition in an enclosing scope (if any).
+<P>
+SDL does not support operator (method) overloading.
+<P><A NAME="sdlman:interfaceexample2">&#160;</A><H2><A NAME="SECTION00092000000000000000000">
+More Examples</A>
+</H2>
+<P><PRE>
+    interface A { 
+        public: 
+            const long a = 1; 
+            const long b = 2; 
+    };
+
+    interface B : public A { 
+        public: 
+            const long c = b; //  c = B::b = 3 
+            const long b = 3; 
+    }; 
+
+    interface C : public A {
+        public: 
+            const long c = 4; 
+    }; 
+
+    interface D : public A, public C {
+        public: 
+            const long d = 5; 
+            // D defines A::a, A::b, B::b, B::c, 
+            //        C::c, and D::d 
+            // Inside D, a, b, and d can be used without
+            // qualification, but c must be qualified.  
+            // The name b resolves to B::b, since its 
+            // definition hides A::b, but neither B::c 
+            // nor C::c hides the other. 
+    };
+</PRE>
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html161"
+ HREF="node10.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html158"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html152"
+ HREF="node8.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html160"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html162"
+ HREF="node10.html">Constants</A>
+<B> Up:</B> <A NAME="tex2html159"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html153"
+ HREF="node8.html">Name Scopes</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

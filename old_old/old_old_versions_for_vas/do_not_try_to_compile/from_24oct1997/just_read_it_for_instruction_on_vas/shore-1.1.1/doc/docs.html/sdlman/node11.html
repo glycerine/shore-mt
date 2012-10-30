@@ -1,0 +1,301 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Types</TITLE>
+<META NAME="description" CONTENT="Types">
+<META NAME="keywords" CONTENT="sdlman">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="sdlman.css">
+<LINK REL="next" HREF="node12.html">
+<LINK REL="previous" HREF="node10.html">
+<LINK REL="up" HREF="sdlman.html">
+<LINK REL="next" HREF="node12.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html186"
+ HREF="node12.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html183"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html177"
+ HREF="node10.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html185"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html187"
+ HREF="node12.html">Attributes</A>
+<B> Up:</B> <A NAME="tex2html184"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html178"
+ HREF="node10.html">Constants</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html188"
+ HREF="node11.html#SECTION000111000000000000000000">
+Examples</A>
+<LI><A NAME="tex2html189"
+ HREF="node11.html#SECTION000112000000000000000000">
+External Types</A>
+<LI><A NAME="tex2html190"
+ HREF="node11.html#SECTION000113000000000000000000">
+Examples</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="sdlman:type">&#160;</A><H1><A NAME="SECTION000110000000000000000000">
+Types</A>
+</H1>
+<P><PRE>
+    type_dcl : 'typedef' type_spec declarators
+        | struct_type | union_type | enum_type | external_type
+    type_spec : simple_type | constructed_type
+    simple_type : atomic_type
+        | string_type
+        | enum_type
+        | ref_type
+        | type_name
+    constructed_type : struct_type
+        | union_type
+        | sequence_type
+    atomic_type : floating_pt_type
+        | integer_type
+        | char_type
+        | boolean_type
+        | octet_type
+        | any_type
+    type_name : scoped_name
+    declarators : declarator ( ',' declarator )*
+    declarator : ID [ array_size ]
+    array_size : '[' positive_int_const ']'
+    positive_int_const : const_exp 
+            // must evaluate to a positive integer
+
+    octet_type : 'octet'
+    char_type : 'char'
+    any_type : 'any'
+
+    struct_type : 'struct' ID [ struct_body ]
+    struct_body : '{' struct_member* '}'
+    struct_member : type_spec declarators ';'
+
+    union_type : 'union' ID [ union_body ]
+    union_body : 'switch' '(' discriminator ')' '{' case* '}'
+    discriminator : scalar_type ID
+    scalar_type : integer_type
+        | char_type
+        | boolean_type
+        | enum_type
+        | type_name // denoting a scalar type
+    case : case_label+ ( type_spec declarators ';' )+
+    case_label : 'case' const_exp ':' | 'default' ':'
+
+    enum_type : 'enum' ID '{' ID ( ',' ID )* '}'
+    sequence_type :
+        'sequence' '&lt;' type_name [ ',' positive_int_const ] '&gt;'
+    string_type :
+        'string' [ '&lt;' positive_int_const '&gt;' ]
+
+    external_type : 'external' external_qualifier ID 
+    external_qualifier : 'typedef' | 'class' | 'enum' | 'union' | 'struct'
+</PRE>
+<P>
+Types are either
+<EM>simple</EM>
+or
+<EM>constructed</EM>.
+Simple types include the atomic types (integer, floating-point, etc.),
+character strings,
+and enumerations.
+The
+<EM>positive_int_const</EM>
+in a
+<EM>string</EM>
+type bounds the maximum length of the string.
+If the constant is omitted, the length of the string is unbounded.
+<P>
+Constructed types are built from base types, which may themselves be
+simple or constructed.
+A
+<EM>struct</EM>
+is a fixed heterogeneous sequence of values, selected by field names.
+It corresponds to a Pascal
+<EM>record</EM>
+or a C
+<EM>struct</EM>.
+A
+<EM>union</EM>
+consists of a discriminator value of a scalar type and a heterogeneous
+sequence of values (as in a
+<EM>struct</EM>)
+whose types are determined by the value of the discriminator.
+<A NAME="sdlman:sequence">&#160;</A>A
+<EM>sequence</EM>
+is a homogeneous sequence of values of a base type.
+As with
+<EM>strings</EM>,
+a bound on the length is optional.
+<P><EM>Beware the construction <TT>sequence&lt;ref&lt;T&gt;&gt;</TT>,
+as the two adjacent &quot;&gt;&gt;&quot; characters are parsed
+as a right-shift operator.
+In order to avoid this problem, you must put a space
+between the two brackets: &quot;&gt;&nbsp;&gt;&quot;.
+</EM>
+<P><EM>Arrays</EM>
+are as in C:
+one-dimensional, fixed-length sequences of values of the base type,
+whose elements are indexed by non-negative integers.
+As in C (and C++), the fact that a name denotes an array type is
+indicated in its definition by following it with a size in brackets.
+<em>
+<EM>References</EM>
+are either
+<EM>local</EM>
+or
+<EM>remote</EM>.
+Local references are similar to pointers in other languages, but are
+constrained to point to values in the object containing the
+reference.
+</em><A NAME="sdlman:typeexample">&#160;</A><H2><A NAME="SECTION000111000000000000000000">
+Examples</A>
+</H2>
+<P><PRE>
+    typedef long vector[100];
+    const long MaxName = 40;
+    struct FullName {
+        string&lt;MaxName&gt; given_name, family_name;
+        char initial;
+    };
+    typedef struct FullName2 {
+        string&lt;MaxName&gt; given_name, family_name;
+        char initial;
+    } FullName3;
+    struct PersonalInfo {
+        FullName name;
+            struct Addr {
+            string number, name;
+            string city;
+            char state[2];
+            long zip;
+        } address;
+    };
+    enum WidgetType { Simple, Complex };
+    struct simple_case {
+        float cost;
+        string description;
+    };
+    struct complex_case {
+        short part_count;
+        sequence&lt;Widget&gt; components;
+    };
+    union Widget switch (WidgetType part_type) {
+        case Simple:
+            simple_case si;
+        case Complex:
+            complex_case cx;
+    };
+</PRE>
+<P>
+These declarations define the types
+<EM>vector</EM>, <EM>FullName</EM>, <EM>FullName2</EM>, <EM>FullName3</EM>,
+<EM>PersonalInfo</EM>, <EM>WidgetType</EM>, and <EM>Widget</EM>,
+and the constants
+<EM>MaxName</EM> (with type <EM>long</EM> and value 40),
+<EM>Simple</EM>, and <EM>Complex</EM>
+(enumeration values of type <EM>WidgetType</EM>).
+The names
+<EM>FullName2</EM> and <EM>FullName3</EM>
+are aliases for a type that is equivalent to (but distinct from)
+the type bound to <EM>FullName</EM>.
+<P><A NAME="sdlman:external">&#160;</A><H2><A NAME="SECTION000112000000000000000000">
+External Types</A>
+</H2>
+<P>
+All data types that represent persistent data must
+be defined in the SDL sources, but data types for
+arguments to operations may be defined externally.
+The names of these data types must be declared in
+the SDL sources with the appropriate declaration,
+as in the example below:
+<P><A NAME="sdlman:externexample">&#160;</A><H2><A NAME="SECTION000113000000000000000000">
+Examples</A>
+</H2>
+<P><PRE>
+    module exeg {
+        external class a;
+        external enum b;
+        external typedef c;
+        external union d;
+        external struct e;
+
+        interface eg {
+            // ...
+        public:
+            e op(in a _a, in b _b, out c _c, out d _d);
+        };
+    }
+</PRE>
+<P>
+These declarations appear in the same places that any
+other type declarations may appear, but externally
+defined types can be used only in operations declarations.
+<A NAME="tex2html9"
+ HREF="footnode.html#394"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+See Section <A HREF="node15.html#sec:operations">14</A> for more information about
+operations.
+<P>
+Depending on the language for which a binding is generated,
+types declared to be external in the SDL source
+might have to be defined before the language binding header
+file is included in the application program source.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html186"
+ HREF="node12.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html183"
+ HREF="sdlman.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html177"
+ HREF="node10.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html185"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html187"
+ HREF="node12.html">Attributes</A>
+<B> Up:</B> <A NAME="tex2html184"
+ HREF="sdlman.html">Shore Data Language Reference Manual</A>
+<B> Previous:</B> <A NAME="tex2html178"
+ HREF="node10.html">Constants</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

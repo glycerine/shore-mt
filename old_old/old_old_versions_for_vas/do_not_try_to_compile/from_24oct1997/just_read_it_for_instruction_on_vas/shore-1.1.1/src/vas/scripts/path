@@ -1,0 +1,6 @@
+
+# test: search perm denied for component of path prefix: EACCES
+# test: length of path exceeds PATH_MAX : ENAMETOOLONG
+# test: file referred to by path does not exist : ENOENT
+# test: component of path prefix is not a directory : ENOTDIR
+# test: read-only filesystem : EROFS

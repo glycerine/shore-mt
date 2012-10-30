@@ -1,0 +1,45 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+# This script demonstrates a bug in the abort code
+
+source $script_dir/vol.init
+if {$logging == 0} {
+    echo "Logging off: script not run."
+} else {
+if {$volid == 0} {
+    set volid 10
+    sm create_vol $volid 222 1000 
+    set volid [sm init_vol_logical_id $volid 100]
+    sm mount
+}
+
+# create a string larger that the largest small record
+set_config_info
+set app_len $lg_rec_page_space 
+set app_form %0$app_len\d
+set app_data [format $app_form 1]
+verbose app_data
+
+sm begin_xct
+set f1 [sm create_file $volid]
+verbose f1 = $f1
+
+# add these lines and everything works fine
+#sm commit_xct
+#sm begin_xct
+
+set r1 [sm create_rec $f1 "hdr" 1 $app_data]
+
+sm append_rec $r1 $app_data
+sm truncate_rec $r1 $app_len
+sm append_rec $r1 $app_data
+#sm truncate_rec $r1 $app_len
+
+sm abort_xct
+unset app_len app_data app_form r1 f1 
+}

@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Implementing the Operations</TITLE>
+<META NAME="description" CONTENT="Implementing the Operations">
+<META NAME="keywords" CONTENT="stree">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="stree.css">
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="stree.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html142"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html139"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html133"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html141"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html143"
+ HREF="node5.html">The Main Program</A>
+<B> Up:</B> <A NAME="tex2html140"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html134"
+ HREF="node3.html">Defining Data Types</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="stree:operations">&#160;</A><H1><A NAME="SECTION00040000000000000000000">
+Implementing the Operations</A>
+</H1>
+<P>
+The second step in building an application is to write the code that
+implements the operations of its interfaces.
+Currently, this code must be written in C++.
+The Shore project intends to support other implementation languages
+in future releases.
+The implementation code for the search tree example is contained in four
+files, one for each interface:
+<A HREF="node8.html#stree:treeSRC">tree.C</A>,
+<A HREF="node8.html#stree:wordSRC">word.C</A>,
+<A HREF="node8.html#stree:citeSRC">cite.C</A>,
+and
+<A HREF="node8.html#stree:documentSRC">document.C</A>.
+<P>
+On the whole, this code is similar to the code one would write to implement
+the C++ classes generated from the interface definitions.
+However, there are several points to note:
+<P><UL>
+<LI> Each of these files <TT>#include</TT>s the header file <TT>stree.h</TT>,
+which is <A HREF="node6.html#stree:application">generated</A>
+from the interface definitions.
+This file, in turn, 
+<TT>#include</TT>s header files from the Shore library that define a variety
+of types and macros mentioned below.
+<LI> Types defined as <TT>ref&lt;T&gt;</TT> in SDL are written as <TT>Ref&lt;T&gt;</TT>
+in C++.
+Similar remarks apply to <TT>set</TT>, <TT>bag</TT>, etc.
+<LI> Operations declared <TT>const</TT> in SDL become <TT>const</TT> member
+functions in the C++ binding.
+<LI> Values of type <TT>Ref&lt;T&gt;</TT> can be used as
+if they were of type <TT>const T*</TT>.
+For example, consider the body of the function
+<A HREF="node8.html#stree:searchtreefindFUNC"><TT>SearchTree::find</TT></A>.
+The attribute <TT>root</TT>
+of interface <TT>SearchTree</TT>, which is declared to have type <TT>ref&lt;Word&gt;</TT>,
+is translated to a data member of type <TT>Ref&lt;Word&gt;</TT> of class
+<TT>SearchTree</TT>.
+Thus the test &quot;<TT>if (root)</TT>&quot; checks whether the <TT>root</TT> pointer
+is null, and the call &quot;<TT>root-&gt;find(str)</TT>&quot; invokes the const
+member function <TT>Word::find</TT>.
+<LI> The special member function <TT>Ref&lt;T&gt;::update</TT> converts a value of
+type <TT>Ref&lt;T&gt;</TT> into a pointer of type <TT>T*</TT>.  In other words,
+<TT>update</TT> explicitly performs the conversion from <TT>Ref</TT> to pointer
+described in the preceding paragraph, but without the
+<TT>const</TT> qualification.
+For example, consider the body of the function
+<TT>SearchTree::insert</TT>.
+Since the automatic conversion
+described in the preceding paragraph can only convert a <TT>Ref&lt;Word&gt;</TT> to
+a <TT>const Word *</TT>, the compiler would reject
+<TT>root-&gt;find_or_add(s)</TT>
+because <TT>Word::find_or_add</TT> is a non-const member function of <TT>Word</TT>.
+Thus we write <TT>root.update()-&gt;find_or_add(s)</TT> to explicitly convert
+<TT>root</TT> from <TT>Ref&lt;Word&gt;</TT> to <TT>Word *</TT>.
+The <TT>update</TT> function has the runtime effect of locking
+the referenced object to prevent interference from other users
+and marking it as (potentially) modified,
+so that it will be written back to persistent storage at the end of a
+transaction.
+<P></UL><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html142"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html139"
+ HREF="stree.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html133"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html141"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html143"
+ HREF="node5.html">The Main Program</A>
+<B> Up:</B> <A NAME="tex2html140"
+ HREF="stree.html">Getting Started with Shore</A>
+<B> Previous:</B> <A NAME="tex2html134"
+ HREF="node3.html">Defining Data Types</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

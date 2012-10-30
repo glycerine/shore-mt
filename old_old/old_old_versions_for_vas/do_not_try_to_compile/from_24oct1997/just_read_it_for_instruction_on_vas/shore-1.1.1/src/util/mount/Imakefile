@@ -1,0 +1,28 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * $Header: /p/shore/shore_cvs/src/util/mount/Imakefile,v 1.19 1997/10/13 11:43:57 solomon Exp $
+ */
+
+#if defined(IS_LINUX)
+/* Don't try to build the generic smount and sumount.  The standard Linux
+ * mount works fine, and the standard Linux umount is close enough (it can't
+ * contact the server correctly, but it does the local umount anyhow).
+ */
+#	define Tests generic
+#else
+#	define Subdirs generic
+#endif
+
+linux: all
+generic: all
+
+#if defined(IS_LINUX)
+#undef linux
+%GEN install_as(bin,mnt,mnt.linux)
+#endif

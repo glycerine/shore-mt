@@ -1,0 +1,635 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Basic Shore System Concepts</TITLE>
+<META NAME="description" CONTENT="Basic Shore System Concepts">
+<META NAME="keywords" CONTENT="overview">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="overview.css">
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="up" HREF="overview.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html121"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html118"
+ HREF="overview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html112"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html120"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html122"
+ HREF="node4.html">The Shore Architecture</A>
+<B> Up:</B> <A NAME="tex2html119"
+ HREF="overview.html">An Overview of Shore</A>
+<B> Previous:</B> <A NAME="tex2html113"
+ HREF="node2.html">Introduction</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html123"
+ HREF="node3.html#SECTION00031000000000000000000">
+The Big Picture</A>
+<LI><A NAME="tex2html124"
+ HREF="node3.html#SECTION00032000000000000000000">
+Shore Object Basics</A>
+<LI><A NAME="tex2html125"
+ HREF="node3.html#SECTION00033000000000000000000">
+File System Features</A>
+<UL>
+<LI><A NAME="tex2html126"
+ HREF="node3.html#SECTION00033100000000000000000">
+Shore Object Namespace</A>
+<LI><A NAME="tex2html127"
+ HREF="node3.html#SECTION00033200000000000000000">
+Legacy Unix Tool Support</A>
+</UL>
+<LI><A NAME="tex2html128"
+ HREF="node3.html#SECTION00034000000000000000000">
+Object-Oriented Database Features</A>
+<UL>
+<LI><A NAME="tex2html129"
+ HREF="node3.html#SECTION00034100000000000000000">
+The Shore Type System</A>
+<LI><A NAME="tex2html130"
+ HREF="node3.html#SECTION00034200000000000000000">
+Shore Language Bindings</A>
+<LI><A NAME="tex2html131"
+ HREF="node3.html#SECTION00034300000000000000000">
+Other OODB-Like Services</A>
+</UL></UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="overview:basicconcepts">&#160;</A><H1><A NAME="SECTION00030000000000000000000">
+Basic Shore System Concepts</A>
+</H1>
+<P>
+As a hybrid system, Shore may be described as a file system augmented
+with database features or a DBMS with file-system features.
+In this section, we will describe the basic features of
+Shore, explaining how it combines important ideas from these two areas
+in order to arrive at a system capable of addressing the variety of
+application requirements discussed in the introduction.
+<P><A NAME="overview:bigpicture">&#160;</A><H2><A NAME="SECTION00031000000000000000000">
+The Big Picture</A>
+</H2>
+<P>
+Shore is a collection of cooperating data servers, with each data server
+containing typed persistent objects.  To organize this universe
+of persistent Shore objects, a Unix-like name space is provided.
+As in Unix, named objects can be directories, symbolic links, or individual
+(typed) objects (the counterpart of Unix ``plain'' files).  Unlike
+Unix, Shore allows each object to be accessed by a globally unique Object
+Identifier (OID) that is never reused.  Shore also introduces a few new
+types of objects, including <EM>types</EM> and <EM>pools</EM>, as described in more
+detail in 
+Section&nbsp;<A HREF="node3.html#overview:filesystem">2.3</A>.
+<P>
+The type system for Shore objects is
+language-neutral, supporting applications in any programming language for
+which a language binding exists.  For objects whose
+primary data content is textual or untyped binary data, Unix file system
+calls are provided to enable legacy applications (such as existing
+language compilers or CAD tools) to access their data content in an
+untyped manner.
+Shore is structured as a peer-to-peer
+distributed system; each node where objects are stored or where an
+application program wishes to execute contains a Shore server
+process that talks to other Shore servers, interfaces to locally
+executing applications, and caches data pages and locks in order to improve
+system performance.
+<P><A NAME="overview:object">&#160;</A><H2><A NAME="SECTION00032000000000000000000">
+Shore Object Basics</A>
+</H2>
+<P>
+The Shore object model, like many database object models, consists of
+<EM>objects</EM> and <EM>values</EM>.  
+Every persistent datum in Shore is an object,
+and each object has an identity denoted by a unique object identifier
+or <EM>OID</EM>.  Structurally, an object is a container for a value; the
+value can be simple or structured, and may include
+references to (typed OIDs of) other objects.  Every value has
+a type, as does every object.  Behaviorally, each object has a set of
+methods through which its contents can be accessed and
+manipulated.  The internal structure and methods available for a
+given object are dictated by the object's type, referred to as its
+<EM>interface type</EM>, and every Shore object is tagged with a reference to a
+type object that captures this information.
+<P>
+A Shore object is much lighter-weight than a Unix file, but it may still be
+too heavy to support fine-grained data structures that are customarily
+represented as linked lists, trees, or other graph structures in
+non-persistent programs.
+To support the flexibility of dynamic structures with the efficiency of
+(logically) contiguous blocks on secondary storage, Shore allows each
+object to be extended with a variable-sized <EM>heap</EM>
+(see 
+Figure <A HREF="node3.html#fig:objectfigure">3</A>
+).
+The <EM>core</EM> of an object is described by its type.
+The heap is used by the system to store variable-sized components of its
+value such as strings, variable arrays, and sets.  The heap can also
+contain <EM>dynamic values</EM> which are similar to ``top-level'' objects,
+but do not have independent identity (for example, when the object is
+destroyed, all of its dynamic values are destroyed as well).
+Dynamic values can be linked together with <EM>local references</EM>,
+which are stored on disk as offsets from the start of the heap, but are
+swizzled in memory to actual memory addresses.  The O2 commercial
+OODBMS [<A
+ HREF="node7.html#d:O2">Deu91</A>]
+provides a related facility with its objects/values distinction;
+the main difference is that in O2 the encapsulated values must form a
+set, list, or array, whereas in Shore the heap can contain an arbitrary
+data structure.  With demand-paging support for very large
+objects, each object heap closely resembles a small
+Object Store database&nbsp;[<A
+ HREF="node7.html#llow:the">LLOW91</A>]&nbsp;<A NAME="tex2html8"
+ HREF="footnode.html#85"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+<P>
+<BR>
+<DIV ALIGN="CENTER"><A NAME="fig:objectfigure">&#160;</A><A NAME="88">&#160;</A>
+<TABLE>
+<CAPTION><STRONG>Figure 3:</STRONG>
+Shore object structure.</CAPTION>
+<TR><TD><IMG WIDTH="376" HEIGHT="124"
+ SRC="img3.gif"
+ ALT="\begin{figure}
+ \centerline{
+ \epsfxsize=3.3in\epsfbox{fig/object.ps}
+ }\end{figure}"></TD></TR>
+</TABLE>
+</DIV>
+<BR><A NAME="overview:filesystem">&#160;</A><H2><A NAME="SECTION00033000000000000000000">
+File System Features</A>
+</H2>
+<P>
+From a file system standpoint, Shore provides two major services.  First, to
+support object naming and space management in a world with many persistent
+objects, Shore provides a flexible object name space.  Second, to enable legacy
+Unix file-based applications to continue to exist while new Shore applications
+are being developed, mechanisms are provided that permit Shore object data to
+be accessed via Unix file system calls.<A NAME="tex2html9"
+ HREF="footnode.html#93"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+<P><A NAME="overview:namespace">&#160;</A><H3><A NAME="SECTION00033100000000000000000">
+Shore Object Namespace</A>
+</H3>
+<P>
+Shore provides a tree-structured, Unix-like name space in which all
+persistent objects are reachable, either directly or indirectly, from a
+distinguished root directory.  By
+doing so, Shore gives users a framework in which to
+register both individual persistent objects and the roots of
+large persistent data structures, a framework that provides a much
+richer naming environment than the single-level ``persistent root''
+directory found in EXODUS and most other current OODBs.<A NAME="tex2html11"
+ HREF="footnode.html#310"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A> The realization of this framework involves
+extending the set of familiar Unix object types (<EM>directories</EM>,
+<EM>symbolic links</EM>, and ``regular files'') with <EM>cross references</EM>,
+<EM>pools</EM>, <EM>modules</EM>, and <EM>type objects</EM><A NAME="tex2html12"
+ HREF="footnode.html#103"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>.
+<P>
+Shore directory objects provide the same facilities as Unix directories. 
+Familiar Unix concepts such as path name, subdirectory, parent directory,
+link (both hard and symbolic), and
+root directory are all defined as they are in Unix&nbsp;[<A
+ HREF="node7.html#rt:the">RT74</A>].  As in Unix,
+a directory is a set of <IMG WIDTH="96" HEIGHT="28" ALIGN="MIDDLE" BORDER="0"
+ SRC="img4.gif"
+ ALT="\(\langle name, OID \rangle\)"> pairs.
+The <EM>OID</EM> can refer to any other Shore object, but the system maintains
+the Unix invariant that the set of directories forms a single rooted tree.
+Directories and the objects they contain are called <EM>registered</EM> objects.
+Each registered object contains a set of <EM>system properties</EM>, which are
+a superset of the Unix attributes:
+ownership, access permissions, and time stamps.<A NAME="tex2html13"
+ HREF="footnode.html#108"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+To support lighter-weight objects, 
+Shore introduces a new kind of (registered) object called a
+<EM>pool</EM>.  
+Members of a pool, called <EM>anonymous</EM> objects, are clustered
+near each other on disk and share most of the Unix attributes (ownership,
+etc.)  with the pool.  Anonymous objects do not have path names, but they
+can be accessed by OID like any other object.  There is also an operation to
+enumerate the contents of a pool (which can be accessed by OID or path name).
+The <EM>registered</EM> property is orthogonal to type:
+Any type of object can be created either in a pool (as an anonymous object)
+or in a directory (as a registered object). We expect that in a typical
+Shore database, the vast majority of objects will be anonymous, with a few
+registered objects serving as roots or entry points to graphs of anonymous
+objects.
+<P>
+To preserve the invariant that all objects are reachable from the root
+of the directory system, Shore imposes different deletion semantics on
+registered and anonymous objects.  As in Unix, a registered object is
+not explicitly deleted; it is reclaimed by the system when its link
+count (the number of directory entries referring to it) drops to zero.
+An anonymous object can be deleted at any time, but a pool can only be
+deleted when it is empty.  An OID is thus a ``soft'' reference, in that
+it may dangle if the object to which it refers is deleted.
+(Since OIDs are never reused, however, it will never accidentally capture a
+new object.)  Since OIDs can be stored in the contents of arbitrary objects,
+any stronger integrity guarantee would be impractical to enforce.
+<P>
+Shore introduces three more fundamental kinds of objects,
+<EM>modules</EM>, <EM>type objects</EM>, and <EM>cross references</EM>. 
+Modules and type objects are similar to pools and anonymous objects,
+respectively, but have different deletion semantics to preserve the
+existence dependency from objects to their types.
+Cross references are similar to symbolic links in that they provide a
+way to insert an alias for an object into the directory name space,
+but look somewhat like hard links when used through NFS.
+While a symbolic link contains a path name for a registered object,
+a cross reference contains the OID of an arbitrary object.
+Cross references, like symbolic links, are ``soft'' (permitted to dangle).
+They are intended primarily for the Unix compatibility feature described in the
+following section.
+<A NAME="tex2html14"
+ HREF="footnode.html#115"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+<P>
+Figure <A HREF="node3.html#fig:poolsfig">4</A>
+illustrates these concepts.
+The directory <TT>/u/smith</TT> contains the entries <TT>project</TT>,
+<TT>doc</TT>, and <TT>pool1</TT>, referring to another directory, a cross
+reference, and a pool, respectively.  The registered object
+<TT>/u/smith/project/entries</TT> contains pointers to members of <TT>pool1</TT>.
+It might be some sort of application-defined ``directory'' of entry points
+to a data structure.  The symbolic link <TT>/u/smith/project/README</TT> is an
+alias for the cross reference <TT>/u/smith/doc</TT>, which is itself an
+alias for a member of <TT>pool1</TT>.  An attempt to access either of these
+path names through the Unix compatibility interface will resolve to that
+anonymous object.
+<P>
+<BR>
+<DIV ALIGN="CENTER"><A NAME="fig:poolsfig">&#160;</A><A NAME="128">&#160;</A>
+<TABLE>
+<CAPTION><STRONG>Figure 4:</STRONG>
+The Shore name space.</CAPTION>
+<TR><TD><IMG WIDTH="378" HEIGHT="373"
+ SRC="img5.gif"
+ ALT="\begin{figure}
+ \centerline{
+ \epsfxsize=3.3in\epsfbox{fig/newpools.ps}
+ }\end{figure}"></TD></TR>
+</TABLE>
+</DIV>
+<BR><A NAME="overview:legacy">&#160;</A><H3><A NAME="SECTION00033200000000000000000">
+Legacy Unix Tool Support</A>
+</H3>
+<P>
+While Shore provides a much richer environment than traditional file systems,
+there are many situations where tools designed to be used on
+files need to be invoked on database objects.  A typical example is provided
+by the CAPITL project [<A
+ HREF="node7.html#as:ano">AS93</A>], which uses EXODUS.
+CAPITL improves on current software-development environments by maintaining a
+rich set of attributes and relationships for each object in its repository
+(program sources, object files, specifications, documents, etc.)
+It represents each object as a directed graph, with intra- and inter-object
+links represented by OIDs.  While tools developed as part of CAPITL
+take full advantage of this rich structure, it is occasionally necessary
+to invoke existing tools such as compilers or editors on objects stored
+in the database.  Three possible approaches were to rewrite the tools
+to access CAPITL objects, to copy the contents of an object to a file before
+operating on it (and copy back the results), or to keep the contents
+permanently in files, storing only metadata and file names in the CAPITL
+database.  All of these approaches are unsatisfactory for various reasons.
+The solution found for CAPITL, which we have generalized and expanded in
+Shore, is to provide a special <EM>Unix compatibility</EM> feature.
+Each Shore object may optionally designate a range of bytes
+as its <EM>text</EM> field.  
+A compatibility library 
+provides versions of
+Unix system calls such as <TT>open</TT>, <TT>read</TT>, <TT>write</TT>, and <TT>seek</TT>,
+interpreting pathname arguments in the Shore name space and satisfying
+requests by fetching or updating the text field of objects.
+Registered objects without text fields behave like <TT>/dev/null</TT> (they
+read as zero length and ignore attempts to change them).
+Anonymous objects can be accessed via cross references.
+<P>
+For applications that cannot even be re-linked, we have constructed
+an NFS file server [<A
+ HREF="node7.html#sgkwl:des">SGK+85</A>].  An entire subtree of the Shore
+name space can be ``mounted'' on an existing Unix file system.  When
+applications attempt to access files in this portion of the name space,
+the Unix kernel generates NFS protocol requests that are handled by the
+Shore NFS value-added server.<A NAME="tex2html15"
+ HREF="footnode.html#142"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+<P><A NAME="overview:OODB">&#160;</A><H2><A NAME="SECTION00034000000000000000000">
+Object-Oriented Database Features</A>
+</H2>
+<P>
+As we mentioned in 
+Section&nbsp;<A HREF="node2.html#overview:EXODUS">1.1</A>,
+one important motivation for
+Shore was to rectify some of the shortcomings of EXODUS, many of which are
+shared by other existing object-oriented databases.
+Access control and name space limitations were addressed in the previous
+section.  Process structure is addressed in 
+Section&nbsp;<A HREF="node4.html#overview:architecture">3</A>.
+In this section we describe the design and implementation of the Shore
+type system and indicate how it supports hardware and language heterogeneity.
+<P><A NAME="overview:types">&#160;</A><H3><A NAME="SECTION00034100000000000000000">
+The Shore Type System</A>
+</H3>
+<P>
+The Shore type system is embodied by the SHORE Data Language, <EM>SDL</EM>,
+the language in which Shore types are defined.  
+SDL is quite similar in nature to the Object Definition Language (ODL)
+proposal from the ODMG consortium&nbsp;[<A
+ HREF="node7.html#c:ods">Cat93</A>], which is descended from
+OMG's Interface Description Language (IDL), a dialect of the RPC interface
+language used in OSF's Distributed Computing Environment (DCE).  Our work
+on SDL started at roughly the same time as ODMG's work, and we also used
+OMG's IDL as a starting point.  We have been following the development of
+ODL, but we had to proceed as well rather than waiting for ODMG to complete
+their work.  (At this time, the ODMG standards are still only in the late
+paper design stage, and portions are not yet entirely clear or internally
+consistent.)  The goals of ODMG are also somewhat different from ours.
+They concentrate on
+a standardized interface to existing C++ oriented OODBs, while our focus
+has been support for inter-language object sharing within a large name space
+of objects.
+<P>
+All objects are instances of <EM>interface types</EM>,
+types constructed with the <EM>interface</EM> type constructor.  Interface
+types can have methods, attributes, and relationships.  The attributes of
+an interface type can be of one of the primitive types (e.g., integer,
+character, real), or they can be of constructed types.  Shore provides the
+usual set of type constructors: enumerations, structures, arrays, and
+references (which are used to define relationships).  In addition, Shore
+provides a variety of <EM>bulk types</EM>, including sets, lists, and
+sequences, that enable a Shore object to contain a collection of references
+to other objects.  Finally, Shore provides the notion of <EM>modules</EM>, to
+enable related types to be grouped together for name scoping and type
+management purposes.  To provide a brief taste of SDL,
+Figure <A HREF="node3.html#fig:oo7sdl">5</A>
+shows how one of the OO7
+benchmark&nbsp;[<A
+ HREF="node7.html#cdn:the">CDN93</A>] types can be defined.<A NAME="tex2html17"
+ HREF="footnode.html#157"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+<P>
+<BR>
+<DIV ALIGN="CENTER"><A NAME="fig:oo7sdl">&#160;</A><A NAME="312">&#160;</A>
+<TABLE>
+<CAPTION><STRONG>Figure 5:</STRONG>
+Contents of the file <TT>oo7.sdl</TT>.</CAPTION>
+<TR><TD><IMG WIDTH="546" HEIGHT="605"
+ SRC="img6.gif"
+ ALT="\begin{figure}
+ {\small
+ \begin{verbatim}
+module oo7
+ {
+
+ const long TypeSize = ...
+ ...nnection, CompositePart, and other types go here
+
+ }\end{verbatim} }\end{figure}"></TD></TR>
+</TABLE>
+</DIV>
+<BR><A NAME="overview:lb">&#160;</A><H3><A NAME="SECTION00034200000000000000000">
+Shore Language Bindings</A>
+</H3>
+<P>
+Shore is intended to allow databases built by an
+application written in one language (e.g., C++) to then be accessed and
+manipulated by applications written in other object-oriented languages as
+well (e.g., CLOS).  This capability will be important for large-scale
+applications, such as VLSI CAD; C++ might be used for
+efficiency in simulating large chips, while CLOS (or perhaps Smalltalk)
+might be more convenient for writing the associated design-rule checking
+and user interface code.  In Shore, the methods associated with SDL
+interfaces can therefore be written using any of the languages for which a
+Shore language binding exists.  Currently, only the C++ binding is
+operational, so we will illustrate Shore's language binding concepts by
+briefly discussing the Shore C++ binding.<A NAME="tex2html19"
+ HREF="footnode.html#165"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+<P>
+An application, such as the OO7 benchmark, is created as follows.
+The first step is to write a
+description of the types in SDL.  In our OO7 example, this description is
+saved in a file called <TT>oo7.sdl</TT>.  The next step is to use the SDL type
+compiler to create type objects corresponding to the new types.  The type
+compiler is a Shore application that creates type objects from SDL
+definitions.<A NAME="tex2html20"
+ HREF="footnode.html#167"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A>
+A language-specific tool (in our case, <EM>sdlcxx</EM>) is then used
+to derive a set of class declarations and special-purpose function definitions
+from the type objects.
+In our example, this generated code is placed in
+two files: <TT>oo7.h</TT>, and <TT>oo7.C</TT>.  The header file <TT>oo7.h</TT> is
+included both in the C++ source files that supply the (application-specific)
+implementation of member functions such as <TT>traverse</TT> and <TT>swapXY</TT>,
+and in source files that manipulate instances of <TT>AtomicPart</TT>, etc.
+The OID of the type object is compiled into these files and used to
+catch version mismatches at runtime.
+<P>
+A fragment of the generated <TT>oo7.h</TT> file is shown in
+Figure <A HREF="node3.html#fig:cplus">6</A>.
+ Some of the data member types
+in 
+Figure <A HREF="node3.html#fig:cplus">6</A>
+correspond directly to SDL types, as
+C++  (like most languages) offers direct support for those simple types.
+For Shore types with no corresponding C++ type, like sets and references,
+a language-appropriate presentation of the SDL type is generated.  For
+C++, Shore presents references, sets, and other collection types using
+pre-defined, macro-based classes (similar to parameterized types) such
+as <TT>REF</TT> and <TT>BAG_INV_DECL</TT> in 
+Figure <A HREF="node3.html#fig:cplus">6</A>.
+The class <TT>REF(CompositePart)</TT> encapsulates an OID; C++ overloading
+features make it behave like a pointer to a read-only instance of
+<TT>CompositePart</TT>.  The class <TT>BAG_INV_DECL(Connection, ...)</TT>
+encapsulates a data structure containing a set of OIDs and provides member
+functions that enable its contents to be accessed; the _INV_DECL suffix
+and other macro arguments enable the generated class to do its part in
+maintaining the inverse relationship declared in the SDL schema.
+<P>
+<BR>
+<DIV ALIGN="CENTER"><A NAME="fig:cplus">&#160;</A><A NAME="313">&#160;</A>
+<TABLE>
+<CAPTION><STRONG>Figure 6:</STRONG>
+C++ Class generated from <TT>oo7.sdl</TT>.</CAPTION>
+<TR><TD><IMG WIDTH="539" HEIGHT="327"
+ SRC="img7.gif"
+ ALT="\begin{figure}
+ {\small
+ \begin{verbatim}
+class AtomicPart {
+ // additional SDL-...
+ ... REF(CompositePart) cp);
+ virtual void Delete();
+ };\end{verbatim} }\end{figure}"></TD></TR>
+</TABLE>
+</DIV>
+<BR>
+<P>
+Given the header file generated by the binder, the application programmer
+can implement the operations associated with the OO7 interfaces.  In the
+C++ binding, access to simple data members is provided safely through the
+use of several techniques.  As mentioned above, <TT>REF</TT>-generated classes
+behave like <EM>read-only</EM> pointers, so information about an atomic part
+could be printed by a function as follows: 
+<SMALL>
+<PRE>
+    void printPart(REF(AtomicPart) p) {
+      cout &lt;&lt; &quot;Type &quot; &lt;&lt; p-&gt;ptype
+           &lt;&lt; &quot; part at (&quot; &lt;&lt; p-&gt;x &lt;&lt; &quot;,&quot;
+           &lt;&lt; p-&gt;y &lt;&lt; &quot;)\n&quot;;
+    }
+</PRE>
+</SMALL>
+This function can directly access
+the <TT>part_type</TT>, <TT>x</TT>, and <TT>y</TT>
+data members of an atomic part, but it cannot update them.  (Attempts to
+do so would be flagged as an error by the C++ compiler.)  Similarly, member
+functions that do not update the contents of an object are flagged as <TT>const</TT> in their SDL definition, as illustrated in 
+Figure <A HREF="node3.html#fig:oo7sdl">5</A>
+(and attempts to call a non-<TT>const</TT> member function through a <TT>REF</TT>
+are also caught by the compiler).
+<P>
+To modify an object, the C++ application must first call a special generated
+member function, <TT>update</TT>, which returns a read-write reference.  For
+example, the following code fragment directly exchanges the <TT>x</TT> and
+<TT>y</TT> attributes of an atomic part:
+<SMALL><PRE>
+    REF(AtomicPart) p = ... ;
+    long tmp = p-&gt;x;
+    p.update()-&gt;x = p-&gt;y;
+    p.update()-&gt;y = tmp;
+</PRE>
+</SMALL>
+The function <TT>update</TT> coerces the type of <TT>p</TT> from
+<TT>REF(AtomicPart)</TT> to (<EM>non</EM> <TT>const</TT>) <TT>AtomicPart *</TT>.
+It also has the runtime effect of marking the referenced object as ``dirty''
+so that changes will be transmitted to the server when the transaction
+commits.
+Since the member function <EM>swapXY</EM> is not declared to be <EM>const</EM> in
+Figure <A HREF="node3.html#fig:cplus">6</A>,
+another legal way to accomplish this exchange
+would be to define this member function as follows:
+<SMALL><PRE>
+    void AtomicPart::swapXY() {
+        long tmp = x;
+        x = y;
+        y = tmp;
+    }
+</PRE>
+</SMALL>
+Given this definition, <EM>swapXY</EM> could then be invoked to do the
+job.
+<SMALL><PRE>
+    REF(AtomicPart) p = ... ;
+    p.update()-&gt;swapXY();
+</PRE>
+</SMALL>
+<P>
+The Shore C++ binding implements collection types similarly to C++
+OODBs [<A
+ HREF="node7.html#llow:the">LLOW91</A>,<A
+ HREF="node7.html#Objectivity">Obj92</A>,<A
+ HREF="node7.html#Ontos">Ont92</A>,<A
+ HREF="node7.html#Versant">Ver92</A>]:  A template type
+(in this case, one implemented via the use of C++ macros) such as
+<TT>BAG_INV_DECL(Connection, ...)</TT> in 
+Figure <A HREF="node3.html#fig:cplus">6</A>
+contains a member function <TT>get_elt</TT> that gets a specified element
+from the collection.  For example, the <TT>printPart</TT> function could be
+extended to print an atomic part's outgoing connections as follows:
+<SMALL>
+<PRE>
+    void printPart(REF(AtomicPart) p) {
+      cout &lt;&lt; &quot;Type &quot; &lt;&lt; p-&gt;ptype &lt;&lt; &quot; part at (&quot;
+           &lt;&lt; p-&gt;x &lt;&lt; &quot;,&quot; &lt;&lt; p-&gt;y
+           &lt;&lt; &quot;) with outgoing connections\n&quot;;
+      int i;
+      REF(Connection) c;
+      for (c = to.get_elt(i=0); c != NULL; c = to.get_elt(++i)) {
+          c-&gt;print();
+      cout &lt;&lt; endl;
+      }
+    }
+</PRE>
+</SMALL>
+<P><A NAME="overview:other">&#160;</A><H3><A NAME="SECTION00034300000000000000000">
+Other OODB-Like Services</A>
+</H3>
+<P>
+Shore provides
+support for concurrency control (via locking) and crash recovery (via
+logging); these services are integrated with the support
+for data caching described below.  Shore will <A NAME="tex2html21"
+ HREF="footnode.html#223"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]"
+ SRC="../icons.gif/foot_motif.gif"></SUP></A> also
+provide users with a choice of lower levels of consistency and recovery.
+Details of these reduced levels are still being worked out.
+Other Shore services will include optimized object queries over
+bulk types (currently being implemented based on the OQL language, as
+specified by ODMG&nbsp;[<A
+ HREF="node7.html#c:ods">Cat93</A>]) and a flexible, user-controllable notion of
+``sticky'' object clusters to permit users to cluster and later recluster
+related objects (also being designed and implemented currently).
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html121"
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html118"
+ HREF="overview.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html112"
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html120"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html122"
+ HREF="node4.html">The Shore Architecture</A>
+<B> Up:</B> <A NAME="tex2html119"
+ HREF="overview.html">An Overview of Shore</A>
+<B> Previous:</B> <A NAME="tex2html113"
+ HREF="node2.html">Introduction</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

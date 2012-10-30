@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Running the Example</TITLE>
+<META NAME="description" CONTENT="Running the Example">
+<META NAME="keywords" CONTENT="ssmvas">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmvas.css">
+<LINK REL="next" HREF="node9.html">
+<LINK REL="previous" HREF="node7.html">
+<LINK REL="up" HREF="ssmvas.html">
+<LINK REL="next" HREF="node9.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html255"
+ HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html252"
+ HREF="ssmvas.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html246"
+ HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html254"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html256"
+ HREF="node9.html">Appendix: Program Sources</A>
+<B> Up:</B> <A NAME="tex2html253"
+ HREF="ssmvas.html">Writing Value-Added Servers with Manager</A>
+<B> Previous:</B> <A NAME="tex2html247"
+ HREF="node7.html">Compiling the Example</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="ssmvas:running">&#160;</A><H1><A NAME="SECTION00080000000000000000000">
+Running the Example</A>
+</H1>
+<P>
+The first thing to do is to run <TT>server -i</TT> to format and make the
+volumes containing the grid data.
+Before running the grid server, you must
+edit <TT>exampleconfig</TT> and change the value of the <TT>sm_diskrw</TT>
+option to <TT>$SHORE/bin/diskrw</TT>.
+(Note:  You must replace <TT>$SHORE/bin/diskrw</TT> with the actual
+pathname of the <TT>diskrw</TT> executable; you cannot use a &quot;shell
+variable&quot; in this file.)
+Information about all the options available to the programs
+can be found by running them with a <TT>-h</TT> flag.
+<P>
+Running <TT>grid</TT> will leave log files in <TT>./log.grid</TT>
+and a storage device file called <TT>./device.grid</TT>.  These
+can be removed when you are done.
+<P><PRE>
+    % server -i
+</PRE>
+<P>
+Answer &quot;y&quot; to
+the question &quot;Do you really want to
+initialize the Grid database?&quot;.
+You should see something like this:
+<PRE>
+    processing configuration options ...
+    Do you really want to initialize the Grid database? y
+    Starting SSM and performing recovery ...
+    Formatting and mounting device: device.grid with a 2000KB quota ...
+    Creating a new volume on the device
+        with a 2000KB quota ...
+    starting up, listening on port 1234
+    allocating a tcp socket for listening for connections ...
+    binding to port 1234
+    creating tcp service
+    registering rpc service
+    main starting stdin thread
+    creating file handler for listener socket
+    Command thread is running
+    Creating a new Grid
+    Server&gt;
+</PRE>
+<P>
+With the server running in one window, type <TT>client</TT> in another window
+to start
+a client.  At either the client or server prompt, you can type <TT>help</TT> to get this list of available commands.
+<PRE>
+    % client
+    processing configuration options ...
+    trying to connect to server at port 1234
+    attempting server connection
+    Client ready.
+    client&gt; help
+    Valid commands are: 
+
+        commit 
+            commit transaction and start another one
+        abort 
+            abort transaction and start another one
+        clear 
+            clear grid
+        print 
+            print grid
+        add name x y
+            add new item &lt;name&gt; at &lt;x,y&gt;
+        remove name
+            remove item &lt;name&gt;
+        move name x y
+            move item &lt;name&gt; to location &lt;x,y&gt;
+        locate name
+            print location of item &lt;name&gt;
+        spatial x_lo y_lo x_hi y_hi
+            print count of items in rectangle and list first few items
+        quit 
+            quit and exit program (aborts current transaction)
+        help 
+            prints this message
+
+        Comments begin with a '#' and continue until the end of the line.
+    client&gt;
+</PRE>
+<P>
+At all times a transaction is running for the server and
+client prompts.  As commands are run, appropriate locks are
+obtained.  Locks will be released when a commit or abort
+command is given.
+<P>
+Here are some commands you might try typing to the client.
+<P><PRE>
+print                   # print the empty grid
+add Junk 20 10          # add and item named Junk at coordinate 20,10
+add Car 15 5
+print
+commit                  # commit the current transaction
+locate Car              # find location of Car
+spatial 0 0 39 14       # count all items on grid
+spatial 20 10 20 10     # list all items at location 20,10
+clear                   # clear the grid
+print                   # it should be empty
+abort                   # abort the current transaction
+print                   # grid should have items on it now
+quit                    # quit -- aborts current transaction
+</PRE>
+<P>
+When you are done, you can type &quot;<TT>make clean</TT>&quot; to remove
+the compiled programs, or &quot;<TT>make distclean</TT>&quot; to remove
+the compiled programs as well as the &quot;database&quot; and log files
+generated by running them.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html255"
+ HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html252"
+ HREF="ssmvas.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html246"
+ HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html254"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html256"
+ HREF="node9.html">Appendix: Program Sources</A>
+<B> Up:</B> <A NAME="tex2html253"
+ HREF="ssmvas.html">Writing Value-Added Servers with Manager</A>
+<B> Previous:</B> <A NAME="tex2html247"
+ HREF="node7.html">Compiling the Example</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,38 @@
+
+// PR 275
+// example from sdl manual -- the sdl manual
+// show the interfaces only
+// see also PR 268 -- scopes for consts (not yet fixed)
+
+
+module m1 {
+
+    interface A {
+        public:
+            const long a = 1;
+            const long b = 2;
+    };
+
+    interface B : public A {
+        public:
+            const long c = b; //  c = B::b = 3
+            const long b = 3;
+    };
+
+    interface C : public A {
+        public:
+            const long c = 4;
+    };
+
+    interface D : public A, public C {
+        public:
+            const long d = 5;
+            // D defines A::a, A::b, B::b, B::c,
+            //        C::c, and D::d
+            // Inside D, a, b, and d can be used without
+            // qualification, but c must be qualified.
+            // The name b resolves to B::b, since its
+            // definition hides A::b, but neither B::c
+            // nor C::c hides the other.
+    };
+}

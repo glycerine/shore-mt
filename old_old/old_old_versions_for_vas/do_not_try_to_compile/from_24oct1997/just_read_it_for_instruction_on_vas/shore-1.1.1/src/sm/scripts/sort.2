@@ -1,0 +1,41 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test sort on spatial objects (2-dimensional boxes)
+#
+source $script_dir/vol.init
+
+set nrec 200
+set u "2.-1500.-1500.1500.1500"
+
+#create and load a file with 2-d spatial objects
+sm begin_xct
+set f1 [sm create_file $volid]
+verbose f1 = $f1
+for {set i 0} {$i < $nrec} {incr i} {
+    set b [sm next_box $u]
+    sm create_typed_hdr_rec $f1 $b spatial 16 $i i4
+}
+#verbose scans on f1...
+verbose [sm scan_sorted_recs $f1 spatial i4 $u]
+sm commit_xct
+
+#sort and display
+sm begin_xct
+verbose sort ...
+set f2 [sm sort_file $f1 $volid 3 spatial normal keep regular $u]
+verbose f2 = $f2
+
+verbose scans on f2 ...
+verbose [sm scan_sorted_recs $f2 spatial i4 $u]
+
+#sm destroy_file $f1
+#sm destroy_file $f2
+sm commit_xct
+
+unset b i u f2 nrec f1

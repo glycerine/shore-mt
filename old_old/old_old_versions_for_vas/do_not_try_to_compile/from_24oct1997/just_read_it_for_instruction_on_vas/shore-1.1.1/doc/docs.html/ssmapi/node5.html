@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Transaction Facilities</TITLE>
+<META NAME="description" CONTENT="Transaction Facilities">
+<META NAME="keywords" CONTENT="ssmapi">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmapi.css">
+<LINK REL="next" HREF="node6.html">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="ssmapi.html">
+<LINK REL="next" HREF="node6.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html178"
+ HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html175"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html169"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html177"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html179"
+ HREF="node6.html">Crash Recovery Facilities</A>
+<B> Up:</B> <A NAME="tex2html176"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html170"
+ HREF="node4.html">Storage Facilities</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html180"
+ HREF="node5.html#SECTION00051000000000000000000">
+Transactions</A>
+<LI><A NAME="tex2html181"
+ HREF="node5.html#SECTION00052000000000000000000">
+Concurrency Control</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="ssmapi:transaction">&#160;</A><H1><A NAME="SECTION00050000000000000000000">
+Transaction Facilities</A>
+</H1>
+<P>
+As a database storage engine, the SSM provides the atomicity,
+consistency, isolation, and durability (often referred to as ACID)
+properties associated with transactions.
+More information on transaction processing issues can be found
+in the book <EM>Transaction Processing: concepts and techniques</EM>
+[<A
+ HREF="node12.html#gr:tra">GR93</A>].
+<P><A NAME="ssmapi:xact">&#160;</A><H2><A NAME="SECTION00051000000000000000000">
+Transactions</A>
+</H2>
+<P>
+A transaction is an atomic set of operations
+on records, files, and indexes.  The manual page
+<A NAME="tex2html27"
+ HREF="../man/transaction.ssm.html">transaction(ssm)</A> describes methods
+for beginning, committing and aborting transactions.  Updates made
+by committed transactions are guaranteed to be reflected on stable
+storage, even in the event of software or processor failure. Updates
+made by aborted transactions are rolled back and are not reflected on
+stable storage.
+<P>
+Although nested transactions are not provided at this time, the notion
+of save-points are.  Save-points delineate a set of operations that can be
+rolled back without rolling back the entire transaction.  The interface
+is described in <A NAME="tex2html28"
+ HREF="../man/transaction.ssm.html">transaction(ssm)</A>.
+<P><A NAME="ssmapi:concurrency">&#160;</A><H2><A NAME="SECTION00052000000000000000000">
+Concurrency Control</A>
+</H2>
+<P>
+Transactions are also a unit if isolation.  Locking is provided
+by the SSM as a way to keep a transaction from seeing the effect of another,
+uncommitted transaction.
+Normally, locks are implicitly acquired by operations that access or
+modify persistent data structures, but the SSM
+interface also provides methods for locks to be
+acquired explicitly.  See <A NAME="tex2html29"
+ HREF="../man/lock.ssm.html">lock(ssm)</A> for details.
+<P>
+The SSM uses a standard hierarchical, two-phase locking protocol [<A
+ HREF="node12.html#gr:tra">GR93</A>].
+For a file, the hierarchy is volume, file, page, record (slot number);
+for an index, it is volume, index, key-value.
+<P>
+Chained transactions are also provided.  Chaining involves committing
+a transaction, retaining its locks, starting a new transaction
+and giving the locks to the new transaction.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html178"
+ HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html175"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html169"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html177"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html179"
+ HREF="node6.html">Crash Recovery Facilities</A>
+<B> Up:</B> <A NAME="tex2html176"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html170"
+ HREF="node4.html">Storage Facilities</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

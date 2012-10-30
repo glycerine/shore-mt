@@ -1,0 +1,23 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+This directory contains example SDL applications:
+	stree/: creates a search tree of words in documents
+	pscan/: building, scanning, destroying pools
+	shls/:  ("Shore ls") simple directory scan example
+	unixfile/: some examples that use the type SdlUnixFile,
+		which is a registered object with one attribute,
+		of type TEXT. (The object looks like a Unix file).
+
+	vas/: directory also contains two examples of 
+		value-added servers that use the Shore Storage Manager. 
+
+In an installed release (as opposed to the source tree), 
+this directory also includes
+	oo7/:   the oo7 benchmark implemented on Shore.
+
+

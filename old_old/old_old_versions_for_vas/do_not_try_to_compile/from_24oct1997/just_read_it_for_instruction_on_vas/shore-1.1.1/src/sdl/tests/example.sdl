@@ -1,0 +1,249 @@
+module e1 {
+	export all;
+
+	const boolean tautology = true;
+	const boolean falsehood = ( false);
+	const float floater = 3.234 - 1.234;
+	const int integerconst = 30000 + 3;
+	const string name = "now is the time";
+
+	struct struct_t1 {
+		int integer_member;
+	};
+
+	interface e1i1 {
+	// cannot use this because it has no members 
+	// or operations
+	};
+
+
+}
+
+module m1 {
+	export all;
+
+	// shed some light on the confusingest stuff, 
+	// i.e., enums
+	enum logic3 { t,f,maybe };
+	enum enum4 { one,two,three,four };
+
+	// TODO more typedef variants
+
+}
+
+module m2 {
+	export attri;
+
+	// need separate line for each one!
+	import m1;
+	import e1;
+	import m3;
+
+	interface opi; // necessary
+
+	interface attri {
+	public:
+		attribute int m1;
+
+		attribute string s1;
+		attribute boolean b1;
+		attribute char c1;
+
+		attribute logic3 l1;
+
+		attribute struct_t1 member1;
+
+		struct struct_t2 {
+			int integer_member;
+			ref<opi> ref_member;
+			struct_t1 struct_member;
+		};
+		
+		// simple unions
+		union union_t switch (logic3 tag) {
+			case t: 	struct_t2 u_struct;
+			case f:		ref<opi>  u_ref;
+			case maybe: string    u_string;
+		};
+
+		typedef sequence<int> 	seq0_t;
+		typedef sequence<int, 3> 		seq1_t;
+
+		union union_seq_t switch (enum4 tag) {
+			case one: 	ref<opi> u_ref;
+			case two:	set<opi>  u_set;
+			case three:	bag<opi>  u_bag;
+			case four:	seq1_t	  u_seq;
+		};
+
+		// sequence containing union
+		typedef sequence<union_t, 3> seq2_t;
+
+		// sequence containing union containing sequence
+		typedef sequence<union_seq_t> seq3_t;
+
+		typedef sequence<boolean> seq4_t;
+		typedef sequence<int,10> seq5_t;
+
+		struct struct_t3 {
+			seq3_t	seq_member;
+			int 	int_member;
+		};
+		typedef sequence<struct_t3> seq6_t;
+		typedef sequence<union_t> seq7_t;
+
+		typedef ref<opi> refopi_t;
+		typedef sequence<refopi_t,3> seq8_t;
+		attribute sequence<opi>	sequence_of_obj;
+
+        attribute seq0_t seq0_a;
+        attribute seq1_t seq1_a;
+        attribute seq2_t seq2_a;
+        attribute seq3_t seq3_a;
+        attribute seq4_t seq4_a;
+        attribute seq5_t seq5_a;
+        attribute seq6_t seq6_a;
+        attribute seq7_t seq7_a;
+        attribute seq8_t seq8_a;
+
+        attribute union_t union_a;
+        attribute union_seq_t union_seq_a;
+        attribute struct_t1 struct_t1_a;
+        attribute struct_t2 struct_t2_a;
+        attribute struct_t3 struct_t3_a;
+
+/////////RELATIONSHIPS!!!!!
+
+        attribute bag<opi> opi_bag;
+        // attribute list<opi> opi_list;
+        attribute set<opi> opi_set;
+        attribute ref<opi> one_opi;
+
+//TODO: what's the diff if I use "relationship" vs "attribute", below ?
+        relationship ref<opi> uni_one_opi;
+        relationship set<opi> uni_opi_set;
+
+		// all combinations of relationship kinds, where
+		//  relationship is with instances of another type
+        relationship ref<opi> one_to_one inverse one_to_one;
+        relationship set<opi> many_to_one inverse one_to_many;
+        relationship ref<opi> one_to_many inverse many_to_one;
+        relationship ref<opi> many_to_many inverse many_to_many;
+
+        // relationship list<opi> list_to_one inverse one_to_list;
+        relationship bag<opi> bag_to_one inverse one_to_bag;
+        relationship bag<opi> bag_to_bag inverse bag_to_bag;
+
+		// all combinations of relationship kinds, where
+		//  relationship is with instances of same type
+        relationship ref<attri> self_one_to_one inverse self_one_to_one;
+        relationship set<attri> self_many_to_one inverse self_one_to_many;
+        relationship ref<attri> self_one_to_many inverse self_many_to_one;
+        relationship ref<attri> self_many_to_many inverse self_many_to_many;
+
+// Bag and list should not have inverses, and the documentation should
+// be fixed to express that limitation.
+
+        // relationship ref<attri> self_one_to_list inverse self_list_to_one;
+        // relationship list<attri> self_list_to_one inverse self_one_to_list;
+        // relationship list<attri> self_list_to_list inverse self_list_to_list;
+
+        relationship ref<attri> self_one_to_bag inverse self_bag_to_one;
+        relationship bag<attri> self_bag_to_one inverse self_one_to_bag;
+        relationship bag<attri> self_bag_to_bag inverse self_bag_to_bag;
+	};
+
+	interface attri_child : public attri {
+	public:
+	};
+
+
+}
+
+module m3 {
+	export all;
+	import m2;
+	use 	e1;
+
+	interface opi {
+	private:
+		// all combinations
+        relationship ref<attri> one_to_one inverse one_to_one;
+        relationship set<attri> many_to_one inverse one_to_many;
+        relationship ref<attri> one_to_many inverse many_to_one;
+        relationship ref<attri> many_to_many inverse many_to_many;
+
+        // relationship ref<attri> one_to_list inverse list_to_one;
+        relationship ref<attri> one_to_bag inverse bag_to_one;
+        relationship bag<attri> bag_to_bag inverse bag_to_bag;
+
+	public:
+
+	// TODO: interfaces with all variants
+	// of operations: const, non-const, maybe
+	// all param variations
+	// public and private
+
+		lref<struct_t1> structop(in lref<e1::struct_t1> in1, out e1::struct_t1 out1);
+		void voidop(in lref<e1::struct_t1> in1, out e1::struct_t1 out1);
+
+
+	};
+
+	interface opi_child : public opi {
+	public:
+		// inheritance and override
+		override structop;
+	};
+
+}
+
+module e2 {
+	export struct_t2;
+	import e1;
+
+	struct struct_t2 {
+		struct_t1 struct_member;
+	};
+
+	interface e2i1 {
+	public:
+		attribute struct_t1 member1;
+		attribute struct_t2 member2;
+	};
+}
+
+module e3 {
+	export struct_t3;
+	import e2;
+	// apparently importing e2 doesn't get e1 imported
+	import e1;
+
+	struct struct_t3 {
+		struct_t2 struct_member;
+	};
+
+	interface e3i1 {
+	public:
+		attribute struct_t1 member1;
+		attribute struct_t2 member2;
+		attribute struct_t3 member3;
+	};
+}
+
+module e4 {
+	import e3;
+	import e2;
+	import e1;
+
+	struct struct_t4 {
+		struct_t2 struct_member;
+	};
+
+	interface e4i1 {
+	public:
+		attribute struct_t1 member1;
+		attribute struct_t2 member2;
+		attribute struct_t3 member3;
+	};
+}

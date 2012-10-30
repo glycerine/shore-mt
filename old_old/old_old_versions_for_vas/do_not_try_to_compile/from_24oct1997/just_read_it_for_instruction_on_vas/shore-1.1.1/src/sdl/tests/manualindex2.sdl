@@ -1,0 +1,38 @@
+
+module m1 {
+	struct struct_t {
+		int i;
+		char c;
+		// sequence<int> j; // if I add this,
+		// the LB for indx3 & indx4 are bad
+	};
+	typedef sequence<int> seq_t;
+	typedef index<long,long> indx_t;
+	typedef ref<my_obj> ref_t;
+
+	interface my_obj {
+	public:
+
+		// reasonable:
+		attribute index<char,int> indx0;
+		attribute index<long,long> indx1;
+
+		// index of refs   --  same bad LB:
+		// attribute index<ref_t,int>	indx2;
+		// attribute index<ref<my_obj>,int>	indx2;
+
+		// if sequence in value -- bad LB
+		attribute index<string,struct_t> indx3; 
+		// if sequence in key -- bad LB
+		attribute index<struct_t,string> indx4;
+
+		// array of indexes 
+		attribute indx_t	a[3];
+
+		// index of indexes  !!!
+		// attribute index<indx_t,indx_t>	b[3];
+		// index of sequences  !!!
+		// attribute index<seq_t,seq_t>	indx5;
+
+	};
+}

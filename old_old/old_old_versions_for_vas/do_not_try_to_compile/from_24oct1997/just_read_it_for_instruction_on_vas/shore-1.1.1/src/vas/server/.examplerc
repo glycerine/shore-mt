@@ -1,0 +1,86 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# $Header: /p/shore/shore_cvs/src/vas/server/.examplerc,v 1.30 1995/04/24 19:45:54 zwilling Exp $
+#
+# Example .svasrc file
+#
+# Edit this as you see fit, then stash it somewhere,
+# and set your environment variable SHORE_RC to the name 
+# of the stashed file.
+#
+
+# Options have the form:
+#		type.class.progname.option
+#
+# type = general type of program
+# class = class of program within the type.
+# progname = program executable name
+# option = specific name of option
+#
+#	e.g., shoreclient.oo7.bench.count
+#
+
+#
+# Storage manager options:
+# 
+
+# Specify the log directory for all ssh programs
+*.sm_logging: yes
+
+#
+*.sm_logsize: 100000
+*.sm_logdir: ./log
+*.sm_multiserver: no
+
+# Specify the sm buffer pool size for any program
+*.sm_bufpoolsize: 320
+
+# installed dir must be in your path:
+*.sm_diskrw: diskrw
+
+# 
+# Shore vas layer options
+#
+*.svas_nfsd_port: 2999
+*.svas_nfsd_log: syslogd
+*.svas_nfsd_log_level: error
+*.svas_nfsd_pmap: no
+
+*.svas_mountd_port: 2998
+*.svas_mountd_log: syslogd
+*.svas_mountd_log_level: error
+*.svas_mountd_pmap: no
+
+*.svas_client_port: 2999
+*.svas_client_log: -
+*.svas_client_log_level: info
+*.svas_client_pmap: no
+
+*.svas_remote_port: 2998
+*.svas_remote_log: -
+*.svas_remote_log_level: error
+*.svas_remote_pmap: no
+
+*.svas_tclshell: yes
+*.svas_shellrc: ~/shore.rc
+*.svas_shell_log: -
+*.svas_shell_log_level: error
+
+*.svas_noshm: no
+*.svas_rpc_unregister: yes
+*.svas_print_user_errors: yes
+*.svas_print_user_stats: no
+*.svas_clear_user_stats: no
+*.svas_sysp_cache_size: 1
+*.svas_root: ./volumes/miniroot 10
+
+#
+#
+# test this:-- also -1, 33
+*.svas_mount_table_size: 20

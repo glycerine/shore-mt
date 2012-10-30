@@ -1,0 +1,12 @@
+DirName			/oo7/little
+PoolName		pool
+NummAssmPerAssm 	3
+NumCompPerAssm		3
+NumCompPerModule	50
+NumAssmLevels		7
+TotalModules		1
+NumAtomicPerComp	10
+NumConnPerAtomic	3
+DocumentSize		2000
+ManualSize              100000
+CacheSize               1500

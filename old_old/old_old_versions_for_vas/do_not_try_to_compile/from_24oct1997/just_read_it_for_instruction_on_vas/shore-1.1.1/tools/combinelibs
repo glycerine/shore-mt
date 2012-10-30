@@ -1,0 +1,85 @@
+#!/bin/sh 
+#
+# combine many archives into one 
+#
+# usage: combinelibs $(AR) target otherlibs
+# $(AR) is the archive executable to use
+# target is the name of the generated library
+# otherlibs is a list of libraries to combine
+
+pn=`basename $0`
+t=/tmp/$pn.$$
+trap "rm -rf $t; exit 2" 1 2 3 15
+rm -rf $t
+trap "mkdir $t; exit 2" 1 2 3 15
+mkdir $t
+
+if [ $# -lt 3 ]
+then
+	echo "usage: $pn ar-program target-archive archive [ archive ... ]"
+	exit 1
+fi
+
+AR=$1
+shift
+
+dest=$1
+
+cur=`pwd`
+while [ $# -ge 1 ]
+do
+#	get proper path of $1
+	cd `dirname $1`; p=`pwd`; cd $cur
+	lib=$p/`basename $1`
+	if [ -s $lib ]
+	then
+		echo extracting $lib ...
+
+		cd $t
+		trap "$AR x $lib; exit 2" 1 2 3 15
+		$AR x $lib; 
+		if [ -s "__.SYMDEF" ]
+		then
+			rm -f __.SYMDEF
+		fi
+		cd $cur
+
+		for i in `$AR t $1`
+		do
+			s=`basename $i .o`
+			if [ $s.o != $i -a $i != "__.SYMDEF" ]
+			then
+				echo "Warning: file name was truncated in $1. "
+				echo $i is being changed to $i.o
+				mv $t/$i $t/$i.o
+			fi
+		done
+		echo " done with" $lib
+	fi
+	shift
+done
+
+
+echo
+echo "The following .o files will be in"  $dest":"
+(cd $t; echo *)
+echo
+
+if [ -f $dest ]
+then
+	echo removing $dest
+	rm -f $dest
+fi
+
+echo creating $dest
+$AR q $dest $t/*.o
+
+echo cleaning up .o files
+rm -rf $t
+
+echo ranlib $dest
+ranlib $dest
+
+echo $pn "is done."
+exit 0
+

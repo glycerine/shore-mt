@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Operations on Storage Structures</TITLE>
+<META NAME="description" CONTENT="Operations on Storage Structures">
+<META NAME="keywords" CONTENT="ssmvas">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmvas.css">
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="ssmvas.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html188"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html185"
+ HREF="ssmvas.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html179"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html187"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html189"
+ HREF="node5.html">Implementing a Multi-Threaded Server</A>
+<B> Up:</B> <A NAME="tex2html186"
+ HREF="ssmvas.html">Writing Value-Added Servers with Manager</A>
+<B> Previous:</B> <A NAME="tex2html180"
+ HREF="node3.html">Storage Structure Organization</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html190"
+ HREF="node4.html#SECTION00041000000000000000000">
+Code Road-map</A>
+<LI><A NAME="tex2html191"
+ HREF="node4.html#SECTION00042000000000000000000">
+Initializing Devices and Volumes</A>
+<LI><A NAME="tex2html192"
+ HREF="node4.html#SECTION00043000000000000000000">
+Updates and Save-points</A>
+<LI><A NAME="tex2html193"
+ HREF="node4.html#SECTION00044000000000000000000">
+Pinning and Updating Records</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="ssmvas:operations">&#160;</A><H1><A NAME="SECTION00040000000000000000000">
+Operations on Storage Structures</A>
+</H1>
+<P>
+After deciding on the basic storage structures, we
+can begin implementing operations on them.  This section
+starts by providing road-map to example code for specific types of
+operations.  The code should be self explanatory.
+Later sub-sections discuss some of the less obvious aspects of
+the implementation.
+<P><A NAME="ssmvas:roadmap">&#160;</A><H2><A NAME="SECTION00041000000000000000000">
+Code Road-map</A>
+</H2>
+<P><UL>
+<LI> Volume and Device initialization: <TT>setup_device_and_volume()</TT> in <TT>server.C</TT>
+<LI> Creating Files and Indexes: <TT>command_server_t::init()</TT> in
+<TT>command_server.C</TT>
+<LI> Creating Records and Index Entries: <TT>grid_t::add_item()</TT> in <TT>grid.C</TT>
+<LI> Destroying Records and Index Entries: <TT>grid_t::remove_item()</TT> in <TT>grid.C</TT>
+<LI> Pinning and Updating Records: <TT>grid_t::move_item()</TT> in <TT>grid.C</TT>
+<LI> Scanning Files: <TT>grid_t::generate_display()</TT> in <TT>grid.C</TT>
+<LI> Index Lookups: <TT>grid_t::locate_item()</TT> in <TT>grid.C</TT>
+<LI> Scanning Indexes: <TT>grid_t::spatial_query()</TT> in <TT>grid.C</TT>
+<P></UL><A NAME="ssmvas:initializing">&#160;</A><H2><A NAME="SECTION00042000000000000000000">
+Initializing Devices and Volumes</A>
+</H2>
+<P>
+Before creating a storage volume, the &quot;device&quot; (raw device or
+Unix file) where it will reside must be initialized.
+A flag to <TT>setup_device_and_volume()</TT> indicates whether the
+device is to be initialized (i.e., we are starting from scratch) or
+if there is already an initialized device.
+<P>
+If initialization is needed, the device is formatted using <TT>ss_m::format_dev</TT>.  To begin using the device, we mount it with <TT>ss_m::mount_dev</TT> and create a volume on it with
+<TT>ss_m::create_vol</TT>.  Since we will be using the
+<A HREF="../ssmapi/node4.html#ssmapi:identifiers">SSM's logical ID support</A>
+the <TT>ss_m::add_logical_id_index</TT> method
+must be called to create the index that maps from logical ID
+to physical IDs.
+The reason the logical ID index is not added automatically by <TT>ss_m::create_vol</TT> is an artifact of the fact that the SSM also has
+an interface based on physical IDs (the physical ID interface it not
+supported yet).
+<P>
+If no initialization is needed, we mount the device
+and use <TT>ss_m::list_volumes</TT> to find the ID of the volume
+on the device (currently Shore supports only one volume per device,
+but the interface is designed to allow this rule to be relaxed in the future).
+<P>
+The code in <TT>command_server_t::init()</TT> uses the
+<A HREF="../ssmapi/node4.html#ssmapi:volumes">root index of the volume</A>
+to determine if the grid storage structures
+have already been created.  If not it creates them.
+<P><A NAME="ssmvas:updates">&#160;</A><H2><A NAME="SECTION00043000000000000000000">
+Updates and Save-points</A>
+</H2>
+<P>
+All the grid interface commands that update data
+involve changing more than one storage structure.
+For example, the <EM>add</EM>  command creates
+an item and makes corresponding entries in the name and location indices.
+If any of these operations should fail, it is necessary to
+roll back to the point just before the first operation to keep
+the database consistent.
+Therefore, the first thing <TT>grid_t::add_item</TT> does is
+create a save-point using <TT>ss_m::save_work</TT>.
+If any of the later create operations reports an error,
+<TT>ss_m::rollback_work</TT> is called.
+<P>
+The use of save-points around all operations that make changes
+to storage structures is highly recommended.  That way
+even if an <TT>ss_m</TT> update method should fail, any partial
+work it completed is rolled back.  The only other safe choice is
+to abort the entire transaction.
+<P><A NAME="ssmvas:pinning">&#160;</A><H2><A NAME="SECTION00044000000000000000000">
+Pinning and Updating Records</A>
+</H2>
+<P>
+Reading records is accomplished by using the
+<A HREF="../ssmapi/node4.html#ssmapi:files"><TT>pin_i</TT> class</A>
+to pin the record in the buffer pool.  A <TT>pin_i</TT> object
+is often called a &quot;handle&quot; to a record.  There are a
+couple of things here to keep in mind when using
+the <TT>pin_i</TT> interface.
+<P>
+The <TT>body</TT>
+method returns a <TT>const</TT> pointer to the record body.
+<EM>Never modify the record through these pointers.  If you do,
+roll back and recovery information will not be generated</EM> .
+The most efficient way to modify a pinned record is to use
+the <TT>update_rec</TT>, <TT>append_rec</TT> and <TT>truncate_rec</TT>
+methods of class <TT>pin_i</TT> rather than those in <TT>ss_m</TT> .
+If the append or truncate methods cause the record to be moved, the
+pin object will continue to point to it.
+<P>
+A record can also be updated using
+the <TT>update_rec</TT>, <TT>append_rec</TT> and <TT>truncate_rec</TT>
+methods of class <TT>ss_m</TT>.  However, if the record
+is already pinned, the pin object will not be changed
+to reflect the update and <TT>pin_i::repin</TT>
+would need to be called.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html188"
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html185"
+ HREF="ssmvas.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html179"
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html187"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html189"
+ HREF="node5.html">Implementing a Multi-Threaded Server</A>
+<B> Up:</B> <A NAME="tex2html186"
+ HREF="ssmvas.html">Writing Value-Added Servers with Manager</A>
+<B> Previous:</B> <A NAME="tex2html180"
+ HREF="node3.html">Storage Structure Organization</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

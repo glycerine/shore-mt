@@ -1,0 +1,40 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ *  $Id: Imakefile,v 1.20 1997/07/01 20:50:23 solomon Exp $
+ */
+
+SRC = rc.cc list1.cc list2.cc list3.cc fastnew.cc \
+	hash1.cc hash2.cc cq1.cc cq2.cc bit.cc \
+	timer.cc ntime.cc
+CPPFLAGS = -I..
+
+all_local:: rc list1 list2 list3 fastnew hash1 hash2 cq1 cq2 bit timer %
+	ntime vector
+
+%GEN c_plus_program(rc, rc.o, ../libfc.a)
+%GEN c_plus_program(list1, list1.o, ../libfc.a)
+%GEN c_plus_program(list2, list2.o, ../libfc.a)
+%GEN c_plus_program(list3, list3.o, ../libfc.a)
+%GEN c_plus_program(fastnew, fastnew.o, ../libfc.a)
+%GEN c_plus_program(hash1, hash1.o, ../libfc.a)
+%GEN c_plus_program(hash2, hash2.o, ../libfc.a)
+%GEN c_plus_program(cq1, cq1.o, ../libfc.a)
+%GEN c_plus_program(cq2, cq2.o, ../libfc.a)
+%GEN c_plus_program(bit, bit.o, ../libfc.a)
+%GEN c_plus_program(timer, timer.o, ../libfc.a)
+%GEN c_plus_program(ntime, ntime.o, ../libfc.a)
+%GEN c_plus_program(vector, vector.o, ../libfc.a)
+
+pure_execs: rc.pure timer.pure
+
+%GEN purify_c_plus_program(rc, rc.o, ../libfc.a, $(PURE_OPTIONS))
+%GEN purify_c_plus_program(timer, timer.o, ../libfc.a, $(PURE_OPTIONS))
+
+%GEN depend_target($(SRC))
+%GEN tags($(SRC))

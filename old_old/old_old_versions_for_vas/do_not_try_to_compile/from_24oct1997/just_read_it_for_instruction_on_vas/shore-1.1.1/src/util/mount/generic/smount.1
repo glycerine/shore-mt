@@ -1,0 +1,199 @@
+.TH SH_MOUNT SHORE "18 August 1995"
+.SH NAME
+SMOUNT \- Mount a Shore Database as an NFS Filesystem
+SUMOUNT \- Unmount a Shore Database
+.SH SYNOPSIS
+.LP
+.BR smount " [-rv] [-o options] host:path /path"
+.LP
+.BR sumount " [-vflrm] [-p port] [host:]path "
+.LP
+.BR sumount " [-vflrm] [-p port] host:path path "
+.SH DESCRIPTION
+.LP
+The Shore server is capable of acting as an NFS (Sun Network File System)
+server, making a Shore database appear to be a Unix file system.
+A Shore database (or any subtree of its directory hierarchy) may
+be ``mounted'' into the namespace of any system that supports the client
+side of the NFS protocol (which includes just about any flavor of Unix
+these days, as well as many non-Unix systems).
+To allow Shore to act as an NFS server on a host that also has a
+standard NFS server, Shore listens on port 2999 (or any other port specified
+in the configuration file) for NFS requests rather than
+the standard port of 2049.
+The standard Unix utility
+.IR mount (8)
+on most systems has an option that allows you to specify a non-standard
+port for NFS requests.
+Unfortunately, this option only controls NFS requests
+.I "per se" ;
+NFS
+.I mount
+and
+.I unmount
+requests are still sent to the ``standard'' port.
+The Shore distribution comes with patches for the some versions of
+.IR mount (8)
+and
+.IR umount (8)
+to add an option to control the port used for 
+.I mount
+and
+.I unmount
+requests, but for copyright reasons, only patches are included, not
+the entire programs, so they are only useful to users who have access to
+the source programs.
+Moreover, these programs vary substantially among flavors of Unix, so
+they must be separately patched for each system.
+.LP
+Shore also includes the programs
+.I smount
+and
+.IR sumount .
+These programs have the advantage that they can be freely distributed under
+the same terms as the rest of Shore, and since they are considerably simpler
+than they vendor-supplied versions, they should be easier to port to
+new systems.
+However, they lack many of the bells and whistles of the vendor-supplied
+versions, notably the ability to mount file system types other than
+NFS or to mount more than one file system at a time.
+.SH "IMPORTANT NOTE"
+On many systems, these commands may only be executed by the super-user,
+since the
+.IR mount (2)
+and
+.IR unmount (2)
+system calls are privileged.
+.SH MOUNT
+There must be exactly two non-option arguments.
+The first argument must have the form
+.I "host:remove_path"
+where
+.I host
+is the name of a host where a Shore server is running (``localhost'' is
+always acceptable) and
+.I remote_path
+is a pathname relative to the root directory of the database
+served by that server.
+The second argument is the absolute pathname
+.I local_path
+of a node (usually an empty directory) on the local filesystem.
+If the request is successful,
+.I local_path
+becomes an alias for the node named by
+.I remote_path
+on the database served by the indicated server.
+.SH "MOUNT OPTIONS"
+.TP
+.B \-r
+Mount the specified database as a read-only file system.
+.TP
+.B \-v
+Verbose.
+Indicate exactly what is being done.
+.TP
+.BI \-o " options"
+Specify a variety of system-specific options, such as buffer sizes and
+timeouts.
+The exact options available depend on the host operating system.
+See
+.IR mount (8)
+for a description.
+In general, all options relevant to NFS are supported, as well as one
+additional option:
+.IR "mport=nnnn" ,
+where
+.I nnnn
+is the port number (in decimal) where mount and unmount request packets
+should be sent.
+The default is compiled into the program (currently 2999).
+.SH UMOUNT
+Either one or two non-option arguments may be supplied.
+If two arguments are supplied, they should match the arguments to a
+corresponding call of
+.IR smount .
+If only one argument is given, it is interpreted as matching the first or
+second argument of
+.IR smount ,
+depending on whether it contains a colon.
+The other argument is reconstructed, if possible, from data stored by
+.IR smount .
+For example, under SunOS,
+.IR mount (8)
+(and hence
+.IR smount )
+records its parameters in
+.IR /etc/mtab .
+.LP
+.I Sumount
+performs three operations (in this order):
+it uses a local system call to remove the mount point,
+it sends an NFS unmount request to the server to tell it that the mount
+association is removed, and it updates
+.I /etc/mtab
+to remove the information.
+Normally, if any operation fails, subsequent ones are skipped as well.
+(Note: 
+The standard /etc/umount will probably work ok except that the second
+step (sending a message to the mountd server) will send the message to
+the wrong place.
+Since most mountd servers do a slipshod job of keeping track of who's got
+what mounted anyhow, you may not notice any difference).
+.SH "UMOUNT OPTIONS"
+.TP
+.B \-v
+Verbose.
+Indicate exactly what is being done.
+.TP
+.B \-f
+Force the unmount, even if
+.I /etc/mtab
+does not indicate any matching mount.
+With this option, both arguments must be specified.
+.TP
+.B \-i
+Ignore errors;
+try to perform all three actions even if some of them fail.
+.TP
+.B \-l
+Do
+.I not
+execute the (local)
+.IR unmount (2)
+system call.
+.TP
+.B \-r
+Do
+.I not
+send the NFS unmount request to the remote Shore server.
+.TP
+.B \-m
+Do
+.I not
+update
+.I /etc/mtab
+(or whatever).
+.TP
+.BI \-p " port"
+Specify a port to use in contacting the server.
+If this option is omitted,
+.I sumount
+uses the value specified in the corresponding
+.IR smount ,
+if that value was recored in
+.IR /etc/mtab ,
+and otherwise, a compiled-in default (2999).
+.SH BUGS
+These programs only handle file systems of type NFS.
+In particular, they cannot do local mounts or mounts of other filesystem
+types supported on various systems.
+.LP
+Many features commonly provided by the standard
+.IR /etc/mount
+are not supported.
+In particular, the \-a option (mount all filesystems listed in a standard
+place, such as /etc/fstab) is not supported , nor is any other usage that
+attempts to mount more than one file system in one call.
+.SH AUTHOR
+.br
+Marvin Solomon (solomon@cs.wisc.edu)

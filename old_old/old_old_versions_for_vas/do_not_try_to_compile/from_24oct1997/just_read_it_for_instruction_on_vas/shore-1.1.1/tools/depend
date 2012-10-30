@@ -1,0 +1,50 @@
+#!/bin/csh -f
+
+set program=$0
+
+set touchonly = false
+set norm = false
+set usage = ("usage:" $program '[-t]' '[-n]')
+
+while ($#argv > 0)
+	switch ($argv[1])
+	case "-t":
+		set touchonly = true
+		breaksw
+	case "-n":
+		set norm = true
+		breaksw
+	default:
+		echo "$usage"
+		exit 1
+		breaksw
+	endsw
+	shift argv
+end
+
+# do this recursively
+
+echo "Phase 1: touch .depend for each directory..."
+foreach f (`find . -name "Makefile" -type f -print`)
+    $norm || rm -f $f:h/.depend
+    #echo touch $f:h/.depend
+    touch $f:h/.depend
+end
+
+$touchonly && exit 0
+
+echo "Phase 2: running make depend for each directory..."
+if (-e Makefile) then
+    make depend
+else
+    #run make depend on any top level subdirs if possible
+    foreach d (`ls`)
+	if (-d $d) then
+	    if (-e $d/Makefile) then
+		(cd $d; make depend)
+	    endif
+	endif
+    end
+endif
+
+exit 0

@@ -1,0 +1,61 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+############################################################################
+#
+#  This script tests lock upgrade:  
+#	{ SH EX	}		on record
+# 	{ IS IX SH SIX UD EX }	on file and volume
+#
+#  Currently, the script is not self-verifying, so the results
+#  need to be looked at to see if the expected lock is set on
+#  an object.
+#
+############################################################################
+set mode1		{ SH EX }
+set mode2 		{ IS IX SH SIX UD EX }
+set rid			"k(s(10.0).100.200)"
+set fid			"s(10.0)"
+set vid			"10"
+
+proc lockit { id locks } {
+    global supremum
+    global verbose_flag
+
+    foreach i $locks {
+    	foreach j $locks {
+	    verbose "===== Expected lock on $id  $i + $j = $supremum($i,$j) ====="
+    	    sm begin_xct
+	    sm lock $id $i LONG
+	    if {$verbose_flag}  { sm dump_locks }
+	    verbose "------------"
+	    sm lock $id $j LONG
+	    if {$verbose_flag}  { sm dump_locks }
+
+	    set mode [sm query_lock $id] 
+	    verbose "verifying $mode == $supremum($i,$j)"
+	    assert {expr [string compare $mode $supremum($i,$j)] == 0}
+    	    sm commit_xct
+	    verbose ""
+	}
+    }
+}
+
+verbose "TEST:\tLock Upgrade on Record and File"
+
+verbose "\n*******  Lock Upgrade on Record  *******\n"
+lockit $rid $mode1
+
+verbose "\n*******  Lock Upgrade on File  *******\n"
+lockit $fid $mode2
+
+verbose "\n*******  Lock Upgrade on Volume  *******\n"
+lockit $vid $mode2
+
+verbose "STATUS:\tOK"
+
+unset mode1 mode2 fid vid rid

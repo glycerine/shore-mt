@@ -1,0 +1,83 @@
+# source ../scripts/mkdir
+
+source ../scripts/mkdir.compensate
+
+cd /small
+
+set me	  	  [getuid]
+set mygrp	  [getgid]
+
+set parent dira
+set child  dirb
+
+
+#this test has parent's set-gid bit clear
+
+set oldumask [umask]
+umask 022
+begin
+	mkdir $parent
+	set oldpmtime [sfile mtime $parent]
+	set oldpctime [sfile ctime $parent]
+	set oldpatime [sfile atime $parent]
+	set pmode	  [sfile mode $parent]
+	set pgrp	  [sfile group $parent]
+
+	cout sleeping...
+	cout slept [sleep 2]
+	umask 0777
+	mkdir $parent/$child
+
+	set newpmtime [sfile mtime $parent]
+	set newpctime [sfile ctime $parent]
+	set newpatime [sfile atime $parent]
+
+	cd $parent
+
+	set cmode		[sfile mode $child]
+	set cgrp		[sfile group $child]
+	set cown		[sfile owner $child]
+	set cmtime 		[sfile mtime $child]
+	set cctime 		[sfile ctime $child]
+	set catime 		[sfile atime $child]
+
+#	test that child's owner is me
+	assert [expr {$cown == $me}]
+
+# 	we're assuming that the orig parent's set-uid bit is clear
+#	test that setgid bit of child is inherited from parent
+#	test that mode is otherwise determined by umask
+
+	cout pmode= $pmode
+	cout cmode= $cmode
+	assert [expr {$pmode == 040755}]
+	assert [expr {$cmode == 040000}]
+
+#	test that parent's mtime and ctime are updated
+#	cout oldpctime= $oldpctime
+#	cout newpctime= $newpctime
+#	cout newpatime= $newpatime
+
+	assert [expr {$oldpctime != $newpctime}]
+	assert [expr {$oldpmtime != $newpmtime}]
+	assert [expr {$oldpatime != $newpatime}]
+
+#	test that child's atime, mtime and ctime are recent
+	assert [expr {$oldpctime != $cmtime}]
+	assert [expr {$oldpmtime != $cctime}]
+
+
+#	test that group owner of child is effective gid
+#	(parent's set gid bit is clear)
+	assert [expr {$cgrp == $mygrp}]
+
+	expect OS_PermissionDenied from { rmdir $child }
+	chmod 0755 $child
+	rmdir $child
+	cd ..
+	rmdir $parent
+commit
+
+umask $oldumask 
+
+return "mkdir done."

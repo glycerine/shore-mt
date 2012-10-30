@@ -1,0 +1,16 @@
+source ../scripts/setup.all
+
+begin
+	cd /small
+	set o1 [mkanon pool 100:0:NoText]
+	read $o1
+	set o1size [sfile size $o1]
+	expect SVAS_BadRange from { read $o1  $o1size } 
+	expect SVAS_BadRange from { read $o1  $o1size 10 } 
+	read $o1 0 $o1size
+
+	set o2 [mkanon pool 50:0:NoText]
+	append $o1 30
+	read $o2
+commit
+

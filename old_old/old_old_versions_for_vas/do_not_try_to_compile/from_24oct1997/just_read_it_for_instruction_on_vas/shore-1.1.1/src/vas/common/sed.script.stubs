@@ -1,0 +1,5 @@
+/^#include "\/tmp\/msg.h"/s="\/tmp/\msg.h"="msg.h"=
+/^{/,/^}/d
+/CLIENT \*clnt;/a\
+{ }
+/CLIENT/s=CLIENT \*clnt;=void *clnt=

@@ -1,0 +1,349 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>What is the Shore Release?</TITLE>
+<META NAME="description" CONTENT="What is the Shore Release?">
+<META NAME="keywords" CONTENT="release">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="release.css">
+<LINK REL="next" HREF="node3.html">
+<LINK REL="previous" HREF="node1.html">
+<LINK REL="up" HREF="release.html">
+<LINK REL="next" HREF="node3.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html112"
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html109"
+ HREF="release.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html103"
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html111"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html113"
+ HREF="node3.html">Release Contents</A>
+<B> Up:</B> <A NAME="tex2html110"
+ HREF="release.html">The Shore Release 1.1.1</A>
+<B> Previous:</B> <A NAME="tex2html104"
+ HREF="node1.html">Contents</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html114"
+ HREF="node2.html#SECTION00021000000000000000000">
+Requirements</A>
+<LI><A NAME="tex2html115"
+ HREF="node2.html#SECTION00022000000000000000000">
+Copyright and Disclaimer</A>
+<LI><A NAME="tex2html116"
+ HREF="node2.html#SECTION00023000000000000000000">
+What is New in Release 1.1.1</A>
+<LI><A NAME="tex2html117"
+ HREF="node2.html#SECTION00024000000000000000000">
+What was New in Release 1.1</A>
+<UL>
+<LI><A NAME="tex2html118"
+ HREF="node2.html#SECTION00024100000000000000000">
+Maintenance Fixes</A>
+<LI><A NAME="tex2html119"
+ HREF="node2.html#SECTION00024200000000000000000">
+Configuration</A>
+</UL>
+<LI><A NAME="tex2html120"
+ HREF="node2.html#SECTION00025000000000000000000">
+What was New in Release 1.0</A>
+<UL>
+<LI><A NAME="tex2html121"
+ HREF="node2.html#SECTION00025100000000000000000">
+General</A>
+<LI><A NAME="tex2html122"
+ HREF="node2.html#SECTION00025200000000000000000">
+Applications</A>
+<LI><A NAME="tex2html123"
+ HREF="node2.html#SECTION00025300000000000000000">
+Object cache</A>
+<LI><A NAME="tex2html124"
+ HREF="node2.html#SECTION00025400000000000000000">
+Shore server</A>
+<LI><A NAME="tex2html125"
+ HREF="node2.html#SECTION00025500000000000000000">
+Storage manager</A>
+</UL></UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="release:what">&#160;</A><H1><A NAME="SECTION00020000000000000000000">
+What is the Shore Release?</A>
+</H1>
+<P>
+Release 1.1.1 of the Shore software represents a bug-fix and
+maintenance release relative to the previous release.
+The release is targeted
+for sites that will use Shore as a system for writing applications
+using the Shore Data-definition Language and for those who
+want to write their own servers using the Shore Storage Manager.
+This document describes the release and provides pointers
+to other documents explaining how to install and use the
+software.
+<P>
+If you have questions, comments or bug reports, please mail
+them to 
+<PRE>
+    shore_support@cs.wisc.edu
+</PRE>
+<P>
+For information on other mailing lists, see the Shore WWW home
+page: 
+<A NAME="tex2html1"
+ HREF="http://www.cs.wisc.edu/shore/">http://www.cs.wisc.edu/shore/</A>
+.
+<A NAME="release:requirements">&#160;</A><H2><A NAME="SECTION00021000000000000000000">
+Requirements</A>
+</H2>
+<P>
+The Version 1.1.1  release of Shore is supported for 
+Solaris 2.5 on SPARCstations and Intel X86 (Pentium) workstations
+and Linux.
+Shore has been ported to other platforms, but there are no supported ports
+at this time.  We hope to make available, on an &quot;as is&quot; basis,
+ports contributed by the user community.
+<P>
+You will need a current version of GNU C/C++ compiler <EM>gcc</EM> 
+(with its include files) and the GNU <EM>make</EM>  utility.
+We do not support other compilers or versions of <EM>make</EM> .
+The current release builds successfully with versions
+2.7.2.2 and 2.7.2.3 of the compiler.
+The pre-compiled (binary) release was built with gcc 2.7.2.3 and libg++ 2.7.2.
+As newer versions of the compiler are released, we will update the Shore
+software.
+<P>
+Complete details about required software and hardware are available in
+the <A HREF="../installation/node3.html#installation:requirements">Requirements section</A> of the
+Installation manual.
+<P><A NAME="release:copyright">&#160;</A><H2><A NAME="SECTION00022000000000000000000">
+Copyright and Disclaimer</A>
+</H2>
+<P>
+The Shore software is distributed with the following copyright
+notice and disclaimer, and is subject to its terms:
+<P><em>Copyright &#169; 1994-7
+<br> Computer Sciences Department, University of Wisconsin-Madison.
+<br> All Rights Reserved.</em>
+<P>
+Permission to use, copy, modify and distribute this software and its
+documentation is hereby granted, provided that both the copyright
+notice and this permission notice appear in all copies of the
+software, derivative works or modified versions, and any portions
+thereof, and that both notices appear in supporting documentation.
+<P>
+THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY OF WISCONSIN -
+MADISON ALLOWS FREE USE OF THIS SOFTWARE IN ITS &quot;AS IS&quot;
+CONDITION.  THE DEPARTMENT DISCLAIMS ANY LIABILITY OF ANY KIND FOR ANY
+DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.
+<P>
+The Shore Project Group requests users of this software to return any
+improvements or extensions that they make to the Shore Project Group,
+Computer Sciences Department, University of Wisconsin, 1210 West Dayton
+Street, Madison, WI 53706-1685.
+<P>
+In addition, the Shore Project Group requests that users grant the
+Computer Sciences Department rights to redistribute these changes.
+<P><A NAME="release:new111">&#160;</A><H2><A NAME="SECTION00023000000000000000000">
+What is New in Release 1.1.1</A>
+</H2>
+The Linux port has been brought up-to-date.
+Changes were small but rather pervasive.
+Recent releases have become more and more Solaris-specific.
+These updates should make Shore easier to port to other platforms.
+<P>
+Numerous other small bugs, mostly concerned with compiling and installing
+the software, have been repaired.
+<P>
+A rather obscure bug concerning SIX mode locking has been fixed in the
+lock manager (src/sm/lock.cc).
+<P>
+The binary release was built with the latest GNU compilers: gcc (and g++)
+version 2.7.2.3 and libg++ 2.7.2.
+<P><A NAME="release:new11">&#160;</A><H2><A NAME="SECTION00024000000000000000000">
+What was New in Release 1.1</A>
+</H2>
+<P><A NAME="release:new11:bugfixes">&#160;</A><H3><A NAME="SECTION00024100000000000000000">
+Maintenance Fixes</A>
+</H3>
+Numerous bug fixes and performance improvements have been made throughout
+Shore, especially in the storage manager.
+In particular,
+<UL>
+<LI>
+Locks are automatically escalated from record to page to file level.
+<LI>
+Logging has been substantially improved to generate fewer log records.
+<LI>
+Bulk loading facilities have been improved.
+<LI>
+Allocation of space in files has been substantially improved.
+<LI>
+Numerous storage leaks and uninitialized variables discovered by
+Purify<SUP><I>TM</I></SUP> have been fixed.
+<LI>
+More kinds of temporary files are available.
+The semantics have been cleaned up and bugs in logging have been fixed.
+<LI>
+The concurrency control and recovery code for btrees has been extensively
+revised more closely to follow Mohan's ARIES algorithms.
+<LI>
+Keys of all primitive types are now correctly handled (in a machine-independent
+manner) for btrees and for sorting.
+<LI>
+The <TT>#include</TT> files in the storage manager have been reorganized
+to reflect a cleaner layering and to improve compilation speed.
+<LI>
+Error messages from the <TT>diskrw</TT> process have been
+made more intelligible.
+<LI>
+A great deal of obsolete code has been removed.
+<LI>
+Most of the documents have been substantially rewritten.
+</UL><A NAME="release:new11:configuration">&#160;</A><H3><A NAME="SECTION00024200000000000000000">
+Configuration</A>
+</H3>
+The system for configuring and building Shore from source has been
+substantially streamlined.
+We no longer use <TT>imake</TT> (from the X Window System) to generate
+Makefiles.
+Instead, Makefiles are generated from Imakefiles and configuration files
+in the <TT>config</TT> directory by a Perl script.
+In addition to eliminating the need to install <TT>imake</TT>, this change
+makes configuration considerably easier to understand and modify.
+Imakefiles and substantially shorter, and the generated Makefiles are 
+both <EM>much</EM>  shorter (up to 5 times shorter) and formatted more
+readably.
+All local configuration settings related to compiling are confined to a single
+file: <TT>config/config.h</TT>, and mostly to the first 160 or so lines.
+The only runtime configuration necessary is a one-line change to a single
+file (<TT>lib/options</TT>, which is normally installed as
+<TT>~/.shoreconfig</TT>).
+<P><A NAME="release:new10">&#160;</A><H2><A NAME="SECTION00025000000000000000000">
+What was New in Release 1.0</A>
+</H2>
+<P><A NAME="release:newall">&#160;</A><H3><A NAME="SECTION00025100000000000000000">
+General</A>
+</H3>
+<UL>
+<LI>
+Ported to Solaris 2.5.
+<LI> The software builds under gcc 2.7.2 with the
+libg++ 2.7.1 library and include files.
+<LI> Numerous bugs were fixed.
+<P></UL><A NAME="release:newapplic">&#160;</A><H3><A NAME="SECTION00025200000000000000000">
+Applications</A>
+</H3>
+<P><UL>
+<LI> Applications linked with the no-debug
+libraries must be recompiled with the no-debug include files,
+because the two implementations of the return-code class
+are incompatible.
+<LI> Ref&lt;Pool&gt; can be used in applications.
+<LI> Enumerations can be used for index key types.
+<LI> Reference-counting on modules is enabled and under the control
+of the option <TT>oc_refcount</TT>.
+If you use this, use it with caution.
+<P></UL><A NAME="release:newoc">&#160;</A><H3><A NAME="SECTION00025300000000000000000">
+Object cache</A>
+</H3>
+<P>
+No changes.
+<P><A NAME="release:newserver">&#160;</A><H3><A NAME="SECTION00025400000000000000000">
+Shore server</A>
+</H3>
+<P>
+See <EM>Storage manager</EM>.
+<P><A NAME="release:newssm">&#160;</A><H3><A NAME="SECTION00025500000000000000000">
+Storage manager</A>
+</H3>
+<P><UL>
+<LI> The format of logs and volumes has changed; data created
+under previous releases cannot be read by a Version 1.0 server.
+<LI>
+The SM programming interface is slightly changed to support
+multi-threaded transactions 
+(in limited circumstances: see <A NAME="tex2html2"
+ HREF="../man/smthread_t.ssm.html">smthread_t(SSM)</A> ),
+<P>
+external two-phase commit (see
+<A NAME="tex2html3"
+ HREF="../man/transaction.ssm.html">transaction(SSM)</A>),
+and
+faster record creation in a file in append-only context (see
+<A NAME="tex2html4"
+ HREF="../man/scan_file_i.ssm.html">scan_file_i(SSM)</A>
+).
+<LI> The log can be a raw device.
+The SM can be configured to use a separate (diskrw) process
+for the log or to perform the log I/O locally (and synchronously).
+The SM layer has a new option <TT>sm_reformat_log</TT> to control reformatting the log,
+in the event that a raw device is used.  The
+meaning of the option <TT>sm_logsize</TT> has changed.
+(See
+<A NAME="tex2html5"
+ HREF="../man/options.svas.html">options(SVAS)</A>
+for details.)
+<LI> More statistics are reported.
+<LI> Miscellaneous performance improvements were made (logging
+uninitialized data, append-only file population, store-descriptor
+cache expands as needed, lock manager simplified).
+<LI>
+The programming interface for threads has changed.
+The changes are incorporated into the example value-added
+server, and described in the companion document.
+<P></UL><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html112"
+ HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html109"
+ HREF="release.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html103"
+ HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html111"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html113"
+ HREF="node3.html">Release Contents</A>
+<B> Up:</B> <A NAME="tex2html110"
+ HREF="release.html">The Shore Release 1.1.1</A>
+<B> Previous:</B> <A NAME="tex2html104"
+ HREF="node1.html">Contents</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

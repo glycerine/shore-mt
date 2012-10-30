@@ -1,0 +1,104 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# This script tests latching and locking with pin_i's.
+# I specifically tests for a latch/lock deadlock case
+# that used to deadlock the sm
+#
+source $script_dir/vol.init
+
+if { $logging == 0 } {
+    echo "Logging off: script not run. "
+} else {
+sm begin_xct
+
+verbose creating file
+set f1 [sm create_file $volid ]
+
+# change body width
+set id_body_width %0100d
+
+verbose [format $id_body_width 1]
+
+verbose creating r1 and r2
+set r1 [ sm create_rec $f1 "" 11 [format $id_body_width 1] ]
+set r2 [ sm create_rec $f1 "" 11 [format $id_body_width 2] ]
+verbose $r1 $r2
+
+sm commit_xct
+
+proc rem1 { dummy } {
+	global r1 r2
+	verbose in rem1
+	sm begin_xct
+	set pin1 [sm pin_create]
+	sm pin_pin $pin1 $r1 0
+	set pin2 [sm pin_create]
+	sm pin_pin $pin2 $r2 0
+	verbose pinned $r1 and $r2
+	sync
+
+	verbose rem1 updating $r1
+	if [catch {sm pin_update_rec $pin1 1 "Z"} err] {
+	    if {[error_is $err E_DEADLOCK] == 1} {
+		echo Unnecessary DEADLOCK
+	    }
+	} else {
+	    verbose rem1 update complete
+	    sync
+	}
+
+	sm pin_destroy $pin1
+	sm pin_destroy $pin2
+	verbose rem1 abort
+	sm abort_xct
+}
+
+proc rem2 { dummy } {
+	global r1 r2 verbose_flag
+	verbose in rem2
+	sm begin_xct
+	set pin2 [sm pin_create]
+	sm pin_pin $pin2 $r2 0
+	verbose pinned $r2
+	sync
+
+	if {$verbose_flag}  {
+	    sm dump_locks
+	    sm dump_threads
+	}
+	verbose rem2 updating $r2
+	if [catch {sm pin_update_rec $pin2 2 "Z"} err] {
+	    if {[error_is $err E_DEADLOCK] == 1} {
+		echo Unnecessary DEADLOCK
+	    }
+	} else {
+	    verbose rem2 update complete
+	    sync
+	}
+
+	sm pin_destroy $pin2
+	verbose rem2 abort
+	sm abort_xct
+}
+
+verbose forking 1
+set t1 [ fork_thread rem1 "dummy"]
+verbose forking 2
+set t2 [ fork_thread rem2 "dummy"]
+
+verbose about to call sync_thread
+sync_thread $t1
+sync_thread $t2
+sync_thread $t1
+sync_thread $t2
+join_thread $t1 $t2
+
+
+unset t1 t2 f1 r1 r2
+}

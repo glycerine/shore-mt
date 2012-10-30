@@ -1,0 +1,165 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test quarks
+#
+source $script_dir/vol.init
+
+set update_ops {update_rec update_rec_hdr append_rec truncate_rec}
+
+set sp [sm preemption_simulated]
+sm simulate_preemption off
+
+sm begin_xct
+set f1 [sm create_file $volid]
+verbose f1 = $f1
+
+for {set i 0} {$i < [llength $update_ops]} {incr i} {
+    set rec($i) [sm create_rec $f1 rec$i 11 rec$i]
+    verbose rec $i = $rec($i)
+}
+sm commit_xct
+
+link_to_inter_thread_comm_buffer sync_result
+set sync_result "hello"
+
+proc reader {rid1 rid2} {
+    global sync_result
+    link_to_inter_thread_comm_buffer sync_result
+
+    verbose reader::sync 1
+    sync
+    sm begin_xct
+    verbose reader: pinning $rid1
+    set pin [sm pin_create]
+    sm pin_pin $pin $rid1 0
+    sm pin_unpin $pin
+
+    set quark [sm open_quark]
+    verbose reader opened quark $quark
+    verbose reader: pinning $rid2 in quark $quark
+    sm pin_pin $pin $rid2 01
+    set sync_result "$rid1 and $rid2 are pinned"
+    verbose reader: $sync_result
+
+    # pin again and see if blocks writer
+    set pin2 [sm pin_create]
+    sm pin_pin $pin2 $rid2 0
+
+    # pin rid1 again to make sure it's not freed
+    sm pin_pin $pin2 $rid1 0
+
+    sm pin_destroy $pin2
+    verbose reader::sync 2
+    sync
+
+    verbose reader closing quark $quark
+    sm close_quark $quark 
+    # make sure we can open and close again
+
+    set quark [sm open_quark]
+    verbose reader opened quark $quark
+    verbose reader closing quark $quark
+    sm close_quark $quark 
+
+    sm pin_destroy $pin
+    set sync_result "$rid2 lock released by quark"
+    verbose reader::sync 3
+    verbose reader: $sync_result
+    sync
+    set sync_result "$rid1 lock released by commit"
+    verbose reader: $sync_result
+    sm commit_xct
+}
+
+proc writer {rid1 rid2} {
+    global sync_result
+    link_to_inter_thread_comm_buffer sync_result
+
+    verbose writer::sync 1
+    sync
+    sm begin_xct
+    verbose pinning $rid1 for write
+    set pin [sm pin_create]
+    sm pin_pin $pin $rid1 0
+    sm pin_update_rec $pin 1 "X"
+    sm pin_unpin $pin
+    set sync_result "$rid1 updated"
+    verbose writer: $sync_result
+    verbose writer::sync 2
+    sync
+
+    verbose writer: pinning $rid2 for write
+    sm pin_pin $pin $rid2 0
+    sm pin_update_rec $pin 1 "X"
+    set sync_result "$rid2 updated"
+    verbose writer: $sync_result
+    verbose writer::sync 3
+    sync
+
+    sm pin_destroy $pin
+    verbose writer committing
+    sm commit_xct
+}
+
+#set update_ops {update_rec update_rec_hdr append_rec truncate_rec}
+
+
+verbose forker: forking 1
+set t1 [ fork_thread reader $rec(0) $rec(1)]
+verbose forker: forking 2
+set t2 [ fork_thread writer $rec(1) $rec(0)]
+
+verbose forker: sync_result: $sync_result
+assert {expr [string compare $sync_result hello] == 0}
+verbose forker: sync1
+
+verbose forker: sync t1
+sync_thread $t1
+verbose sync_result = $sync_result
+verbose assert {= "$rec(0) and $rec(1) are pinned"}
+assert {expr [string compare $sync_result "$rec(0) and $rec(1) are pinned"] == 0}
+
+verbose forker: sync t2
+sync_thread $t2
+# thread 2 should be blocked, so sync has no effect on sync_thread
+assert {expr [string compare $sync_result "$rec(0) and $rec(1) are pinned"] == 0}
+
+verbose forker: sync3
+sync_thread $t1
+verbose forker: this allows thread 2 to proceed
+verbose forker: sync_result: $sync_result
+assert {expr [string compare $sync_result "$rec(1) lock released by quark"] == 0}
+
+verbose forker: sync4
+sync_thread $t2
+assert {expr [string compare $sync_result "$rec(1) updated"] == 0}
+verbose forker: sync5
+sync_thread $t1
+assert {expr [string compare $sync_result "$rec(0) lock released by commit"] == 0}
+verbose forker: sync6
+sync_thread $t2
+assert {expr [string compare $sync_result "$rec(0) updated"]==0}
+
+verbose forker: joining threads
+join_thread $t1 $t2
+
+
+sm begin_xct
+sm destroy_file $f1
+sm commit_xct
+
+verbose done
+
+sm simulate_preemption $sp
+
+unset rec update_ops t1 t2  sp
+unset f1 i
+# can't unset sync_result -- it's linked to the comm buffer.
+addcleanupvars {sync_result}
+

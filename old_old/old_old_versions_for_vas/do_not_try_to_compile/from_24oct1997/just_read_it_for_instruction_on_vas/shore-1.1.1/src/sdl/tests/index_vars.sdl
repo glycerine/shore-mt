@@ -1,0 +1,12 @@
+module m1 {
+	interface Person {
+	public:
+		attribute string name;
+		attribute long	 age;
+	};
+	interface IndexObj {
+	public:
+		attribute index<string,Person> name_index;
+		attribute index<long,Person>   age_index;
+	};
+}

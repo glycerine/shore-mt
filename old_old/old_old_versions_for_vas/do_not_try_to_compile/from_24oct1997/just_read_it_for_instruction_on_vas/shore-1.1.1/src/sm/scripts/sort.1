@@ -1,0 +1,32 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#	Test sort on multiple key types
+#
+source $script_dir/vol.init
+
+set nrec 10
+set ktype i4
+set ksize 4
+
+set typelist { u1 u2 u4 i1 i2 i4 f4 f8 b1 }
+# sort does not work for variable-length keys, since
+# the key lengths then need to be stored with each key
+# set typelist { b*1000 }
+#
+
+set len [llength $typelist]
+
+for {set k 0} {$k < $len} {incr k} {
+    set ktype [lindex $typelist $k] 
+    verbose "---- testing -- $ktype"
+
+    source $script_dir/sort.1a
+}
+
+unset nrec ktype ksize typelist len k

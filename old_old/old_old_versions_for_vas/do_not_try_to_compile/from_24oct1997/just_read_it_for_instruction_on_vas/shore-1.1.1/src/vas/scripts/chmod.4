@@ -1,0 +1,19 @@
+# source ../scripts/chmod.4
+source ../scripts/chmod.compensate
+set true "1"
+set false "0"
+
+# One tx for testing a file
+begin
+	set subject tfile
+	set oid [mkuserdef $subject 0:1:0]
+
+#  TODO: test conditions in  
+#	see CHMOD_2_V_MAN_PAGE in Object.C for chmod
+#  effective user-id of process must match onwer
+#  of the file or be SU to chmod the file
+
+
+commit
+
+return "chmod.4 done."

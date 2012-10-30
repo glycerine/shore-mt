@@ -1,0 +1,51 @@
+# source ../scripts/mkdir
+
+source ../scripts/mkdir.compensate
+
+cd /small
+
+set parent dira
+set child  dirb
+set clink1  dirc
+set clink2  dird
+
+set oldumask [umask]
+umask 022
+if [expr {[getuid] == 0}] {
+	set cmd mkdir
+	set uncmd rmdir
+} else {
+	set cmd mkpool
+	set uncmd rmpool
+}
+# only super-user can create links to directories
+begin
+	mkdir $parent
+	$cmd $parent/$child
+	assert [expr {[sfile nlinks $parent/$child]==1} ]
+	mklink $parent/$child  $parent/$clink1
+	assert [expr {[sfile nlinks $parent/$child]==2} ]
+	mklink $parent/$clink1  $clink2
+	assert [expr {[sfile nlinks $parent/$child]==3} ]
+	assert [expr {[sfile nlinks $parent/$clink1]==3} ]
+	assert [expr {[sfile nlinks $clink2]==3} ]
+
+# test mklinks to directories and rmdir of 
+# directory with nlinks > 1
+
+	cd $parent
+	assert [expr {[sfile nlinks $child]==3} ]
+	assert [expr {[sfile nlinks $clink1]==3} ]
+	assert [expr {[sfile nlinks ../$clink2]==3} ]
+	$uncmd $child
+	assert [expr {[sfile nlinks $clink1]==2} ]
+	$uncmd $clink1
+	cd ..
+	assert [expr {[sfile nlinks $clink2]==1} ]
+	$uncmd $clink2
+	rmdir $parent
+commit
+
+umask $oldumask
+
+return "link.1 done."

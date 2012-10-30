@@ -1,0 +1,134 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * Imakefile for sdl tools
+ *
+ * $Header: /p/shore/shore_cvs/src/sdl/Imakefile,v 1.47 1997/10/13 11:39:05 solomon Exp $
+ */
+
+#define Subdirs include
+#define Tests tests
+
+.PRECIOUS: metatypes.sdl
+
+CPPFLAGS = Include(FlexInclude) -Iinclude -I../lil/oc -I../vas/include %
+	-I../vas/client -I../common -I../fc -I../sm -I../sthread
+
+all_local::  libsdl.a sdl
+
+GENERATED_C =	sdl-gram.tab.C sdl_lex.C
+OQL_GENERATED_C =oql_gram.tab.C oql_lex.C
+GENERATED_H =	sdl-gram.tab.h
+GENERATED =	$(GENERATED_C) $(GENERATED_H)
+SRC.parser = main_sdl.C
+PARSER_SRCS =	$(GENERATED_C) $(SRC.parser)
+OQL_PARSER_SRCS =	$(OQL_GENERATED_C) $(SRC.parser)
+
+SDLLIB_SRCS =  mtcxx.C tresolve.C meta_init.C metatypes.sdl.C sdl_support.C %
+	sdldummy.C sdl_string.C sdl_set.C lookup.C PoolScan.C DirScan.C %
+	sdl_index.C sdl_UnixFile.C get_type_oid.C app_class.C node.C str-tab.C
+
+OQLLIB_SRCS	=	nmain.C oql_gram.tab.C  ndummy.C noql.C %
+tree.C aqua_tran.C aqua_check.C demo.o utility.C oql_context.C %
+odl.C oql_lex.C auto_string.C symbol.C oql_types.C %
+typedb.C  scope.C load.C aqua_to_shore.C eval.C shore_tran.C
+
+CXX_SRCS =	main_cxx.C
+LINK_SRCS = main_link.C
+MAIN_SRCS = main.C
+OQLS_SRCS = main_oql.C
+
+SRC = %
+	DirScan.C PoolScan.C app_class.C aqua_check.C aqua_to_shore.C %
+	aqua_tran.C auto_string.C demo.C sdldummy.C eval.C get_type_oid.C lex.yy.C %
+	load.C lookup.C main.C main_cxx.C main_link.C main_oql.C main_sdl.C %
+	meta_init.C metatypes.sdl.C mtcxx.C ndummy.C nmain.C node.C noql.C %
+	odl.C oql_context.C oql_types.C scope.C sdl_UnixFile.C sdl_index.C %
+	sdl_set.C sdl_string.C sdl_support.C shore_tran.C str-tab.C symbol.C %
+	tree.C tresolve.C typedb.C utility.C
+
+HDR = metatype_ext.h metatypes.sdl.h node.h sdl_ext.h sdl_internal.h %
+	type_globals.h
+
+SDLLIB_OBJS =	$(SDLLIB_SRCS:.C=.o)
+OQLLIB_OBJS =   $(OQLLIB_SRCS:.C=.o)
+PARSER_OBJS =	$(PARSER_SRCS:.C=.o)
+OQL_PARSER_OBJS =	$(OQL_PARSER_SRCS:.C=.o)
+CXX_OBJS =	$(CXX_SRCS:.C=.o)
+LINK_OBJS =	$(LINK_SRCS:.C=.o)
+MAIN_OBJS =	$(MAIN_SRCS:.C=.o)
+OQLS_OBJS	= $(OQLS_SRCS:.C=.o)
+
+/*
+ *Include files
+	???
+OQLB = -I.
+
+OQL_INCL = -Ioql -I$(OQLB)/oql_types $(OQLB)/utils $(OQLB)/odl $(OQLB)/tsi
+OQL_INCL += $(OQLB)/query $(OQLB)/opt $(OQLB)/pincl $(OQLB)/oql_mincs
+OQL_INCL += $(OQLB)/oql_parser $(OQLB)/apg $(OQLB)/pplan
+ */
+
+%# The following are to prevent an attempt to build metatypes.sdl (which is a
+%# source files) from metatypes.sdl.o or metatypes.sdl.C
+%%: %%.o
+
+%%: %%.C
+
+#if defined(IS_SOLARIS2)
+/* Solaris does not require librpc.a, since it's in the default libraries */
+LIB = ../lil/oc/liboc.a ../vas/client/libvas.a ../vas/common/libcommon.a %
+	../common/libcommon.a ../fc/libfc.a %
+	FlexLib ../sm/libsm.a ../sthread/libst.a
+#else
+LIB = ../lil/oc/liboc.a ../vas/client/libvas.a ../vas/common/libcommon.a %
+	../common/libcommon.a ../fc/libfc.a ../rpc4.0/rpc/librpclib.a %
+	FlexLib ../sm/libsm.a ../sthread/libst.a
+#endif
+
+
+sdl-gram.tab.C:	sdl-gram.y
+	Bison -d sdl-gram.y
+	cat sdl-gram.tab.c | sed '/^#line/s=sdl-gram.tab.c=sdl-gram.tab.C=' > sdl-gram.tab.C
+	rm sdl-gram.tab.c
+
+oql_gram.tab.C:	oql_gram.y
+	Bison -d oql_gram.y
+	cat oql_gram.tab.c | sed '/^#line/s=sdl-gram.tab.c=sdl-gram.tab.C=' > oql_gram.tab.C
+	rm oql_gram.tab.c
+
+sdl_lex.C:	sdl-lex.l
+	Flex sdl-lex.l
+	cat lex.yy.c | sed '/^#line/s=lex.yy.c=sdl_lex.C=' > sdl_lex.C
+	rm lex.yy.c
+oql_lex.C:	oql_gram.l
+	Flex -+ oql_gram.l
+	cat lex.yy.cc | sed '/^#line/s=lex.yy.cc=oql_lex.C=' > oql_lex.C
+	rm lex.yy.cc
+
+sdl-gram.tab.h: sdl-gram.tab.C
+oql_gram.tab.h: oql_gram.tab.C
+
+%# In case you forget to do "make depend":
+node.o str-tab.o: sdl-gram.tab.h
+
+%GEN generated_headers(sdl-gram.tab.h oql_gram.tab.h)
+
+%GEN generated_srcs(sdl-gram.tab.C oql_gram.tab.C sdl_lex.C oql_lex.C)
+
+%GEN install(bin, sdl)
+%GEN install(include, metatypes.sdl.h metatypes.sdl )
+
+%GEN c_plus_program(sdl, $(PARSER_OBJS) $(MAIN_OBJS), libsdl.a $(LIB))
+%GEN c_plus_program(oql, $(OQLS_OBJS), liboql.a libsdl.a FlexLib $(LIB))
+
+%GEN library(libsdl.a, $(SDLLIB_OBJS))
+%GEN library(liboql.a, $(OQLLIB_OBJS))
+
+%GEN tags($(SRC) $(HDR))
+%GEN depend_target($(SRC))

@@ -1,0 +1,14 @@
+module m1 {
+	interface one {
+		public:
+		lref<char> me() const;
+	};
+	interface two: public one {
+	};
+	interface three: public two {
+	};
+	interface other {
+		public:
+		lref<char> whatis(in ref<one> it) const;
+	};
+}

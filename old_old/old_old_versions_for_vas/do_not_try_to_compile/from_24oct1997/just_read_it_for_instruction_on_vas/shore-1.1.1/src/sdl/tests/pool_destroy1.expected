@@ -1,0 +1,8 @@
+destroying pool pool_4_destroy1
+pool_4_destroy1 created. 
+expect error...
+1. error in ObjCache.C:1254 Permission denied
+	called from:
+	0) OCRef.C:122
+	1) pool_destroy1.C:120
+

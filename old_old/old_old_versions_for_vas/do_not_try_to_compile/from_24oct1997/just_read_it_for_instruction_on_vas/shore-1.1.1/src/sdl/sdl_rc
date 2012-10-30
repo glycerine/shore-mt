@@ -1,0 +1,12 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+*.svas_host: localhost
+shoreclient.tester.cli.svas_port: 2999
+shoreclient.?.?.svas_port: 2999
+*.svas_use_pmap: no
+

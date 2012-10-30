@@ -1,0 +1,30 @@
+set dir ../scripts
+source $dir/setup.all
+suppress on
+set verbose 0
+foreach f {
+	small large 
+	mkdir mkdir.2 mkdir.3 cd ls
+	link.1 4 3 lock utimes 
+	chmod.1 chmod.2 chmod.3 chmod.4
+	chgrp.1 chown.1 
+	remove
+	anon.random
+	2 5 
+	perm chmod
+	xref symlink 
+	largedir.all  
+} { 
+	cout $dir/$f
+	source $dir/$f 
+	cout $dir/$f done.
+}
+
+#
+# batch.all -- client side only
+#	index 
+#	appendAnon createAnon truncateAnon truncateAnon.2
+#	dismount.all
+#	mklgpool
+#	time.all 
+#

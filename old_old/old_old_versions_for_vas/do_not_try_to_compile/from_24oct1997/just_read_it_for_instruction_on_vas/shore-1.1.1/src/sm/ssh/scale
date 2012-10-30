@@ -1,0 +1,60 @@
+#!/bin/sh 
+
+doit() 
+{
+    ob=$1
+    no=$2
+    log=$3
+    udc=0
+
+    totsize=`expr $ob \* $no`
+    echo totsize = $totsize 
+    bpksize=`expr $totsize / 1000`
+    # Make it a fifth the total amt of data written
+    bpksize=`expr $bpksize / 5`
+    echo bpksize = $bpksize 
+
+    echo LOGGING $log
+    echo ---- objsize $ob -- nobjs $no -- update count $udc
+    file="-Vf ../scripts/bng.2"
+
+    list="1 2 3 4"
+    count="1"
+    for nd in $list; do
+	echo ---- ---- $nd disks
+	# bp=`expr $bpksize \* $nd`
+	bp=$bpksize
+	no=`expr $totsize / $nd`
+	no=`expr $no / $ob`
+	args="-sm_logging $log -t objsize=$ob -t nobjs=$no -t update_count=$udc $file"
+	for i in $count; do
+	    /bin/rm -f log/* volumes/*
+	    echo ssh -sm_bufpoolsize $bp -ssh_sshrc .sshrc.$nd $args
+	    ssh -s -sm_bufpoolsize $bp -ssh_sshrc .sshrc.$nd $args
+	done
+    done
+
+}
+
+do_selected_file_sizes() 
+{
+    logging=$1
+
+    # 10 meg total per disk
+    # buffer pool size is given for 1 disk; it's
+    # increased for more disks
+    objsize=100
+    nobjs=900000
+
+    doit $objsize $nobjs $logging
+
+    # 10 meg total per disk
+    objsize=1000
+    nobjs=90000
+
+    doit $objsize $nobjs $logging
+}
+
+
+# do_selected_file_sizes yes
+do_selected_file_sizes no

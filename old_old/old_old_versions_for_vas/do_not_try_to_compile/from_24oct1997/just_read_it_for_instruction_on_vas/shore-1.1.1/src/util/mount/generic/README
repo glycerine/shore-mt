@@ -1,0 +1,52 @@
+This is a portable version of mount designed to support mounting a Shore
+filesystem as an NFS filesystem. 
+
+smount.1 is a manaual page that contains an explanation for
+the reason why this program is needed, as well as caveats on its limitations,
+vis a vis the "standard" /etc/mount.
+(A modified version of this manual page is included in the Shore documentation,
+in postscript and HTML forms.)
+
+These programs are designed to build and run a wide variety of Unix systems,
+including many that cannot currently host the Shore server.
+Therefore, there are two ways to configure and build.
+In the context of a complete Shore installation, the Makefile is generated in
+the usual way with 'make make' or with ../../../../tools/makemake.
+
+In a "stand-alone" configuration, the Makefile may be built from Makefile.tmpl
+by running the "configure" script.
+
+In either case, the generated Makefile may be used to build the following
+targets
+    smount      builds the smount program
+    sumount     builds the sumount program
+    all         builds both smount and sumount
+    clean       removes things built
+    make        re-runs configure to customize the Makefile for the current
+                platform (the only "customizing" currently is to determine
+                whether the linker flags -lrpcsvc and/or -lnsl are required
+                on this platform).
+all: smount sumount
+clean:
+sumount: sumount.o mount_tab.o
+smount: smount.o mount_tab.o
+make:
+mount_tab.o smount.o sumount.o: config.h globals.h
+
+
+Files:
+    README          This file
+    configure       A shell script to generate a Makefile from Makefile.tmpl
+    Makefile.tmpl   A template edited by configure.tmpl to create Makefile
+    smount.1        A man page suitable for use with `man'.
+    smount.c        A generic mount program
+    sumount.c       The corresponding umount program.
+    mnt             A shell script for calling smount with a typical set
+                    of arguments
+
+Status:
+
+Currently works on SunOS, Solaris, HPUX, and Ultrix.
+Partially ported to Linux.
+See also ../linux, which contains a copy of the Linux version of these
+programs.

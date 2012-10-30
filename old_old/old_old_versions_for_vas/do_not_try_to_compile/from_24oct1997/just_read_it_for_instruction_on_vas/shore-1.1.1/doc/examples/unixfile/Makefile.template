@@ -1,0 +1,33 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+# $Header: /p/shore/shore_cvs/src/examples/unixfile/Makefile.template,v 1.24 1997/06/13 22:31:53 solomon Exp $
+
+#
+# Makefile for unixfile examples
+#
+ifndef SHORE
+SHORE = /usr/local/shore
+endif
+
+# Modify the following as desired to control compilation options
+# NOTE:  -lnsl is only required for Solaris
+CXX = g++
+CXXFLAGS = -g -I$(SHORE)/include
+LDLIBS = ../../sdl/libsdl.a ../../lil/oc/liboc.a $(SHORE)/lib/libshore.a -lnsl
+
+EXECS = uf dir chm cho ufstat remove error uf_create uf_cat
+
+all:: $(EXECS)
+
+%: %.o
+	$(LINK.cc) -o $@ $@.o $(LDLIBS)
+	
+tags::
+	ctags -wt *.C *.h
+clean::
+	$(RM) -f $(EXECS) *.o a.out core tags 

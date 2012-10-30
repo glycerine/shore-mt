@@ -1,0 +1,26 @@
+#
+#  This script tests truncating the entire heap from objects, including
+#  objects of 0 length.  More importantly, this script can run to completion
+#  with successful verification before running out of memory and disk space!!
+#
+
+begin
+cd ned
+mkpool p
+commit
+
+foreach core { 0 1 2 3 4 5 6 10 20 50 100 500 1000 5000 } {
+  foreach heap { 0 1 2 3 4 5 6 10 20 50 100 500 1000 5000 } { 
+	    puts stdout "$core $heap"
+	    begin
+    	    set oid [mkanon p $core:$heap:0]
+	    trunc $oid $core
+	    append $oid $heap
+	    trunc $oid $core
+	    commit
+  }
+}
+
+puts stdout "Verify begins"
+verify
+puts stdout "Verify ends"

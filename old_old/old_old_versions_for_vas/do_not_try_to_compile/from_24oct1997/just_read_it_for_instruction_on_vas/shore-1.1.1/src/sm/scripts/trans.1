@@ -1,0 +1,37 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+
+#
+# Test various combinations of commit/abort/prepare/extern2pc
+#
+
+set do_file_create 1
+source $script_dir/trans.lib
+
+set finishlist { 
+	extern.commit extern.abort
+	extern.prepare.commit extern.prepare.abort
+	prepare.commit prepare.abort 
+	commit abort 
+	}
+
+foreach a $actionlist {
+    foreach f $finishlist {
+
+	set y [fork_thread trans $a $f]
+	join_thread $y
+
+    }
+}
+
+sm begin_xct
+sm destroy_file $f0
+sm commit_xct
+
+unset f0 a f
+unset finishlist actionlist y

@@ -1,0 +1,8 @@
+
+1i\
+#define RPC_CLNT
+/^#include "\/tmp\/msg.h"/s="\/tmp/\msg.h"="msg.h"=
+/^	CLIENT \*clnt/s=CLIENT=void=
+/clnt_call.clnt,/s=clnt,=(CLIENT *)clnt,=
+/clnt_call/s=argp,=(caddr_t)argp,=
+/clnt_call/s=&res,=(caddr_t)\&res,=

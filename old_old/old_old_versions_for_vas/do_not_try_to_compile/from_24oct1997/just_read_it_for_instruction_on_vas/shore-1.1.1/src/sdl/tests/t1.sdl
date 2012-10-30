@@ -1,0 +1,49 @@
+module m1 {
+  interface ReuseRecord;
+  interface IndexObj;
+  interface ReuseSet;
+  interface cString;
+
+  interface cString {
+  public:
+    attribute string text_;
+  };
+
+  interface ReuseSet {
+  public:
+    attribute set<ReuseRecord> reuse_set_;
+  };
+
+  interface ReuseRecord {
+  public:
+    attribute long   unique_id_;
+    attribute string description_;
+    attribute string keys_;
+    attribute string function_name_;
+    attribute string creator_;
+    attribute string program_;
+    attribute string language_;
+    attribute string compiler_;
+    attribute string example_;
+    attribute string date_;
+    attribute set<cString> libraries_;
+    attribute set<cString> includes_;
+    attribute set<cString> include_files_;
+    attribute set<cString> files_;
+  };
+
+  interface IndexObj {
+  public:
+    attribute long unique_id_;
+    attribute long num_records_;
+    attribute long num_queries_;
+    attribute long num_failed_queries_;
+    attribute long num_copies_;
+    attribute index<string, ReuseSet> index_;
+    attribute index<long, ReuseRecord> id_index_;
+
+  public:
+    void initialize();
+  };
+}
+

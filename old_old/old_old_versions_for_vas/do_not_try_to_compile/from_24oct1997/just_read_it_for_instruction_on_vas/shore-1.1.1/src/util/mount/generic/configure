@@ -1,0 +1,22 @@
+#!/bin/sh
+echo 'main(){}' >nil.c
+gcc -c nil.c
+libs='-lrpcsvc -lnsl'
+if gcc nil.o $libs 2>/dev/null
+then
+	:
+else
+	libs='-lrpcsvc'
+	if gcc nil.o $libs 2>/dev/null
+	then
+		:
+	else
+		libs=
+	fi
+fi
+rm -f Makefile
+echo '# Created by configure.  DO NOT EDIT' >Makefile
+echo >> Makefile
+sed "s/@LIB@/$libs/" <Makefile.tmpl >>Makefile
+chmod -w Makefile
+rm -f nil* a.out

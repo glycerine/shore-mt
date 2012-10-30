@@ -1,0 +1,109 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ *      $RCSfile: Imakefile,v $
+ *      $Revision: 1.64 $
+ *      $Date: 1997/09/19 11:55:36 $
+ *      $Author: solomon $
+ */
+CPPFLAGS = RpcInclude -I../include -I../../common -I../../fc %
+	-I../../sm Include(TclInclude)
+RPCFLAGS = -D__STDC__ -E -DRPCGEN $(CFLAGS) -Dvolatile="" -Dsigned=""
+PREPROC = $(CXX) -x c-header -U__cplusplus $(CPPFLAGS)
+
+all_local:: libcommon.a msg.defs.h msg_svc.o
+
+SHELL.src = commands.dat commands.generic.dat commands.sdl.dat
+SHELL.gen = shell.commands shell.aliases shell.h shell.help %
+	shell.help_txt shell.keywords shell.usage shell.generated.h
+
+HDR = %
+	auditpg.h errors.h grp.hack.h inet_stuff.h interp.h krbplusplus.h %
+	msg_stats.h rusage.h sdl_fct.h server_stubs.h shell.misc.h string_t.h %
+	sysprops.h uname.h vas_internal.h vasshell.h xdrmem.h 
+
+SRC = %
+	cmsg_names.C commands.C commands2.C commands3.C commandsg.C commandst.C %
+	errors.C getwd.C inet_stuff.C interp.C msg_stats.C process_options.C %
+	reserved_oids.C rusage.C sdl_fct.C shell.C shell.generated.C string_t.C %
+	stringhash.C svas_base.C sysprops_util.C uname.C vasshell.C %
+	xdrmem.c msg_xdr.c
+
+EXTRA = vcmsg_names.C unixfs.C string_test.C
+
+#if IS_SPARC_SOLARIS2
+OBJ = $(patsubst %%.C,%%.o,$(SRC:.c=.o)) byteorder.o
+#else
+OBJ = $(patsubst %%.C,%%.o,$(SRC:.c=.o))
+#endif
+
+
+%GEN library(libcommon.a, $(OBJ))
+%GEN library(libunix.a, unixfs.o)
+%GEN stats(rusage.dat,rusage_flat)
+
+$(SHELL.gen): $(SHELL.src) $(TOP)/tools/shell.pl
+	cat $(SHELL.src) | Perl $(TOP)/tools/shell.pl
+%GEN generated_headers($(SHELL.gen))
+
+/* Note:  This rule is more complicated than would seem to be necessary,
+ * because the crappy version of rpcgen we are using does not really work
+ * with -h, -c, -m, or -l but not -o (i.e., with output going to stdout),
+ * numerous attempts to fix it over the years notwithstanding.
+ */
+%DEF gen_msg(target, defs, script, flag)
+target: msg.x ../include/vas_types.h script ../../rpc4.0/rpcgen/rpcgen 
+	$(PREPROC) $(RPCFLAGS) defs msg.x >/tmp/msg.x$$$$; %
+	../../rpc4.0/rpcgen/rpcgen flag -o target /tmp/msg.x$$$$; %
+	sed -f script target >/tmp/msg.x$$$$; %
+	mv /tmp/msg.x$$$$ target
+%ENDDEF
+
+%GEN gen_msg(msg.h, -DRPC_HDR, sed.script.msg, -h)
+%GEN generated_headers(msg.h)
+
+%GEN gen_msg(msg_xdr.c, , sed.script.xdr, -c)
+%GEN generated_srcs(msg_xdr.c)
+
+%GEN gen_msg(msg_svc.C, , sed.script.svc, -m)
+%GEN generated_srcs(msg_svc.C)
+
+%GEN gen_msg(msg_clnt.c, , sed.script.clnt, -l)
+%GEN generated_srcs(msg_clnt.c)
+
+msg.defs.h: msg.h
+	grep "^#define" msg.h > msg.defs.h
+
+%# Note:  vas_stubs.c is not meant to be compiled.  To add a new function to
+%# the RPC protocol, add it to the appropriate .x file, make vas_stubs.c,
+%# copy the generated function header from vas_stubs.c to a new source file,
+%# and fill in a body for it.
+vas_stubs.c: sed.script.stubs msg_clnt.c
+	sed -f sed.script.stubs msg_clnt.c > vas_stubs.c
+
+cmsg_stats.i: msgstats.pl msg.h
+	Perl msgstats.pl -c -v msg.h >$@
+%GEN generated_headers(cmsg_stats.i)
+
+cmsg_names.i: msgstats.pl msg.h
+	Perl msgstats.pl -c -s msg.h >$@
+%GEN generated_headers(cmsg_names.i)
+
+byteorder.o:
+	Ar x /lib/libsocket.a byteorder.o
+
+%GEN c_plus_program(string_test, string_test.o, libcommon.a ../../common/libcommon.a ../../fc/libfc.a) 
+
+%GEN install(include, rusage_flat_def.i sdl_fct.h)
+%GEN install(lib, vas.tcllib)
+
+%GEN tags($(SRC) $(HDR))
+%GEN depend_target($(SRC))
+
+../../rpc4.0/rpcgen/rpcgen:
+	$(MAKE) -C ../../rpc4.0/rpcgen rpcgen

@@ -1,0 +1,732 @@
+
+147: ;
+	strlen()=0
+	blen()=0
+	value=(null)|
+
+157: o.update()->stringarray[j].set(initial)
+	strlen()=14
+	blen()=16
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+162: o.update()->stringarray[j].set(17, '\0')
+	strlen()=14
+	blen()=18
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+166: o.update()->stringarray[j].set(14, 'Z')
+	strlen()=15
+	blen()=18
+	value=initial value=Z|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+170: o.update()->stringarray[j].set(14, (char)('0'+j))
+	strlen()=15
+	blen()=18
+	value=initial value=0|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+176: o.update()->stringarray[j].set(20, 'Z')
+	strlen()=15
+	blen()=21
+	value=initial value=0|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+192: o.update()->stringarray[j].set(0, 'I')
+	strlen()=15
+	blen()=21
+	value=Initial value=0|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+
+195: o.update()->stringarray[j].set(Value, 8, 5)
+	strlen()=15
+	blen()=21
+	value=Initial Value=0|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+o->stringarray[0]: .blen()=21 .strlen()=15
+
+147: ;
+	strlen()=0
+	blen()=0
+	value=(null)|
+
+157: o.update()->stringarray[j].set(initial)
+	strlen()=14
+	blen()=16
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+162: o.update()->stringarray[j].set(17, '\0')
+	strlen()=14
+	blen()=18
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+166: o.update()->stringarray[j].set(14, 'Z')
+	strlen()=15
+	blen()=18
+	value=initial value=Z|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+170: o.update()->stringarray[j].set(14, (char)('0'+j))
+	strlen()=15
+	blen()=18
+	value=initial value=1|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+176: o.update()->stringarray[j].set(20, 'Z')
+	strlen()=15
+	blen()=21
+	value=initial value=1|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+192: o.update()->stringarray[j].set(0, 'I')
+	strlen()=15
+	blen()=21
+	value=Initial value=1|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+
+195: o.update()->stringarray[j].set(Value, 8, 5)
+	strlen()=15
+	blen()=21
+	value=Initial Value=1|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+o->stringarray[1]: .blen()=21 .strlen()=15
+
+147: ;
+	strlen()=0
+	blen()=0
+	value=(null)|
+
+157: o.update()->stringarray[j].set(initial)
+	strlen()=14
+	blen()=16
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+162: o.update()->stringarray[j].set(17, '\0')
+	strlen()=14
+	blen()=18
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+166: o.update()->stringarray[j].set(14, 'Z')
+	strlen()=15
+	blen()=18
+	value=initial value=Z|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+170: o.update()->stringarray[j].set(14, (char)('0'+j))
+	strlen()=15
+	blen()=18
+	value=initial value=2|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+176: o.update()->stringarray[j].set(20, 'Z')
+	strlen()=15
+	blen()=21
+	value=initial value=2|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+192: o.update()->stringarray[j].set(0, 'I')
+	strlen()=15
+	blen()=21
+	value=Initial value=2|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+
+195: o.update()->stringarray[j].set(Value, 8, 5)
+	strlen()=15
+	blen()=21
+	value=Initial Value=2|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+o->stringarray[2]: .blen()=21 .strlen()=15
+
+147: ;
+	strlen()=0
+	blen()=0
+	value=(null)|
+
+157: o.update()->stringarray[j].set(initial)
+	strlen()=14
+	blen()=16
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+162: o.update()->stringarray[j].set(17, '\0')
+	strlen()=14
+	blen()=18
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+166: o.update()->stringarray[j].set(14, 'Z')
+	strlen()=15
+	blen()=18
+	value=initial value=Z|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+170: o.update()->stringarray[j].set(14, (char)('0'+j))
+	strlen()=15
+	blen()=18
+	value=initial value=3|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+176: o.update()->stringarray[j].set(20, 'Z')
+	strlen()=15
+	blen()=21
+	value=initial value=3|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+192: o.update()->stringarray[j].set(0, 'I')
+	strlen()=15
+	blen()=21
+	value=Initial value=3|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+
+195: o.update()->stringarray[j].set(Value, 8, 5)
+	strlen()=15
+	blen()=21
+	value=Initial Value=3|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+o->stringarray[3]: .blen()=21 .strlen()=15
+
+147: ;
+	strlen()=0
+	blen()=0
+	value=(null)|
+
+157: o.update()->stringarray[j].set(initial)
+	strlen()=14
+	blen()=16
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+162: o.update()->stringarray[j].set(17, '\0')
+	strlen()=14
+	blen()=18
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+166: o.update()->stringarray[j].set(14, 'Z')
+	strlen()=15
+	blen()=18
+	value=initial value=Z|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+170: o.update()->stringarray[j].set(14, (char)('0'+j))
+	strlen()=15
+	blen()=18
+	value=initial value=4|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+176: o.update()->stringarray[j].set(20, 'Z')
+	strlen()=15
+	blen()=21
+	value=initial value=4|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+192: o.update()->stringarray[j].set(0, 'I')
+	strlen()=15
+	blen()=21
+	value=Initial value=4|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+
+195: o.update()->stringarray[j].set(Value, 8, 5)
+	strlen()=15
+	blen()=21
+	value=Initial Value=4|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+o->stringarray[4]: .blen()=21 .strlen()=15
+
+147: ;
+	strlen()=0
+	blen()=0
+	value=(null)|
+
+157: o.update()->stringarray[j].set(initial)
+	strlen()=14
+	blen()=16
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+162: o.update()->stringarray[j].set(17, '\0')
+	strlen()=14
+	blen()=18
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+166: o.update()->stringarray[j].set(14, 'Z')
+	strlen()=15
+	blen()=18
+	value=initial value=Z|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+170: o.update()->stringarray[j].set(14, (char)('0'+j))
+	strlen()=15
+	blen()=18
+	value=initial value=5|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+176: o.update()->stringarray[j].set(20, 'Z')
+	strlen()=15
+	blen()=21
+	value=initial value=5|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+192: o.update()->stringarray[j].set(0, 'I')
+	strlen()=15
+	blen()=21
+	value=Initial value=5|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+
+195: o.update()->stringarray[j].set(Value, 8, 5)
+	strlen()=15
+	blen()=21
+	value=Initial Value=5|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+o->stringarray[5]: .blen()=21 .strlen()=15
+
+147: ;
+	strlen()=0
+	blen()=0
+	value=(null)|
+
+157: o.update()->stringarray[j].set(initial)
+	strlen()=14
+	blen()=16
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+162: o.update()->stringarray[j].set(17, '\0')
+	strlen()=14
+	blen()=18
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+166: o.update()->stringarray[j].set(14, 'Z')
+	strlen()=15
+	blen()=18
+	value=initial value=Z|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+170: o.update()->stringarray[j].set(14, (char)('0'+j))
+	strlen()=15
+	blen()=18
+	value=initial value=6|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+176: o.update()->stringarray[j].set(20, 'Z')
+	strlen()=15
+	blen()=21
+	value=initial value=6|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+192: o.update()->stringarray[j].set(0, 'I')
+	strlen()=15
+	blen()=21
+	value=Initial value=6|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+
+195: o.update()->stringarray[j].set(Value, 8, 5)
+	strlen()=15
+	blen()=21
+	value=Initial Value=6|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+o->stringarray[6]: .blen()=21 .strlen()=15
+
+147: ;
+	strlen()=0
+	blen()=0
+	value=(null)|
+
+157: o.update()->stringarray[j].set(initial)
+	strlen()=14
+	blen()=16
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+162: o.update()->stringarray[j].set(17, '\0')
+	strlen()=14
+	blen()=18
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+166: o.update()->stringarray[j].set(14, 'Z')
+	strlen()=15
+	blen()=18
+	value=initial value=Z|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+170: o.update()->stringarray[j].set(14, (char)('0'+j))
+	strlen()=15
+	blen()=18
+	value=initial value=7|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+176: o.update()->stringarray[j].set(20, 'Z')
+	strlen()=15
+	blen()=21
+	value=initial value=7|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+192: o.update()->stringarray[j].set(0, 'I')
+	strlen()=15
+	blen()=21
+	value=Initial value=7|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+
+195: o.update()->stringarray[j].set(Value, 8, 5)
+	strlen()=15
+	blen()=21
+	value=Initial Value=7|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+o->stringarray[7]: .blen()=21 .strlen()=15
+
+147: ;
+	strlen()=0
+	blen()=0
+	value=(null)|
+
+157: o.update()->stringarray[j].set(initial)
+	strlen()=14
+	blen()=16
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+162: o.update()->stringarray[j].set(17, '\0')
+	strlen()=14
+	blen()=18
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+166: o.update()->stringarray[j].set(14, 'Z')
+	strlen()=15
+	blen()=18
+	value=initial value=Z|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+170: o.update()->stringarray[j].set(14, (char)('0'+j))
+	strlen()=15
+	blen()=18
+	value=initial value=8|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+176: o.update()->stringarray[j].set(20, 'Z')
+	strlen()=15
+	blen()=21
+	value=initial value=8|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+192: o.update()->stringarray[j].set(0, 'I')
+	strlen()=15
+	blen()=21
+	value=Initial value=8|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+
+195: o.update()->stringarray[j].set(Value, 8, 5)
+	strlen()=15
+	blen()=21
+	value=Initial Value=8|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+o->stringarray[8]: .blen()=21 .strlen()=15
+
+147: ;
+	strlen()=0
+	blen()=0
+	value=(null)|
+
+157: o.update()->stringarray[j].set(initial)
+	strlen()=14
+	blen()=16
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+162: o.update()->stringarray[j].set(17, '\0')
+	strlen()=14
+	blen()=18
+	value=initial value=|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+166: o.update()->stringarray[j].set(14, 'Z')
+	strlen()=15
+	blen()=18
+	value=initial value=Z|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+170: o.update()->stringarray[j].set(14, (char)('0'+j))
+	strlen()=15
+	blen()=18
+	value=initial value=9|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+176: o.update()->stringarray[j].set(20, 'Z')
+	strlen()=15
+	blen()=21
+	value=initial value=9|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=3
+	countc(u)=1
+
+192: o.update()->stringarray[j].set(0, 'I')
+	strlen()=15
+	blen()=21
+	value=Initial value=9|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+
+195: o.update()->stringarray[j].set(Value, 8, 5)
+	strlen()=15
+	blen()=21
+	value=Initial Value=9|
+	countc(a)=2
+	countc(e)=1
+	countc(i)=2
+	countc(u)=1
+o->stringarray[9]: .blen()=21 .strlen()=15
+
+219: astring
+	strlen()=16
+	blen()=18
+	value=Now is the time.|
+	countc(e)=2
+	countc(i)=2
+	countc(o)=1
+
+224: astring
+	strlen()=16
+	blen()=18
+	value=Now is the time.|
+	countc(e)=2
+	countc(i)=2
+	countc(o)=1
+Doing checks...
+ o->stringarray[j].strlen() = 15
+stringarray[0]=Initial Value=0
+ o->stringarray[j].strlen() = 15
+stringarray[1]=Initial Value=1
+ o->stringarray[j].strlen() = 15
+stringarray[2]=Initial Value=2
+ o->stringarray[j].strlen() = 15
+stringarray[3]=Initial Value=3
+ o->stringarray[j].strlen() = 15
+stringarray[4]=Initial Value=4
+ o->stringarray[j].strlen() = 15
+stringarray[5]=Initial Value=5
+ o->stringarray[j].strlen() = 15
+stringarray[6]=Initial Value=6
+ o->stringarray[j].strlen() = 15
+stringarray[7]=Initial Value=7
+ o->stringarray[j].strlen() = 15
+stringarray[8]=Initial Value=8
+ o->stringarray[j].strlen() = 15
+stringarray[9]=Initial Value=9
+astring=Now is the time.
+Now is the time.>A stitch in time.
+Now is the time.=Now is the time.
+Now is the time.<Zebra stripes.
+done with checks...

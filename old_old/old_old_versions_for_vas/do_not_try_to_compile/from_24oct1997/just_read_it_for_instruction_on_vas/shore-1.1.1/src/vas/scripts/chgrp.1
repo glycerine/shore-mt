@@ -1,0 +1,69 @@
+# source ../scripts/chgrp.1
+source ../scripts/chmod.compensate
+
+# One tx for testing a file
+begin
+	set subject tfile
+	set oid [mkuserdef $subject 0:1:0]
+
+	set mygid [getgid]
+	set othergid [getgid exodus]
+	set nogroup [getgid nogroup]
+	set badgid "-1"
+
+	set myuid [getuid]
+	set otheruid [expr { $mygid + 1 }]
+	set rootuid [getuid root]
+	set baduid "-1"
+
+#  test: only owner of file or SU can change group
+#	part 1: owner can change group to one of which he is a member
+	chgrp $mygid $subject
+	assert [expr { [sfile group $subject] == $mygid } ]
+
+	chgrp $othergid $subject
+	assert [expr { [sfile group $subject] == $othergid } ]
+
+#	part 2: owner cannot change group to one of which he is not a member
+	expect OS_PermissionDenied from { chgrp $nogroup tfile }
+	assert [expr { [sfile group $subject] == $othergid } ]
+
+#	part 3: non-owner cannot change group 
+#	TODO: need a way to change uid to show error return
+
+#   part 4: SU can change group arbitrarily
+#	TODO: need a way to change uid to show error return
+
+#   part 5: if group is -1, no change is done
+	set oldgroup [sfile group $subject]
+	expect OS_PermissionDenied from { chgrp $badgid $subject }
+	cerr "Chgrp to -1 perhaps should just be a noop?-- what does Unix do?"
+	assert [expr { [sfile group $subject] == $oldgroup } ]
+	assert [expr { [sfile group $subject] == $othergid } ]
+
+#	see CHOWN_2_V_MAN_PAGE in Registered.C:
+#  	part 6: change the symlink, not the object to which it points
+
+	chgrp $mygid $subject
+	assert [expr { [sfile group $subject] == $mygid } ]
+
+	set path [pwd]
+	mksymlink $path/$subject symxxx
+	ls -li
+	chgrp  $othergid symxxx
+	assert [expr { [sfile group symxxx] == $othergid } ]
+	assert [expr { [sfile group $subject] == $mygid } ]
+	rmsymlink symxxx
+
+#   part 7: clear setuid and setgid bits if non-SU does change group
+#   see CHMOD_2_V_MAN_PAGE in Registered.C
+
+	chmod 06755 $subject
+	assert [expr { [sfile mode $subject] == "0106755" } ]
+	chgrp  $othergid $subject
+	assert [expr { [sfile mode $subject] == "0100755" } ]
+	assert [expr { [sfile group $subject] == $othergid } ]
+
+commit
+
+return "chgrp.1 done."

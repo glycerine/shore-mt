@@ -1,0 +1,51 @@
+# source ../scripts/mkdir
+
+source ../scripts/mkdir.compensate
+
+cd /small
+
+set me	  	  [getuid]
+set mygrp	  [getgid]
+
+set parent dira
+set child  dirb
+
+set oldumask [umask]
+umask 022
+begin
+	expect OS_InvalidArgument from { rmdir . }
+
+	mkdir $parent
+	mkdir $parent/$child
+
+# test EINVAL for rmdir: see that it fails if current process is 
+# sitting in the directory being removed
+# (NB: unix only detects ".", does not detect
+# access to "." by full path name
+
+# see that it fails if the directory isn't empty
+	expect OS_NotEmpty from { rmdir $parent }
+
+#	make sure the parent's times are updated when
+#	the child is removed
+
+	set oldpmtime [sfile mtime $parent]
+	set oldpctime [sfile ctime $parent]
+	set oldpatime [sfile atime $parent]
+	sleep 1
+
+	rmdir $parent/$child
+	set newpmtime [sfile mtime $parent]
+	set newpctime [sfile ctime $parent]
+	set newpatime [sfile atime $parent]
+
+	assert [expr {$oldpctime != $newpctime}]
+	assert [expr {$oldpmtime != $newpmtime}]
+	assert [expr {$oldpatime != $newpatime}]
+
+	rmdir $parent
+commit
+
+umask $oldumask
+
+return "mkdir.3 done."

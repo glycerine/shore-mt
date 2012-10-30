@@ -1,0 +1,15 @@
+
+module m1 {
+	interface my_obj {
+	public:
+		struct astruct {
+			long l;
+			char c;
+			string s;
+		};
+		typedef astruct astruct_t;
+	public:
+		// attribute sequence<ref<my_obj>> a_seq;
+		attribute sequence<astruct_t> s_seq;
+	};
+}

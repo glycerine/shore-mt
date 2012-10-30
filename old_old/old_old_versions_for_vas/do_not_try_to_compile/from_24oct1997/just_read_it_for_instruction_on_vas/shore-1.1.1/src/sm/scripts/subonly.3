@@ -1,0 +1,77 @@
+# debugflags "subord.c sm_coord.c coord_thread.c sm_mappings.c participant.c restart.c"
+
+verbose $coname $subname  
+set volid 1
+source $script_dir/vol.init
+source $script_dir/coord.lib
+sm begin_xct
+   set err 0
+   verbose RE-MOUNTED .... $f0 ....
+   # have to try to get the lock - if a tx is prepared,
+   # it won't be able to do the check
+   set err [catch {sm lock $f0 EX INSTANT 0} result]
+   if {$err == 0} {
+       set err [catch {sm set_store_property $f0 regular} result]
+       verbose set_store_property resulted in : $err $result
+       if {$err == 0} {
+	   verbose contains [scanit $f0] records
+	} else {
+	   verbose $f0 DOES NOT EXIST : $result
+	   sm crash bad file
+	}
+   } else {
+       verbose error result of lock($f0): $err $result
+       verbose Skipping count of records in $f0
+   }
+sm commit_xct
+verbose REMOUNTED... 
+
+
+sm coord $volid 
+co startns ns_file
+verbose RECONNECTED TO NS... 
+
+
+set err 1
+set res 0
+while {$err != 0} {
+    set err [catch {co startsub $subname $coname} res]
+    if {$err == 0} {
+	verbose SUBORD STARTED
+    } else {
+	verbose error : $res
+	verbose WAITING FOR COORDINATOR TO REGISTER WITH NS ...
+	sm sleep 10000
+    }
+}
+
+
+# recover prepared txs if necessary
+set n  [sm num_prepared]
+while {1} {
+    verbose RECOVERING $n PREPARED TRANSACTIONS
+    co print
+    sm sleep 10000
+    set n  [sm num_prepared]
+    if {$n == 0} break;
+}
+
+# make sure no prepared txs left 
+assert {expr [sm num_prepared] == 0}
+
+sm begin_xct
+   verbose RECOVERED .... $f0 ....
+   set err [catch {sm set_store_property $f0 regular}]
+   if { $err == 0 } {
+       verbose contains [scanit $f0] records
+    } else {
+       verbose does not exist
+    }
+sm commit_xct
+
+verbose Done with recovery -- allowing remote commands now.
+allow_remote_command yes
+
+set awaitthread [fork_thread forever ignored]
+join_thread $awaitthread
+

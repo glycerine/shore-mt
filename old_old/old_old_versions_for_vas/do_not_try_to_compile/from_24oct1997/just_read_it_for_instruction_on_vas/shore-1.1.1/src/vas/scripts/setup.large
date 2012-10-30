@@ -1,0 +1,41 @@
+begin
+cd /
+if [not [sfile exists large] ] {
+	mkdir 	large
+}
+cd /large
+if [not [sfile exists x] ] {
+	mkdir 	x
+}
+cd x
+ls -lF
+cd ..
+ls -lF
+
+cd /large/x
+
+# the theory here is that
+# you get an off-volume reference
+# to /small/z/uf, but you can't, really,
+# unless /small/z/uf is on a different volume.
+#
+set off [offvolref /small/z/uf]
+
+#
+# Here, we wanted to make
+# offvol a chained xref to /small/z/uf,
+# through excess serial #s, but
+# the vas doesn't make chains if the
+# references things are on the same volume.
+# TODO: we need /large and /small to be
+# on 2 different volumes in order to test this
+#
+set xoff [cleanupxref offvol $off]
+
+snapref	offvol
+snapref	$xoff
+snapref	$off
+stat 	$off
+
+commit
+return "setup.large done."

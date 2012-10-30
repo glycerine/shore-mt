@@ -1,0 +1,15 @@
+
+module m1 {
+	export all;
+
+	// shed some light on the confusingest stuff, 
+	// i.e., enums
+	typedef	enum ln1 { t1,f1,n1 } l1; // no complaint, but
+		// bad binding
+
+	enum ln2 { t2,f2,n2 }; // no complaint, good binding
+
+	typedef ln2 l2;	// no complaint, good binding
+
+}
+

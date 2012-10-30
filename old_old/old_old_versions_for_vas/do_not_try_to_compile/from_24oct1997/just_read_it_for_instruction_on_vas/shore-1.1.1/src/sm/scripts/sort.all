@@ -1,0 +1,28 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+source $script_dir/vol.init
+
+set scripts [list sort.1 sort.2 sort.3 sort.4]
+
+echo CLEANUP BEFORE sort.all :
+cleanup stdout
+addcleanupvars {script}
+
+if {$Use_logical_id==1} {
+    echo Sort not supported for logical ids
+} else {
+
+    foreach script $scripts {
+	echo
+	echo RUNNING: $script 
+	source $script_dir/$script
+	checkstats  $script
+	puts stdout [concat CLEANUP AFTER  $script  : ]
+	cleanup stdout
+    }
+}

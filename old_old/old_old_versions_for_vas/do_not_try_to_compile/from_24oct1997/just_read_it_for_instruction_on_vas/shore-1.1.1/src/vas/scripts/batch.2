@@ -1,0 +1,17 @@
+#
+# limit reached by qlen=2
+# no errors
+#
+begin
+
+cd /small
+set obj [mkanon pool 10:10:NoText]
+start 2
+append $obj 1000
+trunc $obj 10
+write $obj 1 8
+append $obj 1000
+write $obj 0 2000
+write $obj 0 2000
+send
+commit

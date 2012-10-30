@@ -1,0 +1,22 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+
+client Statistics client page cache and RPCs =	0x00020000 clientstats {
+int		server_calls Total RPCs
+int		page_hits	Page cache hits
+int		page_misses	Page cache misses
+int		page_invalid_hits Page cache hit but marked invalid
+int		page_installs Pages put into page cache
+int		page_invalidates Times page cache invalidated
+int		page_lookups Searches of page cache
+int		htinserts OIDs put into page cache
+float	avghits Average #hits per installed page
+int		mwrite_calls Times an RPC is broken into multiple RPCs
+int		mwrite_rpcs	 Total # RPCs resulting from broken-up requests
+float	avgrpcspercall Avg # RPCs per large request
+};

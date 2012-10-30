@@ -1,0 +1,108 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  Load a unique btree, verify it's content, attempt to reinsert 
+#
+
+#
+# start up
+#
+source $script_dir/vol.init
+
+
+set nrec 120
+# set nrec 70
+
+#
+# create index and load it up 
+#
+sm begin_xct
+set ndx [sm create_index $volid uni_btree]
+verbose created index $ndx
+
+verbose [sm get_store_info $ndx]
+for {set i 1} {$i <= $nrec} {incr i} {
+    verbose inserting $i
+    sm create_assoc $ndx [format $short_form $i] $i
+}
+if {$logging==0} {
+    verbose "Logging off: sm abort_xct not done.  Committing instead."
+    sm commit_xct 
+} else {
+    verbose sm abort_xct 
+    sm abort_xct 
+}
+
+sm begin_xct
+set ndx [sm create_index $volid uni_btree]
+verbose created index $ndx
+for {set i 1} {$i <= $nrec} {incr i} {
+    verbose inserting $i
+    catch {sm create_assoc $ndx [format $short_form $i] $i} err
+    assert {expr [error_is $err E_OK] == 1}
+}
+verbose committing
+sm commit_xct
+
+#
+# attempt reinsert
+#
+sm begin_xct
+verbose reinserting $nrec records --- should get $nrec duplicate errors
+set ecaught 0
+for {set i 1} {$i <= $nrec} {incr i} {
+    verbose inserting $i
+    catch {sm create_assoc $ndx [format $short_form $i] $i} err_caught
+    verbose result of create_assoc is $err_caught
+    if {[error_is $err_caught E_DUPLICATE] == 1} { incr ecaught }
+}
+verbose $ecaught ==? $nrec
+assert {expr $ecaught == $nrec}
+verbose caught all $nrec errors
+sm commit_xct
+
+#
+# verify ascending
+#
+# sm begin_xct
+# sm print_index $ndx
+# sm commit_xct
+
+verbose "scan up:"
+sm begin_xct
+set scan [sm create_scan $ndx >= neg_inf <= pos_inf]
+for {set i 1} {$i <= $nrec} {incr i}  {
+    set r [sm scan_next $scan]
+    if {[string compare $r eof] == 0} then { break }
+    set key [string trimleft [lindex $r 0] 0]
+    set el [lindex $r 1]
+    verbose "scanned ($key, $el)"
+    assert {expr $key == $el}
+    verbose expecting $i == $key
+    assert {expr $i == $key}
+}
+assert {expr $i > $nrec}
+assert {expr [string compare [sm scan_next $scan] eof] == 0}
+sm destroy_scan $scan
+verbose "---- successful"
+
+verbose "probe:"
+for {set i 1} {$i <= $nrec} {incr i} {
+    set el [sm find_assoc $ndx [format $short_form $i]]
+    assert {expr $i == $el}
+    verbose probed $i
+}
+verbose [sm gather_stats]
+verbose "---- successful"
+
+sm commit_xct
+
+unset ndx nrec
+unset i r el key
+unset err_caught err
+unset ecaught scan

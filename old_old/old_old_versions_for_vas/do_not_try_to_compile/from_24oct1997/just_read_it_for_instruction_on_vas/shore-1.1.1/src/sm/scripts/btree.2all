@@ -1,0 +1,139 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  test all types of btree keys
+#  Test scans with im, kvl, none.  IM will interpret the
+#  elements as RIDs and grab locks on those, but it's ok
+#  if the elements aren't really RIDs -- they'll just be wierd locks
+#
+#  Don't test with modkvl, since only == == scans
+#  are allowed with those.
+#  
+#
+
+#
+# start up
+#
+source $script_dir/vol.init
+
+set ok 1
+set bad 0
+set save_random 0
+
+set nrec 80
+
+verbose "testing integer key btree (non-unique)"
+
+foreach cc {t_cc_im t_cc_kvl t_cc_none} {
+    sm begin_xct
+
+    if { $ok } {
+	# ok on pentium
+	verbose sm test_typed_btree $volid $nrec f8 $cc
+	if { $save_random } { write_random ssh.seed.f8 }
+	sm test_typed_btree $volid $nrec f8 $cc
+
+    }
+    if { $ok } {
+	# ok on pentium
+	verbose sm test_typed_btree $volid $nrec f4 $cc
+	if { $save_random } { write_random ssh.seed.f4 }
+	sm test_typed_btree $volid $nrec f4 $cc
+    }
+
+    if { $ok } {
+	    # ok on pentium
+
+    sm commit_xct
+    sm begin_xct
+
+	verbose sm test_typed_btree $volid $nrec i4 $cc
+	if { $save_random } { write_random ssh.seed.i4 }
+	sm test_typed_btree $volid $nrec i4 $cc
+
+    }
+    if { $ok } {
+	    # ok on pentium
+
+	verbose sm test_typed_btree $volid $nrec i2 $cc
+	if { $save_random } { write_random ssh.seed.i2 }
+	sm test_typed_btree $volid $nrec i2 $cc
+
+    }
+    if { $ok } {
+	# problem on pentium
+
+	verbose sm test_typed_btree $volid $nrec i1 $cc
+	if { $save_random } { write_random ssh.seed.i1 }
+	sm test_typed_btree $volid $nrec i1 $cc
+
+    }
+    if { $ok } {
+	    # ok on pentium
+     
+    sm commit_xct
+    sm begin_xct
+
+	verbose sm test_typed_btree $volid $nrec b1 $cc
+	if { $save_random } { write_random ssh.seed.b1 }
+	sm test_typed_btree $volid $nrec b1 $cc
+
+    }
+
+    if { $ok } {
+	# ok on pentium
+	# get errors
+	verbose sm test_typed_btree $volid $nrec b23 $cc
+	if { $save_random } { write_random ssh.seed.b23 }
+	sm test_typed_btree $volid $nrec b23 $cc
+
+    }
+    if { $ok } {
+	# ok on pentium
+
+	verbose sm test_typed_btree $volid $nrec b*1000 $cc
+	if { $save_random } { write_random ssh.seed.b1000 }
+	sm test_typed_btree $volid $nrec b*1000 $cc
+
+
+    sm commit_xct
+    sm begin_xct
+
+    }
+
+    if { $ok } {
+	    # OK
+	verbose sm test_typed_btree $volid $nrec u4 $cc
+	# read_random ssh.seed.u4
+	if { $save_random } { write_random ssh.seed.u4 }
+	sm test_typed_btree $volid $nrec u4 $cc
+
+    }
+
+    if { $ok } {
+	    #oK
+	verbose sm test_typed_btree $volid $nrec u2 $cc
+	# read_random ssh.seed.u2
+	if { $save_random } { write_random ssh.seed.u2 }
+	sm test_typed_btree $volid $nrec u2 $cc
+
+    }
+    if { $ok } {
+	    #problem
+	verbose sm test_typed_btree $volid $nrec u1 $cc
+	# read_random ssh.seed.u1
+	if { $save_random } { write_random ssh.seed.u1 }
+	sm test_typed_btree $volid $nrec u1 $cc
+
+    }
+
+    sm commit_xct
+}
+
+unset nrec cc
+unset bad ok save_random

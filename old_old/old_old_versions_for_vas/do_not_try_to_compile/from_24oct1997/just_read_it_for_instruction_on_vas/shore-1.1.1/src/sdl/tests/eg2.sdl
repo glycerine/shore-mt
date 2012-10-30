@@ -1,0 +1,23 @@
+/////////////
+// PR 221 (closed)
+// PR 274 (closed)
+/////////////
+
+//
+// Example right from the sdl manual
+//
+
+
+module m1 { 
+	export all;    
+	const long C = 1;    
+} 
+module m2 { 
+	import "m1"; 
+	const long D = C; // error: ambiguous (m1::C or m2::C) 
+	// dts- I'm not sure this should be an error; it seems reasonable
+	// for the local scope of the module to override the imported
+	// scope.
+	const long C = 2; 
+	const long E = m1::C; // ok: E = 1  
+} 

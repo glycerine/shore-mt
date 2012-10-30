@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>The Shore Error Handler Function</TITLE>
+<META NAME="description" CONTENT="The Shore Error Handler Function">
+<META NAME="keywords" CONTENT="shrc">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="shrc.css">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="shrc.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif_gr.gif"> 
+<A NAME="tex2html67"
+ HREF="shrc.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html63"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html69"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Up:</B> <A NAME="tex2html68"
+ HREF="shrc.html">Handling Errors in a Application</A>
+<B> Previous:</B> <A NAME="tex2html64"
+ HREF="node4.html">Macros for Transaction Management</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<A NAME="shrc:handler">&#160;</A><H1><A NAME="SECTION00050000000000000000000">
+The Shore Error Handler Function</A>
+</H1>
+<P>
+In certain cases, it is impossible or impractical to return a <TT>shrc</TT>.
+For example, <TT>ref&lt;T&gt;::operator-&gt;</TT> does not have an opportunity to
+return an error code, because of the way C++ defines <TT>operator-&gt;</TT>.
+Ideally, errors from overloaded operators would raise an exception that
+could be caught and handled by the application.  Unfortunately, C++
+exceptions are not stable enough to be used.  Therefore, in situations
+where it is impractical to return a <TT>shrc</TT>, Shore calls a handler
+function, passing a <TT>shrc</TT> as its argument.  The default handler
+function simply prints the <TT>shrc</TT> and exits by calling <TT>_exit</TT>
+(this form of <TT>exit</TT> does not call global destructors).
+<P>
+Applications can install their own error handler by calling <TT>Shore::set_error_handler</TT>.  This function takes a pointer to a handler
+function as its argument.  It installs the given function as the new
+handler and returns the old handler function.  Passing a zero argument to
+<TT>Shore::set_error_handler</TT> reinstalls the default handler.
+<P>
+By installing a handler function, an application gives itself an
+opportunity to clean up its transient state before aborting a transaction.
+Once the transient state has been cleaned up, the handler function can call
+<TT>SH_ABORT_TRANSACTION</TT> to abort the transaction and <TT>longjmp</TT>
+back to the call to <TT>SH_BEGIN_TRANSACTION</TT>.  Alternately, the handler
+function can exit the process with <TT>_exit</TT>.  A handler function should
+not return, however.  If it does, then Shore will terminate the process by
+calling <TT>_exit</TT>.
+<P>
+The error-handling functions are documented in
+<A NAME="tex2html5"
+ HREF="../man/errors.oc.html">errors(OC)</A> and
+<A NAME="tex2html6"
+ HREF="../man/rc.fc.html">rc(FC)</A>.
+<P><HR>
+<!--Navigation Panel-->
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif_gr.gif"> 
+<A NAME="tex2html67"
+ HREF="shrc.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html63"
+ HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html69"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Up:</B> <A NAME="tex2html68"
+ HREF="shrc.html">Handling Errors in a Application</A>
+<B> Previous:</B> <A NAME="tex2html64"
+ HREF="node4.html">Macros for Transaction Management</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

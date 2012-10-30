@@ -1,0 +1,101 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#   Time creation of records 
+#   Parameters: 
+#   	        size of objects written 
+#		logging on or off
+#
+# set objsize [expr {8192 * 6}]
+set objsize 7000
+
+#ignored for now
+set logging 1
+set fid 0
+
+set config [sm config_info]
+
+source ../scripts/vol.init
+
+
+set volsize [lindex [sm get_volume_quota $volid] 0]
+set used [lindex [sm get_volume_quota $volid] 1]
+set volsize [expr {$volsize - $used} ]
+set objksize [expr {$objsize / 1024} ]
+
+echo volsize = $volsize   
+echo objksize = $objksize 
+
+# dstats $volid
+
+# figure out how many (presumably large) 
+# objects will fit on the volume
+
+# set nobjs [expr {$volsize / $objksize} ]
+set nobjs [expr {8192 * 6}]
+
+# round down to the nearest 100
+if { $nobjs > 100 } {
+    set nobjs [expr {$nobjs / 100} ]
+    echo nobjs = $nobjs
+    set nobjs [expr {$nobjs * 100} ]
+}
+set nobjs 5000
+echo nobjs = $nobjs
+
+unset objksize
+
+set hdr "" 
+set id_body_width zvec%d
+set body [format $id_body_width $objsize]
+
+# 
+# in existing file, create a buncha records
+# in one transaction
+#
+# First, clear out the file
+#
+sm begin_xct
+    if {$fid!=0} {
+	sm destroy_file $fid 
+	set fid 0
+    }
+
+    # Now, start over and time it
+    set fid [sm create_file $volid ]
+    echo fid=$fid
+sm commit_xct
+
+echo CREATING $nobjs RECS of size $objsize
+
+set dummy [sm gather_stats reset]
+set wtime [ time {
+    sm begin_xct
+	for {set i 0} {$i < $nobjs} {incr i} {
+	    sm create_rec $fid $hdr $objsize $body
+	}
+	sm force_buffers true
+    sm commit_xct
+} 1 ]
+
+echo
+echo CREATED $nobjs RECS of size $objsize, forced buffers
+
+pstats
+set dummy [sm gather_stats reset]
+echo 
+echo total create time = $wtime
+set msec [lindex $wtime 0]
+set sec [expr {$msec / 1000000} ]
+set tbytes [expr $objsize * $nobjs]
+
+if {$sec > 0} {
+   echo [expr {$tbytes / $sec}] bytes per second
+}
+
+# dstats $volid

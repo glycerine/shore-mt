@@ -1,0 +1,16 @@
+#
+# limit reached by shm/tcp
+# no errors
+#
+begin
+cd /small
+set obj [mkanon pool 10:10:NoText]
+start  10
+append $obj 4000
+trunc  $obj 10
+append $obj 4000
+trunc  $obj 10
+append $obj 4000
+trunc  $obj 10
+send
+commit

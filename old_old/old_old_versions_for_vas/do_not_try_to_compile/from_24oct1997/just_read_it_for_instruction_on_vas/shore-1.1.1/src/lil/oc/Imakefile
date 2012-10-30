@@ -1,0 +1,39 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * Imakefile for Object Cache Layer
+ */
+
+/* $Header: /p/shore/shore_cvs/src/lil/oc/Imakefile,v 1.35 1997/06/13 22:32:31 solomon Exp $ */
+
+CPPFLAGS = -D__STRICT_ANSI__ -DOC_PROFILE -finline-functions %
+	-I../../fc -I../../vas/include -I../../vas/client -I../../common %
+	-I../../sdl/include -I../../sm -I../../sthread
+
+SRC = LOIDTable.C MemMgr.C OCRef.C ObjCache.C Shore.C Type.C VolumeTable.C %
+		get_my_svas.C
+
+OBJ = $(SRC:.C=.o)
+
+HDR = LOIDTable.h MemMgr.h OCInternal.h OCRef.h  OCTypes.h OTEntry.h %
+	ObjCache.h Shore.h ShoreStats.h Type.h VolumeTable.h
+
+
+#define Install SH_error.h OCRef.h OCTypes.h OTEntry.h Shore.h Type.h \
+	ShoreStats.h CacheBHdr.h \
+	OCstats_def.i OCstats_msg.i OCstats_op.i OCstats_struct.i 
+
+all_local:: liboc.a
+
+%GEN stats(OCstats.dat,OCstats)
+%GEN library(liboc.a,$(OBJ))
+%GEN install(include, Install)
+%GEN error_enum(SH_error.dat,SH)
+
+%GEN tags($(SRC) $(HDR))
+%GEN depend_target($(SRC))

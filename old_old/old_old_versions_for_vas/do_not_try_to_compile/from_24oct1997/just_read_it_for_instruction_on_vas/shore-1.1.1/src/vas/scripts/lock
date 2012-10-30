@@ -1,0 +1,14 @@
+source ../scripts/setup.all
+
+
+# the xrefs
+begin
+cd /
+lock /large/x/offvol
+lock /small/pool
+expect OS_IsADirectory from { lock /small/z }
+lock /small/z/xref
+lock /small/z/uf
+commit
+
+return "lock done."

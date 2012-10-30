@@ -1,0 +1,23 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+#  load an integer-key btree and test scans 
+#  In this case, the test function test_int_btree contains
+#  all the test code.
+#
+
+source $script_dir/vol.init
+
+set nrec 50
+
+verbose testing integer key btree
+sm begin_xct
+sm test_int_btree $volid $nrec
+sm commit_xct
+
+unset nrec

@@ -1,0 +1,11 @@
+/*
+ * $Header: /p/shore/shore_cvs/src/rpc4.0/Imakefile,v 1.16 1997/10/13 11:26:54 solomon Exp $
+ */
+
+#if defined(IS_SOLARIS2)
+#define Subdirs rpcgen rpcsvc
+#else
+#define Subdirs rpc rpcgen rpcsvc
+#endif
+
+#define Tests etc

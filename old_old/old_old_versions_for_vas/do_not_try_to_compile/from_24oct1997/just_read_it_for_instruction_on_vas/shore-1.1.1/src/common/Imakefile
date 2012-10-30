@@ -1,0 +1,73 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ * $Id: Imakefile,v 1.114 1997/09/30 21:17:44 solomon Exp $
+ */
+#define Tests tests
+
+CPPFLAGS = -I../fc -I../sthread
+PURE_OPT += -best-effort
+
+all_local:: libcommon.a sm_app.h
+
+regex.o: regex.c
+	$(COMPILE.c) -DSTDC_HEADERS -UDEBUG regex.c
+
+SRC = basics.cc bitmap.cc devid_t.cc lid_t.cc latch.cc %
+	RegEx serial_t.cc tid_t.cc kvl_t.cc vec_t.cc vid_t.cc vec_mkchunk.cc %
+	stid_t.cc %
+	debug.cc errlog.cc option.cc fast_new.cc regex.posix.cc
+%GEN c_to_o(OBJ,$(SRC))
+
+HDR = basics.h serial_t.h bitmap.h stack_t.h %
+	vid_t.h lid_t.h tid_t.h vec_t.h kvl_t.h zvec_t.h pqueue.h pqueue.cc %
+	rsrc.h rsrc.cc hash_lru.h hash_lru.cc getopt.h %
+	debug.h serial_t_data.h cat.h %
+	umemcmp.h errlog.h auto_release.h latch.h errlog_s.h %
+	option.h fast_new.h regex.h regex.posix.h devid_t.h stid_.h
+
+#define Install \
+	shore_version.h sm_app.h basics.h vec_t.h zvec_t.h lid_t.h \
+	serial_t.h unix_error.h dual_assert.h \
+	serial_t_data.h tid_t.h copyright.h option.h opt_error_def.h devid_t.h \
+	debug.h errlog.h cat.h \
+	latch.h regex.posix.h rsrc.h \
+	rsrc.cc bitmap.h
+
+%GEN error_def(opt_error.dat,opt)
+%GEN library(libcommon.a, $(OBJ))
+%GEN merge_library(libshorecommon.a,,
+	libcommon.a ../sthread/libst.a %../fc/libfc.a)
+
+SM_APP_H_INCL = %
+	w.h basics.h option.h vec_t.h tid_t.h lid_t.h sm_s.h sm_base.h file_s.h %
+	page_s.h
+
+sm_app.h: $(SM_APP_H_SRC) ../sm/e_error.h
+	@echo making $@
+	-$(RM) -f $@
+	echo "#ifndef SM_APP_H" > $@
+	echo "#define SM_APP_H" >> $@
+	echo "/* THIS IS A GENERATED FILE -- DO NOT EDIT */" >> $@
+	echo "#include <stddef.h>" >> $@
+	for i in $(SM_APP_H_INCL) ; %
+		do echo "#include \"$$i\"" >> $@; done;
+	Perl -n -e 'print if /BEGIN VISIBLE TO APP/../END VISIBLE TO APP/' %
+		< ../sm/app_support.h >>$@
+	@echo "#endif /* SM_APP_H */" >> $@
+%GEN generated_headers(sm_app.h)
+
+%GEN install(include, Install sm_vas.h vid_t.h stid_t.h kvl_t.h
+	../../config/config.h)
+%GEN install(lib, libshorecommon.a)
+
+../sm/e_error.h:
+	$(MAKE) -C ../sm e_error.h
+
+%GEN tags($(SRC) $(HDR))
+%GEN depend_target($(SRC))

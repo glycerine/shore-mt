@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--Converted with LaTeX2HTML 97.1 (release) (July 13th, 1997)
+ by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippman, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Thread Management</TITLE>
+<META NAME="description" CONTENT="Thread Management">
+<META NAME="keywords" CONTENT="ssmapi">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso_8859_1">
+<LINK REL="STYLESHEET" HREF="ssmapi.css">
+<LINK REL="next" HREF="node8.html">
+<LINK REL="previous" HREF="node6.html">
+<LINK REL="up" HREF="ssmapi.html">
+<LINK REL="next" HREF="node8.html">
+</HEAD>
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html205"
+ HREF="node8.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html202"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html196"
+ HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html204"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html206"
+ HREF="node8.html">Error Handling</A>
+<B> Up:</B> <A NAME="tex2html203"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html197"
+ HREF="node6.html">Crash Recovery Facilities</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><strong>Subsections</strong></A>
+<UL>
+<LI><A NAME="tex2html207"
+ HREF="node7.html#SECTION00071000000000000000000">
+Latches</A>
+<LI><A NAME="tex2html208"
+ HREF="node7.html#SECTION00072000000000000000000">
+Thread-Protected Hash Tables</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<A NAME="ssmapi:threads">&#160;</A><H1><A NAME="SECTION00070000000000000000000">
+Thread Management</A>
+</H1>
+<P>
+Providing the facilities to implement a multi-threaded
+server capable of managing multiple transactions is one of the
+distinguishing features of the SSM.  Other persistent storage
+systems such as the
+<A NAME="tex2html1"
+ HREF="http://www.cs.wisc.edu/exodus/">Exodus Storage Manager (http://www.cs.wisc.edu/exodus/)</A>
+only support clients that run one transaction at a time
+and are usually single-threaded.
+<P>
+The Shore Thread Package is documented in
+<A NAME="tex2html30"
+ HREF="../man/intro.sthread.html">intro(sthread)</A>
+All threads are derived from the abstract base class <TT>sthread_t</TT>.
+Any thread that uses the SSM facilities must be derived from
+class <TT>smthread_t</TT> described in
+<A NAME="tex2html31"
+ HREF="../man/smthread_t.ssm.html">smthread_t(ssm)</A>
+A discussion of how to use the threads facility is included in
+<A HREF="../ssmvas/node5.html#ssmvas:threadmgmt"><EM>Thread management</EM> </A> section of the
+VAS Tutorial.
+<P>
+Any program using the thread package automatically has
+one thread, the one running <TT>main()</TT>.
+In addition, the SSM starts one thread to do background flushing
+of the buffer pool and another to take periodic checkpoints.
+<P>
+We have also implemented some extensions to the thread package.
+These are not formally part of the thread package, but we've found
+them useful enough in building the SSM and the Shore VAS to warrant
+including them as part of the documented interface.
+<P><A NAME="ssmapi:latch">&#160;</A><H2><A NAME="SECTION00071000000000000000000">
+Latches</A>
+</H2>
+<P>
+Latches are a read/write synchronization mechanism for threads,
+as opposed to locks which are used for synchronizing transactions.
+Latches are much lighter weight than locks, have no symbolic names,
+and have no deadlock detection.  Latches are described in
+<A NAME="tex2html32"
+ HREF="../man/latch_t.common.html">latch_t(common)</A>.
+<P><A NAME="ssmapi:hashtable">&#160;</A><H2><A NAME="SECTION00072000000000000000000">
+Thread-Protected Hash Tables</A>
+</H2>
+<P>
+The Resource Manager, <TT>rsrc_m</TT>, template class manages a fixed
+size pool of <EM>shared resources</EM> in a multi-threaded environment.
+The <TT>rsrc_m</TT> protects each resource with a latch and uses them
+to enforce a protocol in which multiple threads have consistent
+and concurrent access to the shared resources. For instance, the
+Shore buffer manager uses rsrc_m to manage buffer control blocks.
+The <TT>rsrc_m</TT> is implemented using a hash table.  When a
+entry needs to be added and the table is full, on old entry is
+removed based on an LRU policy.  More details can be found in
+<A NAME="tex2html33"
+ HREF="../man/rsrc.common.html">rsrc(common)</A>.
+<P><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html205"
+ HREF="node8.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="../icons.gif/next_motif.gif"></A> 
+<A NAME="tex2html202"
+ HREF="ssmapi.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="../icons.gif/up_motif.gif"></A> 
+<A NAME="tex2html196"
+ HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="../icons.gif/previous_motif.gif"></A> 
+<A NAME="tex2html204"
+ HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="../icons.gif/contents_motif.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html206"
+ HREF="node8.html">Error Handling</A>
+<B> Up:</B> <A NAME="tex2html203"
+ HREF="ssmapi.html">The Shore Storage Manager Interface</A>
+<B> Previous:</B> <A NAME="tex2html197"
+ HREF="node6.html">Crash Recovery Facilities</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<I>This page was generated from LaTeX sources
+<BR>10/27/1997 </I>
+</ADDRESS>
+</BODY>
+</HTML>

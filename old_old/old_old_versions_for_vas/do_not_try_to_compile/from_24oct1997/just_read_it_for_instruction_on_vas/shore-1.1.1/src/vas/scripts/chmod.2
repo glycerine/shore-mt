@@ -1,0 +1,21 @@
+# source ../scripts/chmod.2
+
+source ../scripts/chmod.compensate
+set true "1"
+set false "0"
+
+# One tx for testing a file
+begin
+	set subject tfile
+	set oid [mkuserdef $subject 0:1:0]
+
+#  TODO: test group-id on creation of file, dir
+#	see OPEN_2_V_MAN_PAGE in Directory.C
+
+#  TODO: test sticky bit in dir disallows
+#  unpriv user from deleting or renaming files in that dir
+
+
+commit
+
+return "chmod.2 done."

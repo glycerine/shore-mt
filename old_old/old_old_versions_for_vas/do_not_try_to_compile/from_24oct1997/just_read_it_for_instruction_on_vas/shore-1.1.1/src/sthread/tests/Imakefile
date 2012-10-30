@@ -1,0 +1,50 @@
+/* --------------------------------------------------------------- */
+/* -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- */
+/* -- University of Wisconsin-Madison, subject to the terms     -- */
+/* -- and conditions given in the file COPYRIGHT.  All Rights   -- */
+/* -- Reserved.                                                 -- */
+/* --------------------------------------------------------------- */
+
+/*
+ *  $Id: Imakefile,v 1.27 1997/09/30 21:19:23 solomon Exp $
+ */
+SRC = diskinfo.cc ioperf.cc thread1.cc thread2.cc thread3.cc thread4.cc
+CPPFLAGS = -I.. -I../../fc
+LIB = ../libst.a ../../fc/libfc.a
+
+all_local:: thread1 thread2 thread3 thread4 ioperf diskinfo
+
+%GEN tags($(SRC))
+
+%GEN c_plus_program(thread1, thread1.o, $(LIB))
+%GEN c_plus_program(thread2, thread2.o, $(LIB))
+%GEN c_plus_program(thread3, thread3.o, $(LIB))
+%GEN c_plus_program(thread4, thread4.o, $(LIB))
+%GEN c_plus_program(ioperf, ioperf.o, $(LIB))
+%GEN c_plus_program(diskinfo, diskinfo.o, $(LIB))
+
+
+PURE_OPTIONS = $(PURE_OPT)
+
+PURE_EXEC= thread1.pure thread2.pure thread3.pure thread4.pure
+pure_exec: $(PURE_EXEC)
+
+%GEN purify_c_plus_program(thread1, thread1.o, $(LIB), $(PURE_OPTIONS))
+%GEN purify_c_plus_program(thread2, thread2.o, $(LIB), $(PURE_OPTIONS))
+%GEN purify_c_plus_program(thread3, thread3.o, $(LIB), $(PURE_OPTIONS))
+%GEN purify_c_plus_program(thread4, thread4.o, $(LIB), $(PURE_OPTIONS))
+%GEN purify_c_plus_program(ioperf, ioperf.o, $(LIB), $(PURE_OPTIONS))
+%GEN quantify_c_plus_program(ioperf, ioperf.o, $(LIB), $(QUANT_OPTIONS))
+
+#ifdef IS_SP2
+POE_EXEC= thread1.poe thread2.poe thread3.poe thread4.poe ioperf.poe
+poe_exec: $(poe_EXEC)
+
+%GEN poe_c_plus_program(thread1.poe, thread1.o, $(LIB))
+%GEN poe_c_plus_program(thread2.poe, thread2.o, $(LIB))
+%GEN poe_c_plus_program(thread3.poe, thread3.o, $(LIB))
+%GEN poe_c_plus_program(thread4.poe, thread4.o, $(LIB))
+%GEN poe_c_plus_program(ioperf.poe, ioperf.o, $(LIB))
+#endif /* SP2 */
+
+%GEN depend_target($(SRC))

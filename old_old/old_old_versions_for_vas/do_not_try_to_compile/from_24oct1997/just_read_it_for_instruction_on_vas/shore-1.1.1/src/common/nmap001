@@ -1,0 +1,139 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+@dec option_t
+<option.h>
+
+@dec tid_t
+<tid_t.h>
+
+@dec lvid_t
+<lid_t.h>
+
+@dec bfcb_t
+<lid_t.h>
+<sm_s.h>
+<bf_s.h>
+
+@dec dp_entry_t
+<lid_t.h>
+<sm_s.h>
+<restart_s.h>
+
+@dec device_s
+<stddef.h>
+<basics.h>
+<lid_t.h>
+<sm_s.h>
+<sm_base.h>
+<lid_t.h>
+<device.h>
+
+@dec xct_t
+<stddef.h>
+<sthread.h>
+<basics.h>
+<lid_t.h>
+<sm_s.h>
+<sm_base.h>
+<latch.h>
+<tid_t.h>
+<vec_t.h>
+<smthread.h>
+<lock.h>
+<lock_x.h>
+<rsrc.h>
+<page_s.h>
+<bf.h>
+<page.h>
+<xct.h>
+
+@dec lid_t
+<lid_t.h>
+
+@dec lid_entry_t
+<basics.h>
+<lid_t.h>
+<sm_s.h>
+<smthread.h>
+<tid_t.h>
+<vec_t.h>
+<lid_s.h>
+
+@dec lid_cache_entry_t
+<basics.h>
+<lid_t.h>
+<sm_s.h>
+<smthread.h>
+<tid_t.h>
+<vec_t.h>
+<lid_s.h>
+
+@dec vol_lid_info_t
+<lid_t.h>
+<tid_t.h>
+<vec_t.h>
+<sm_s.h>
+<smthread.h>
+<lid_s.h>
+
+@dec lock_head_t
+<stddef.h>
+<basics.h>
+<lid_t.h>
+<sm_s.h>
+<sm_base.h>
+<tid_t.h>
+<vec_t.h>
+<smthread.h>
+<lock.h>
+<lock_x.h>
+
+@dec lock_request_t
+<stddef.h>
+<basics.h>
+<lid_t.h>
+<sm_s.h>
+<sm_base.h>
+<tid_t.h>
+<vec_t.h>
+<smthread.h>
+<lock.h>
+<lock_x.h>
+
+@dec tcl_thread_t
+<sm_vas.h>
+<tcl.h>
+"tcl_thread.h"
+
+@dec ErrLogInfo
+<errlog_s.h>
+
+@dec voltab_entry_t
+<stddef.h>
+<basics.h>
+<lid_t.h>
+<sm_s.h>
+<sm_base.h>
+<tid_t.h>
+<vec_t.h>
+<voltab.h>
+
+@dec xct_dependent_t
+<stddef.h>
+<basics.h>
+<lid_t.h>
+<sm_s.h>
+<sm_base.h>
+
+@dec master_xct_proxy_t
+<stddef.h>
+<basics.h>
+<lid_t.h>
+<sm_s.h>
+<sm_base.h>
+<remote_s.h>

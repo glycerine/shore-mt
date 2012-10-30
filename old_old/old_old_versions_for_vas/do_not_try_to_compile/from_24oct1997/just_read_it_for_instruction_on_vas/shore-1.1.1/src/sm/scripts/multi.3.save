@@ -1,0 +1,50 @@
+#
+# This script demonstrates a bug which occurs
+# when two threads try creating a file at the
+# same time. The problem is that one thread holds
+# a latch on the last log records, which the other
+# thread deadlocks on.
+#
+# Depending upon optimization and DEBUG modes,
+# 'ntries' may have to be increased to demonstrate
+# the problem.
+#
+# bolo, 30 October 1995
+#
+
+source $script_dir/vol.init
+
+set ntries 16
+set nxct 100
+
+proc go_go_gadget {name t} {
+    global ntries volid nxct
+    sm attach_xct $t
+    for {set j 1} {$j <= $nxct} {incr j} {
+	for {set i 1} {$i <= $ntries} {incr i} {
+	    set f0 [sm create_file $volid]]
+	    set f1 [sm create_file $volid]]
+	    sm sleep 1
+	    sm destroy_file $f0
+	    sm destroy_file $f1
+	    verbose $name ":" $i
+	}
+    }
+}
+
+verbose starting 2 threads
+
+
+sm begin_xct
+set tid [sm xct]
+set t1 [fork_thread go_go_gadget {"t1" $tid} ]
+set t2 [fork_thread go_go_gadget {"t2" $tid} ]
+
+verbose waiting for threads
+
+join_thread $t1
+join_thread $t2
+
+sm commit_xct
+
+verbose threads done

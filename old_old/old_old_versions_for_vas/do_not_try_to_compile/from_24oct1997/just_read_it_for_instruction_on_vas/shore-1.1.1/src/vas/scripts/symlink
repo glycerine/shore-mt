@@ -1,0 +1,39 @@
+source ../scripts/setup.all
+
+cd /small/z
+# compensating transaction
+begin
+	foreach f { y symlink2pool sym1 sym2 } {
+		if [sfile islink $f] {
+			unlink $f
+		}
+	}
+commit
+
+# use names
+
+begin
+	if [not [sfile exists y] ] {
+		mksymlink /small y
+	}
+	if [not [sfile exists symlink2pool] ] {
+		set p [mksymlink y/pool symlink2pool]
+	} 
+
+	# count the number of objects in the pool now:
+	set oldverbose $verbose
+	set verbose 0
+	set count1 [scanpool /small/pool count]
+	mkanon symlink2pool 10:10:10
+	set count2 [scanpool symlink2pool count]
+	assert [expr { $count2 == $count1 + 1 } ]
+	set verbose $oldverbose
+
+#	ELOOP: make a circular symlink/symlink chain
+	mksymlink sym2 sym1
+	mksymlink sym1 sym2
+	expect OS_TooManySymlinks from { read sym1 }
+
+commit
+
+return "symlink done."

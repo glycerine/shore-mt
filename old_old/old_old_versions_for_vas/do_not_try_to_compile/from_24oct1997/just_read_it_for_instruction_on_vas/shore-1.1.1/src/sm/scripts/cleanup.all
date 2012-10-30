@@ -1,0 +1,73 @@
+# --------------------------------------------------------------- #
+# -- Copyright (c) 1994, 1995 Computer Sciences Department,    -- #
+# -- University of Wisconsin-Madison, subject to the terms     -- #
+# -- and conditions given in the file COPYRIGHT.  All Rights   -- #
+# -- Reserved.                                                 -- #
+# --------------------------------------------------------------- #
+
+#
+# This scripts is for the purpose of maintaining the other scripts.
+# Put anything you want in the scripts list. After the each script
+# is run, this creates a list of the variables left around by the
+# script.  The list is written in the file named "garbage_variables"
+#
+
+
+set scripts [list \
+    vol.init \
+    btree_split.1 \
+    thread_fork_example \
+    rtree.1 rtree.2 rtree.3 \
+    sort.1 sort.2 sort.3 sort.4 \
+    free_ext free_page \
+    pin.1 pin.2 pin.3 \
+    vol.1 vol.2 vol.3 \
+    thread.1 \
+    btree.1 btree.2 btree.3 btree.4 btree.5 btree.6 \
+    btree.7 btree.8 btree.9 \
+    btree.10 \
+    btree.30 \
+    bt.insert.1 bt.insert.2 bt.insert.3 bt.insert.4 bt.insert.5 \
+    bt.remove.1 bt.remove.2 bt.remove.3 bt.remove.4 \
+    file.1 file.2 file.3 file.4 file.5 \
+    file.6 file.7 file.8 \
+     alloc.1 alloc.3 \
+     lgrec.1 lgrec.2 lgrec.3 \
+     multi.1 multi.2 \
+     trans.1 trans.2 \
+    deadlock.1 deadlock.2 deadlock.3 deadlock.4 \
+    lock.1 \
+     recovery.1 record_create_abort.1 \
+    lock.hier lock.hier_sm \
+    lock.upgrade \
+    quark.1\
+     recovery.1 \
+    lockrec_pin lockrec_sm lockfile_sm \
+     forward.1 tmpfile.1 space_recovery \
+    lid.1 \
+     file_destroy.1 createsmall.1\
+    btree.convert.1 \
+     file.undo.1 file.undo.2 \
+     prepare.1 \
+    ]
+
+echo scripts = $scripts
+source $script_dir/vol.init
+
+set garbage [open garbage_variables w]
+
+cleanup $garbage
+addcleanupvars {script}
+
+foreach script $scripts {
+    echo
+    echo RUNNING: $script 
+    source $script_dir/$script
+    pstats
+
+    puts $garbage [concat CLEANUP AFTER  $script  : ]
+    cleanup $garbage
+    flush $garbage
+}
+
+unset garbage
